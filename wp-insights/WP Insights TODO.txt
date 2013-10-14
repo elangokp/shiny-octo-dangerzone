@@ -1,0 +1,16 @@
+- Track Lost focus count
+- Track actual time that the page was in focus
+- Create loss of focus (Loss of attention) map
+- Create aggregated mouse flow path
+- Create attention map
+- Search filters for recordings page
+- search filters for page stats page
+- Sorting features for recordings page
+- Sorting features for page stats page
+- Get heatmap json data in separate ajax call for heatmaps
+- Gzip heatmap JSON data
+- Change tracking based on visitor id
+	- Change javascript api
+	- Change Db Schema
+- Provide slicing and dicing capabilities for heatmap data
+- Heatmap generation algorithm adjustment when the element is not found.
