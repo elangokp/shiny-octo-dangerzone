@@ -1,0 +1,25 @@
+<project name="wp-insights" default="deploy" basedir=".">
+    <description>
+        Build file for deploying plugin into wordpress environment
+    </description>
+  <!-- set global properties for this build -->
+  <property name="plugin-name" value="wp-insights"/>
+  <property name="local" location="wp-insights"/>
+  <property name="plugins-folder" location="D:\Setups\Xampp\htdocs\wordpress\wp-content\plugins"/>
+
+  <target name="clean" description="clean up" >
+    <delete dir="${plugins-folder}\${plugin-name}"/>
+  </target>
+  
+  <target name="deploy" depends="clean">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <echo>${local}</echo>
+    <mkdir dir="${plugins-folder}\${plugin-name}"/>
+    <copy todir="${plugins-folder}\${plugin-name}">
+    	<fileset dir="../"/>
+ 	</copy>
+  </target>
+
+
+</project>
