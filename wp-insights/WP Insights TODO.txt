@@ -1,7 +1,9 @@
-- Track Lost focus count
-- Track actual time that the page was in focus
+- Track Lost focus count - Done
+- Display Lost focus count in UI
+- Track actual time that the page was in focus - Done
+- Display actual focus time in UI
 - Create loss of focus (Loss of attention) map
-- Create aggregated mouse flow path
+- Create aggregated mouse flow path - Done
 - Create attention map
 - Search filters for recordings page
 - search filters for page stats page
@@ -14,3 +16,5 @@
 	- Change Db Schema
 - Provide slicing and dicing capabilities for heatmap data
 - Heatmap generation algorithm adjustment when the element is not found.
+- Add minify option to build script
+- Add licensing module

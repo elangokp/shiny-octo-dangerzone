@@ -17,7 +17,11 @@
     <echo>${local}</echo>
     <mkdir dir="${plugins-folder}\${plugin-name}"/>
     <copy todir="${plugins-folder}\${plugin-name}">
-    	<fileset dir="../"/>
+    	<fileset dir="../">
+    	    <exclude name="**/.settings/**" />
+    	    <exclude name=".buildpath" />
+    	    <exclude name=".project" />
+    	</fileset>
  	</copy>
   </target>
 
