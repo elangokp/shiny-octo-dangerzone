@@ -391,6 +391,43 @@
       // clean
       smtRec.clearMouseData();
     },
+    
+    /** 
+     * Sends data (POST) in asynchronously mode via an XHR object.
+     * This appends the mouse data to the current tracking session.
+     * If user Id is not set, mouse data are queued.     
+     */   
+    appendExitMouseData: function() 
+    {
+      if (!smtRec.rec || smtRec.paused) { return false; }
+      // prepare data
+      var data  = "uid="        + smtRec.userId;
+          data += "&time="      + smtRec.getTime();
+          data += "&pagew="     + smtRec.page.width;
+          data += "&pageh="     + smtRec.page.height;
+          data += "&xcoords="   + smtRec.coords.x;
+          data += "&ycoords="   + smtRec.coords.y;
+          data += "&clicks="    + smtRec.coords.p;
+          data += "&elhovered=" + encodeURIComponent(JSON.stringify(smtRec.elem.hovered));
+          data += "&elclicked=" + encodeURIComponent(JSON.stringify(smtRec.elem.clicked));
+          data += "&ellostfocus=" + encodeURIComponent(JSON.stringify(smtRec.elem.lostFocus));
+          data += "&lostFocusCount=" + smtRec.lostFocusCount;
+          data += "&focusedTime=" + smtRec.getFocusTime();
+          data += "&scrollPercentage=" + smtRec.scrollPercentage;
+          data += "&action="    + "wpiexit";
+          data += "&remote="    + smtOpt.storageServer;
+      //alert("Inside append mouse data");
+      // send request
+      var gatewayUrl = smtOpt.trackingUrl;
+      aux.sendAjaxRequest({
+        url:       gatewayUrl, 
+        postdata:  data,
+        xmlhttp:   smtRec.xmlhttp
+      });
+      // clean
+      smtRec.clearMouseData();
+    },
+    
     /** 
      * Clears mouse data from queue.        
      */
@@ -598,8 +635,10 @@
         aux.addEvent(window, "unload", smtRec.appendMouseData);
       }
       */
-      window.onbeforeunload = smtRec.appendMouseData;
-      window.unload = smtRec.appendMouseData;
+      jQuery_1_10_2(window).bind("beforeunload", smtRec.appendExitMouseData);
+      //window.onbeforeunload = smtRec.appendExitMouseData;
+      //window.onbeforeunload = smtRec.appendMouseData;
+      //window.unload = smtRec.appendMouseData;
       // this is the best cross-browser method to store tracking data successfully
       setTimeout(smtRec.initMouseData, 1000);
       // compute log session time by date instead of dividing coords length by frame rate

@@ -108,10 +108,12 @@ class WP_Insights {
 		add_action('wp_ajax_nopriv_wpistore', array( $this, 'store_user_data' ) );
 		add_action('wp_ajax_nopriv_wpicachepage', array( $this, 'cache_user_page' ) );
 		add_action('wp_ajax_nopriv_wpiappend', array( $this, 'append_user_data' ) );
+		add_action('wp_ajax_nopriv_wpiexit', array( $this, 'exit_user_data' ) );
 		
 		add_action('wp_ajax_wpistore', array( $this, 'store_user_data' ) );
 		add_action('wp_ajax_wpicachepage', array( $this, 'cache_user_page' ) );
 		add_action('wp_ajax_wpiappend', array( $this, 'append_user_data' ) );
+		add_action('wp_ajax_wpiexit', array( $this, 'exit_user_data' ) );
 		
 		add_action('wp_head', array($this, 'add_IE9_Compatibility_Meta_Tag'));
 		add_action('plugins_loaded', array($this, 'setRecorderStatus'));
@@ -442,6 +444,10 @@ class WP_Insights {
 		$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
 		$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
 		$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
+		//For No Cache
+		header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
+		header('Pragma: no-cache'); // HTTP 1.0.
+		header('Expires: 0'); // Proxies.
 		echo $this->WP_Insights_Recorder_Instance->store();
 		die();
 	}
@@ -460,6 +466,11 @@ class WP_Insights {
 		$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
 		$this->WP_Insights_Recorder_Instance->append();
 		die();
+	}
+	
+	public function exit_user_data() {
+		error_log("Exit call triggered");
+		$this->append_user_data();
 	}
 	
 	public function add_wpinsights_scripts() {
@@ -592,7 +603,7 @@ class WP_Insights {
 			forum_id: 221801,
 			tab_label: 'WP Insights - Feedback & Support',
 			tab_color: '#cc6d00',
-			tab_position: 'middle-right',
+			tab_position: 'bottom-right',
 			tab_inverted: false
 		}]);
 		</script>

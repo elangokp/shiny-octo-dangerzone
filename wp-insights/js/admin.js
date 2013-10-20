@@ -31,5 +31,15 @@
 			var url = $(this).data('url') + "&scrx=" + screen.width + "&scry=" + screen.height;
 			window.open(url,'_blank');
 		});
+		
+		$("a#mousepaths").click(function() {
+			var url = $(this).data('url') + "&scrx=" + screen.width + "&scry=" + screen.height;
+			window.open(url,'_blank');
+		});
+		
+		$("a#lostfocusmap").click(function() {
+			var url = $(this).data('url') + "&scrx=" + screen.width + "&scry=" + screen.height;
+			window.open(url,'_blank');
+		});
 	});
 }(jQuery));

@@ -18,3 +18,4 @@
 - Heatmap generation algorithm adjustment when the element is not found.
 - Add minify option to build script
 - Add licensing module
+- Add jquery before unload event

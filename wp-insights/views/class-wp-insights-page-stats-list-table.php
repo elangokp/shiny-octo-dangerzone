@@ -244,8 +244,8 @@ class WP_Insights_Page_Stats_List_Table extends WPI_WP_List_Table {
     	$tableColumn = '<a id="mvmap" href="javascript:void(0)" data-url="'.$views_url.'showheat.php?'.$displayId.'&hmtype=mv" class="button" target="_blank" title="Play">Movement Heatmap</a>'.PHP_EOL;
     	$tableColumn .= '<a id="clickmap" href="javascript:void(0)" data-url="'.$views_url.'showheat.php?'.$displayId.'&hmtype=click" class="button" target="_blank" title="Play">Click Heatmap</a>'.PHP_EOL;
     	$tableColumn .= '<a id="exitmap" href="javascript:void(0)" data-url="'.$views_url.'showheat.php?'.$displayId.'&hmtype=exit" class="button" target="_blank" title="Play">Exit Heatmap</a>'.PHP_EOL;
-    	$tableColumn .= '<a id="exitmap" href="javascript:void(0)" data-url="'.$views_url.'showheat.php?'.$displayId.'&hmtype=mp" class="button" target="_blank" title="Play">Mouse Paths</a>'.PHP_EOL;
-    	$tableColumn .= '<a id="exitmap" href="javascript:void(0)" data-url="'.$views_url.'showheat.php?'.$displayId.'&hmtype=lf" class="button" target="_blank" title="Play">Lost Focus Heatmap</a>'.PHP_EOL;
+    	$tableColumn .= '<a id="mousepaths" href="javascript:void(0)" data-url="'.$views_url.'showheat.php?'.$displayId.'&hmtype=mp" class="button" target="_blank" title="Play">Mouse Paths</a>'.PHP_EOL;
+    	$tableColumn .= '<a id="lostfocusmap" href="javascript:void(0)" data-url="'.$views_url.'showheat.php?'.$displayId.'&hmtype=lf" class="button" target="_blank" title="Play">Lost Focus Heatmap</a>'.PHP_EOL;
     	return $tableColumn;
     }
     
@@ -470,10 +470,10 @@ class WP_Insights_Page_Stats_List_Table extends WPI_WP_List_Table {
 			    SEC_TO_TIME( MAX( records.sess_time ) ) AS max_browsing_time
 				FROM $recordsTable AS records
 				INNER JOIN $cacheTable AS cache ON records.cache_id = cache.id
-				LEFT OUTER JOIN $recordsTable AS records1 ON records.id = records1.id and records1.sess_time>60
-				LEFT OUTER JOIN $recordsTable AS records2 ON records.id = records2.id and records2.sess_time>120
-				LEFT OUTER JOIN $recordsTable AS records3 ON records.id = records3.id and records3.sess_time>300
-				LEFT OUTER JOIN $recordsTable AS records4 ON records.id = records4.id and records4.sess_time>600
+				LEFT OUTER JOIN $recordsTable AS records1 ON records.id = records1.id and records1.focus_time>60
+				LEFT OUTER JOIN $recordsTable AS records2 ON records.id = records2.id and records2.focus_time>120
+				LEFT OUTER JOIN $recordsTable AS records3 ON records.id = records3.id and records3.focus_time>300
+				LEFT OUTER JOIN $recordsTable AS records4 ON records.id = records4.id and records4.focus_time>600
 				GROUP BY cache.url
 				ORDER BY visits desc 
         		LIMIT ".($current_page-1)*$per_page.",".$per_page;

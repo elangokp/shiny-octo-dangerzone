@@ -214,6 +214,20 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
     	);
     }
     
+    function column_lost_focus_count($item){
+    
+    	return sprintf('%1$s',
+    			$item['lost_focus_count']
+    	);
+    }
+    
+    function column_focused_time($item){
+    
+    	return sprintf('%1$s',
+    			$item['focus_time']
+    	);
+    }
+    
     function column_no_of_clicks($item){
     
     	return sprintf('%1$s',
@@ -293,8 +307,10 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         	'os' => 'OS',
             'display_date'  => 'Display Date',
         	'browsing_time' => 'Browsing Time',
-        	'interaction_time' => 'Interaction Time',
+        	//'interaction_time' => 'Interaction Time',
         	'no_of_clicks' => '# Clicks',
+        	'lost_focus_count' => 'Lost Focus Count',
+        	'focused_time' => 'Focused Time'
         	//'replay' => 'Replay'
         );
         return $columns;
@@ -456,7 +472,7 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         
         $where = $recordsTable.".cache_id != 0";
         
-        $data = $WP_Insights_DB_Utils_Instance->db_select_all(
+        /* $data = $WP_Insights_DB_Utils_Instance->db_select_all(
         		$recordsTable
         		." LEFT JOIN ".$browsersTable." ON ".$recordsTable.".browser_id = ".$browsersTable.".id"
         		." LEFT JOIN ".$osTable." ON ".$recordsTable.".os_id = ".$osTable.".id"
@@ -464,9 +480,23 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         		//"id,client_id,cache_id,os_id,browser_id,ftu,ip,sess_date,sess_time,fps,coords_x,coords_y,clicks",
         		$recordsTable.".*, ".$browsersTable.".name as browser_name, ".$osTable.".name as os_name, ".$cacheTable.".url as url",
         		$where." ORDER BY ".$recordsTable.".id DESC, ".$recordsTable.".client_id LIMIT ".($current_page-1)*$per_page.",".$per_page
-        );
+        ); */
+        
+        $sql = "SELECT 
+        records.*,
+        browsers.name as browser_name,
+        oses.name as os_name,
+        caches.url as url
+        FROM $recordsTable as records
+        LEFT OUTER JOIN $browsersTable as browsers ON records.browser_id = browsers.id
+        LEFT OUTER JOIN $osTable as oses ON records.os_id = oses.id
+        LEFT OUTER JOIN $cacheTable as caches ON records.cache_id = caches.id
+        where records.cache_id != 0
+        ORDER BY records.id desc, records.client_id
+        LIMIT ".($current_page-1)*$per_page.",".$per_page;
                 
         
+        $data = $WP_Insights_DB_Utils_Instance->db_query($sql);
         /**
          * This checks for sorting input and sorts the data in our array accordingly.
          * 
