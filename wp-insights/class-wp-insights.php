@@ -83,6 +83,7 @@ class WP_Insights {
 	 */
 	private function __construct() {
 
+		//error_log(print_r($_REQUEST, true));
 		//error_log("Inside wp-insights class construct");
 		// Load plugin text domain
 		add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
@@ -444,10 +445,6 @@ class WP_Insights {
 		$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
 		$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
 		$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
-		//For No Cache
-		header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
-		header('Pragma: no-cache'); // HTTP 1.0.
-		header('Expires: 0'); // Proxies.
 		echo $this->WP_Insights_Recorder_Instance->store();
 		die();
 	}
@@ -477,7 +474,8 @@ class WP_Insights {
 		//error_log("Inside add_wpinsights_scripts");
 		$smt_aux_js_url = plugins_url('js/dev/smt-aux.js', __FILE__);
 		$smt_record_js_url = plugins_url('js/dev/smt-record.js', __FILE__);
-		$smt_tracking_url = admin_url( 'admin-ajax.php' );
+		$smt_tracking_url = plugins_url('ajax/wpi-ajax.php', __FILE__);
+		$smt_wp_admin_ajax_url = admin_url( 'admin-ajax.php' );
 		//wp_register_script('smt-aux', $smt_aux_js_url);
 		//wp_register_script('smt-record', $smt_record_js_url);
 		//wp_enqueue_script('smt-aux');
@@ -571,6 +569,7 @@ class WP_Insights {
 					    smt2.record({
 					      recTime: 300,
 					      trackingUrl: "<?php echo $smt_tracking_url?>",
+					      wpAdminAjaxUrl: "<?php echo $smt_wp_admin_ajax_url?>",
 					      postInterval: 10
 					    });
 					    //alert("inside custom js - after smt_rec execute");

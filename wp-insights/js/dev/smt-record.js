@@ -48,6 +48,8 @@
      */
     //trackingServer: "/smt2/",
     trackingUrl: "",
+    
+    wpAdminAjaxUrl: "",
     /**
      * URL to remote (smt)2 server, i.e., the site URL where the logs will be stored, and (of course) the CMS is installed.
      * If this value is empty, data will be posted to trackingServer URL.
@@ -253,39 +255,58 @@
     {
       smtRec.computeAvailableSpace();
       // prepare data
-      var data  = "url="        + smtRec.url;
-          data += "&urltitle="  + document.title;
-          data += "&cookies="   + document.cookie;
-          data += "&screenw="   + screen.width;
-          data += "&screenh="   + screen.height;
-          data += "&pagew="     + smtRec.page.width;
-          data += "&pageh="     + smtRec.page.height;
-          data += "&time="      + smtRec.getTime();
-          data += "&fps="       + smtOpt.fps;
-          data += "&ftu="       + smtRec.ftu;
-          data += "&xcoords="   + smtRec.coords.x;
-          data += "&ycoords="   + smtRec.coords.y;
-          data += "&clicks="    + smtRec.coords.p;
-          data += "&elhovered=" + encodeURIComponent(JSON.stringify(smtRec.elem.hovered));
-          data += "&elclicked=" + encodeURIComponent(JSON.stringify(smtRec.elem.clicked));
-          data += "&ellostfocus=" + encodeURIComponent(JSON.stringify(smtRec.elem.lostFocus));
-          data += "&lostFocusCount=" + smtRec.lostFocusCount;
-          data += "&focusedTime=" + smtRec.getFocusTime();
-          data += "&scrollPercentage=" + smtRec.scrollPercentage;
-          data += "&action="    + "wpistore";
-          data += "&remote="    + smtOpt.storageServer;
-      //alert("Inside store mouse data");
-      //alert(data);
-      // send request
-      //alert(smtOpt.trackingUrl);
+      var requestData  = "url="        + smtRec.url;
+      requestData += "&urltitle="  + document.title;
+      requestData += "&cookies="   + document.cookie;
+      requestData += "&screenw="   + screen.width;
+      requestData += "&screenh="   + screen.height;
+      requestData += "&pagew="     + smtRec.page.width;
+      requestData += "&pageh="     + smtRec.page.height;
+      requestData += "&time="      + smtRec.getTime();
+      requestData += "&fps="       + smtOpt.fps;
+      requestData += "&ftu="       + smtRec.ftu;
+      requestData += "&xcoords="   + smtRec.coords.x;
+      requestData += "&ycoords="   + smtRec.coords.y;
+      requestData += "&clicks="    + smtRec.coords.p;
+      requestData += "&elhovered=" + encodeURIComponent(JSON.stringify(smtRec.elem.hovered));
+      requestData += "&elclicked=" + encodeURIComponent(JSON.stringify(smtRec.elem.clicked));
+      requestData += "&ellostfocus=" + encodeURIComponent(JSON.stringify(smtRec.elem.lostFocus));
+      requestData += "&lostFocusCount=" + smtRec.lostFocusCount;
+      requestData += "&focusedTime=" + smtRec.getFocusTime();
+      requestData += "&scrollPercentage=" + smtRec.scrollPercentage;
+      requestData += "&action="    + "wpistore";
+      requestData += "&remote="    + smtOpt.storageServer;
+      requestData += "&wpAdminAjaxUrl="    + smtOpt.wpAdminAjaxUrl;
       var gatewayUrl = smtOpt.trackingUrl;
-      //alert(gatewayUrl);
-      aux.sendAjaxRequest({
-        url:       gatewayUrl,
-        callback:  smtRec.setUserId, 
-        postdata:  data, 
-        xmlhttp:   smtRec.xmlhttp
-      });
+      if ('XDomainRequest' in window && window.XDomainRequest !== null) {
+    	    // Use Microsoft XDR
+    	    var xdr = new XDomainRequest();
+    	    xdr.open("post", gatewayUrl);
+    	    xdr.onload = function () {
+    	    var responseData = xdr.responseText;
+    	    if (responseData == null || typeof (responseData) == 'undefined')
+    	    {
+    	    	responseData = data.firstChild.textContent;
+    	    }
+    	    smtRec.setUserId(responseData);
+    	    };
+    	    xdr.onprogress = function(){};
+    	    xdr.ontimeout = function(){};
+    	    xdr.onerror = function(){};
+    	    setTimeout(function(){
+    	        xdr.send(requestData);
+    	    }, 0);
+    	} else {
+    		jQuery_1_10_2.ajax({
+      		  type: "POST",
+      		  url:  gatewayUrl,
+      		  data: requestData,
+      		  success: function(data) {
+      			  smtRec.setUserId(data);
+      		  }
+    		});
+    	}
+      
       // clean
       smtRec.clearMouseData();
     },
@@ -307,20 +328,34 @@
     /** Send a request to server to cache the page. */
     cacheUserPage: function()
 	{
-		var data  = "uid="    + smtRec.userId;
-        data += "&action="    + "wpicachepage";
-        data += "&url="       + smtRec.url;
-        data += "&urltitle="  + document.title;
-        data += "&cookies="   + document.cookie;
-        data += "&remote="    + smtOpt.storageServer;
+		var requestData  = "uid="    + smtRec.userId;
+		requestData += "&action="    + "wpicachepage";
+		requestData += "&url="       + smtRec.url;
+		requestData += "&urltitle="  + document.title;
+		requestData += "&cookies="   + document.cookie;
+		requestData += "&remote="    + smtOpt.storageServer;
+        requestData += "&wpAdminAjaxUrl="    + smtOpt.wpAdminAjaxUrl;
 	    // send request
 	    var gatewayUrl = smtOpt.trackingUrl;
-	    aux.sendAjaxRequest({
-	      url:       gatewayUrl, 
-	      postdata:  data,
-	      xmlhttp:   smtRec.xmlhttp
-	    });
-		
+	    
+	    if ('XDomainRequest' in window && window.XDomainRequest !== null) {
+    	    // Use Microsoft XDR
+    	    var xdr = new XDomainRequest();
+    	    xdr.open("post", gatewayUrl);
+    	    xdr.onload = function () {};
+    	    xdr.onprogress = function(){};
+    	    xdr.ontimeout = function(){};
+    	    xdr.onerror = function(){};
+    	    setTimeout(function(){
+    	        xdr.send(requestData);
+    	    }, 0);
+    	} else {
+    		jQuery_1_10_2.ajax({
+      		  type: "POST",
+      		  url:  gatewayUrl,
+      		  data: requestData
+    		});
+    	}
 	},
 	
     /** Gets current time (in seconds). */
@@ -365,29 +400,43 @@
     {
       if (!smtRec.rec || smtRec.paused) { return false; }
       // prepare data
-      var data  = "uid="        + smtRec.userId;
-          data += "&time="      + smtRec.getTime();
-          data += "&pagew="     + smtRec.page.width;
-          data += "&pageh="     + smtRec.page.height;
-          data += "&xcoords="   + smtRec.coords.x;
-          data += "&ycoords="   + smtRec.coords.y;
-          data += "&clicks="    + smtRec.coords.p;
-          data += "&elhovered=" + encodeURIComponent(JSON.stringify(smtRec.elem.hovered));
-          data += "&elclicked=" + encodeURIComponent(JSON.stringify(smtRec.elem.clicked));
-          data += "&ellostfocus=" + encodeURIComponent(JSON.stringify(smtRec.elem.lostFocus));
-          data += "&lostFocusCount=" + smtRec.lostFocusCount;
-          data += "&focusedTime=" + smtRec.getFocusTime();
-          data += "&scrollPercentage=" + smtRec.scrollPercentage;
-          data += "&action="    + "wpiappend";
-          data += "&remote="    + smtOpt.storageServer;
+      var requestData  = "uid="        + smtRec.userId;
+	      requestData += "&time="      + smtRec.getTime();
+	      requestData += "&pagew="     + smtRec.page.width;
+	      requestData += "&pageh="     + smtRec.page.height;
+	      requestData += "&xcoords="   + smtRec.coords.x;
+	      requestData += "&ycoords="   + smtRec.coords.y;
+	      requestData += "&clicks="    + smtRec.coords.p;
+	      requestData += "&elhovered=" + encodeURIComponent(JSON.stringify(smtRec.elem.hovered));
+	      requestData += "&elclicked=" + encodeURIComponent(JSON.stringify(smtRec.elem.clicked));
+	      requestData += "&ellostfocus=" + encodeURIComponent(JSON.stringify(smtRec.elem.lostFocus));
+	      requestData += "&lostFocusCount=" + smtRec.lostFocusCount;
+	      requestData += "&focusedTime=" + smtRec.getFocusTime();
+	      requestData += "&scrollPercentage=" + smtRec.scrollPercentage;
+          requestData += "&action="    + "wpiappend";
+          requestData += "&remote="    + smtOpt.storageServer;
+          requestData += "&wpAdminAjaxUrl="    + smtOpt.wpAdminAjaxUrl;
       //alert("Inside append mouse data");
       // send request
       var gatewayUrl = smtOpt.trackingUrl;
-      aux.sendAjaxRequest({
-        url:       gatewayUrl, 
-        postdata:  data,
-        xmlhttp:   smtRec.xmlhttp
-      });
+      if ('XDomainRequest' in window && window.XDomainRequest !== null) {
+  	    // Use Microsoft XDR
+  	    var xdr = new XDomainRequest();
+  	    xdr.open("post", gatewayUrl);
+  	    xdr.onload = function () {};
+  	    xdr.onprogress = function(){};
+  	    xdr.ontimeout = function(){};
+  	    xdr.onerror = function(){};
+  	    setTimeout(function(){
+  	        xdr.send(requestData);
+  	    }, 0);
+	} else {
+		jQuery_1_10_2.ajax({
+			  type: "POST",
+			  url:  gatewayUrl,
+			  data: requestData
+		});
+	}
       // clean
       smtRec.clearMouseData();
     },
@@ -401,29 +450,43 @@
     {
       if (!smtRec.rec || smtRec.paused) { return false; }
       // prepare data
-      var data  = "uid="        + smtRec.userId;
-          data += "&time="      + smtRec.getTime();
-          data += "&pagew="     + smtRec.page.width;
-          data += "&pageh="     + smtRec.page.height;
-          data += "&xcoords="   + smtRec.coords.x;
-          data += "&ycoords="   + smtRec.coords.y;
-          data += "&clicks="    + smtRec.coords.p;
-          data += "&elhovered=" + encodeURIComponent(JSON.stringify(smtRec.elem.hovered));
-          data += "&elclicked=" + encodeURIComponent(JSON.stringify(smtRec.elem.clicked));
-          data += "&ellostfocus=" + encodeURIComponent(JSON.stringify(smtRec.elem.lostFocus));
-          data += "&lostFocusCount=" + smtRec.lostFocusCount;
-          data += "&focusedTime=" + smtRec.getFocusTime();
-          data += "&scrollPercentage=" + smtRec.scrollPercentage;
-          data += "&action="    + "wpiexit";
-          data += "&remote="    + smtOpt.storageServer;
+      var requestData  = "uid="        + smtRec.userId;
+	      requestData += "&time="      + smtRec.getTime();
+	      requestData += "&pagew="     + smtRec.page.width;
+	      requestData += "&pageh="     + smtRec.page.height;
+	      requestData += "&xcoords="   + smtRec.coords.x;
+	      requestData += "&ycoords="   + smtRec.coords.y;
+	      requestData += "&clicks="    + smtRec.coords.p;
+	      requestData += "&elhovered=" + encodeURIComponent(JSON.stringify(smtRec.elem.hovered));
+	      requestData += "&elclicked=" + encodeURIComponent(JSON.stringify(smtRec.elem.clicked));
+	      requestData += "&ellostfocus=" + encodeURIComponent(JSON.stringify(smtRec.elem.lostFocus));
+	      requestData += "&lostFocusCount=" + smtRec.lostFocusCount;
+	      requestData += "&focusedTime=" + smtRec.getFocusTime();
+	      requestData += "&scrollPercentage=" + smtRec.scrollPercentage;
+	      requestData += "&action="    + "wpiexit";
+	      requestData += "&remote="    + smtOpt.storageServer;
+          requestData += "&wpAdminAjaxUrl="    + smtOpt.wpAdminAjaxUrl;
       //alert("Inside append mouse data");
       // send request
       var gatewayUrl = smtOpt.trackingUrl;
-      aux.sendAjaxRequest({
-        url:       gatewayUrl, 
-        postdata:  data,
-        xmlhttp:   smtRec.xmlhttp
-      });
+      if ('XDomainRequest' in window && window.XDomainRequest !== null) {
+  	    // Use Microsoft XDR
+  	    var xdr = new XDomainRequest();
+  	    xdr.open("post", gatewayUrl);
+  	    xdr.onload = function () {};
+  	    xdr.onprogress = function(){};
+  	    xdr.ontimeout = function(){};
+  	    xdr.onerror = function(){};
+  	    setTimeout(function(){
+  	        xdr.send(requestData);
+  	    }, 0);
+	} else {
+		jQuery_1_10_2.ajax({
+			  type: "POST",
+			  url:  gatewayUrl,
+			  data: requestData
+		});
+	}
       // clean
       smtRec.clearMouseData();
     },
