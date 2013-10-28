@@ -247,7 +247,10 @@ class WP_Insights_Recorder {
 		//error_log($wpiScriptElement->nodeValue);
 		if(!is_null($wpiScriptElement)){
 			$wpiScriptElement->parentNode->removeChild($wpiScriptElement);
-		}		
+		}	
+
+		$this->removejscssfile($dom, "smt-record.js", "js");
+		$this->removejscssfile($dom, "smt-aux.js", "js");
 		return $dom;
 	}
 	
@@ -263,6 +266,33 @@ class WP_Insights_Recorder {
 			//error_log("Cached html is not a file");
 			return false;
 		}		
+	}
+	
+	protected function removejscssfile($dom, $filename, $filetype){
+		if($filetype === "js"){
+			$targetelement = "script";
+		}elseif ($filetype === "css") {
+			$targetelement = "link";
+		}else {
+			$targetelement = "none";
+		}
+		
+		if($filetype === "js"){
+			$targetattr = "src";
+		}elseif ($filetype === "css") {
+			$targetattr = "href";
+		}else {
+			$targetattr = "none";
+		}
+
+		$allsuspects = $dom->getElementsByTagName($targetelement);
+		
+		foreach($allsuspects as $anSuspect) {
+			if(!is_null($anSuspect->getAttribute($targetattr)) && strpos($anSuspect->getAttribute($targetattr), $filename) !== FALSE) {
+				$anSuspect->parentNode->removeChild($anSuspect);
+			}
+		}
+
 	}
 
 	public function cache() {

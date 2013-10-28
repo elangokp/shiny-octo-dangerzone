@@ -347,15 +347,17 @@ class WP_Insights_DB_Utils {
 	
 		dbDelta( $sql );
 		*/
-		$sql  = 'CREATE TABLE IF NOT EXISTS '.$this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_OPTIONS.' (';
-		$sql .= 'id           TINYINT       unsigned  NOT NULL auto_increment, ';     // option id
-		$sql .= 'type         VARCHAR(100)            NOT NULL, ';                    // option type
-		$sql .= 'name         VARCHAR(100)            NOT NULL, ';                    // option name
-		$sql .= 'value        VARCHAR(255)            NOT NULL, ';                    // option value
-		$sql .= 'description  TEXT                    NOT NULL, ';                    // option description
-		$sql .= 'PRIMARY KEY  (id) ) DEFAULT CHARSET utf8';
+		
+		$options_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_OPTIONS;
+		$options_table_sql  = "CREATE TABLE $options_table (
+		id           TINYINT       unsigned  NOT NULL auto_increment,
+		type         VARCHAR(100)            NOT NULL,
+		name         VARCHAR(100)            NOT NULL,
+		value        VARCHAR(255)            NOT NULL,
+		description  TEXT                    NOT NULL,
+		PRIMARY KEY  (id) ) DEFAULT CHARSET utf8";
 	
-		dbDelta( $sql );
+		dbDelta( $options_table_sql );
 		
 		//$this->db_delete($this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_OPTIONS, 'name = "recording_status"');
 		
