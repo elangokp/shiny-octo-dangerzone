@@ -442,6 +442,7 @@ class WP_Insights {
 	}
 	
 	public function store_user_data() {
+		error_log("Inside store_user_data");
 		$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
 		$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
 		$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
@@ -466,7 +467,7 @@ class WP_Insights {
 	}
 	
 	public function exit_user_data() {
-		error_log("Exit call triggered");
+		//error_log("Exit call triggered");
 		$this->append_user_data();
 	}
 	
@@ -474,8 +475,7 @@ class WP_Insights {
 		//error_log("Inside add_wpinsights_scripts");
 		$smt_aux_js_url = plugins_url('js/dev/smt-aux.js', __FILE__);
 		$smt_record_js_url = plugins_url('js/dev/smt-record.js', __FILE__);
-		$smt_tracking_url = plugins_url('ajax/wpi-ajax.php', __FILE__);
-		$smt_wp_admin_ajax_url = admin_url( 'admin-ajax.php' );
+		$smt_tracking_url = admin_url( 'admin-ajax.php' );
 		//wp_register_script('smt-aux', $smt_aux_js_url);
 		//wp_register_script('smt-record', $smt_record_js_url);
 		//wp_enqueue_script('smt-aux');
@@ -569,7 +569,6 @@ class WP_Insights {
 					    smt2.record({
 					      recTime: 300,
 					      trackingUrl: "<?php echo $smt_tracking_url?>",
-					      wpAdminAjaxUrl: "<?php echo $smt_wp_admin_ajax_url?>",
 					      postInterval: 10
 					    });
 					    //alert("inside custom js - after smt_rec execute");

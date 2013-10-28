@@ -253,7 +253,7 @@ class WP_Insights_DB_Utils {
 		/* create records table ----------------------------------------------------- */
 	
 		$records_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_RECORDS;
-              $sql  = "CREATE TABLE $records_table (
+              $records_table_sql  = "CREATE TABLE $records_table (
               id           BIGINT        unsigned  NOT NULL auto_increment,
               client_id    VARCHAR(20)             NOT NULL,
               cache_id     BIGINT        unsigned  NOT NULL,
@@ -280,7 +280,7 @@ class WP_Insights_DB_Utils {
               lost_focus   LONGTEXT                NULL,
               PRIMARY KEY  (id) ) DEFAULT CHARSET utf8;";
               
-		dbDelta( $sql );
+		dbDelta( $records_table_sql );
 	
 		$sql  = 'CREATE TABLE IF NOT EXISTS '.$this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_CACHE.' (';
 		$sql .= 'id           BIGINT        unsigned  NOT NULL auto_increment, ';     // cache log id
@@ -298,13 +298,23 @@ class WP_Insights_DB_Utils {
 		$sql .= 'PRIMARY KEY  (id) ) DEFAULT CHARSET utf8';
 	
 		dbDelta( $sql );
+		
+		$browsers_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_BROWSERS;
+		
+		$browsers_table_sql = "CREATE TABLE $browsers_table (
+		id           TINYINT        unsigned  NOT NULL auto_increment,
+		name         VARCHAR(128)             NOT NULL,
+		isBot        TINYINT        DEFAULT   0,
+		PRIMARY KEY  (id) ) DEFAULT CHARSET utf8";
+		
+		dbDelta( $browsers_table_sql );
 	
-		$sql  = 'CREATE TABLE IF NOT EXISTS '.$this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_BROWSERS.' (';
+		/** $sql  = 'CREATE TABLE IF NOT EXISTS '.$this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_BROWSERS.' (';
 		$sql .= 'id           TINYINT        unsigned  NOT NULL auto_increment, ';    // browser id
 		$sql .= 'name         VARCHAR(128)             NOT NULL, ';                   // browser name
 		$sql .= 'PRIMARY KEY  (id) ) DEFAULT CHARSET utf8';
 	
-		dbDelta( $sql );
+		dbDelta( $sql ); */
 	/**
 		$sql  = 'CREATE TABLE IF NOT EXISTS '.$this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_USERS.' (';
 		$sql .= 'id           TINYINT       unsigned  NOT NULL auto_increment, ';     // user id

@@ -13,7 +13,9 @@ class WP_Insights_Detailed_Page_Stats {
 	
 	protected $avgBrowsingTime = null;
 	
-	protected $avgInteractionTime = null;
+	protected $avgFocusTime = null;
+	
+	//protected $avgInteractionTime = null;
 	
 	protected $scrollReach = null;
 	

@@ -39,7 +39,12 @@ class WP_Insights_Recorder {
 		$this->wp_insights_db_utils = $given_wp_insights_db_utils;
 	}
 
-	public function store() {
+	public function store() {	
+
+		if(array_key_exists('isXDR',$_REQUEST) && $_REQUEST['isXDR'] == true) {
+			parse_str(file_get_contents('php://input'), $_POST);
+		}
+		
 		if (empty($_POST)) {
 			exit;
 		}
@@ -153,11 +158,24 @@ class WP_Insights_Recorder {
 		// save browser id
 		$bname = $this->wp_insights_db_utils->db_select($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_BROWSERS, "id", "name='".$browser->getBrowser()."'");
 		if (!$bname) {
+			
+			$browserName = $browser->getBrowser();
+			$isBot = 0;
+			if (strpos($browserName, 'GoogleBot') !== FALSE) {
+				$isBot = 1;
+			} elseif (strpos($browserName, 'Yahoo! Slurp') !== FALSE) {
+				$isBot = 1;
+			} else {
+				$isBot = 0;
+			}
+			
 			$browserdetails = array(
-					"name" => $browser->getBrowser()
+					"name" => $browser->getBrowser(),
+					"isBot" => $isBot
 			);
 			$browserdetailsformat = array(
-					'%s'
+					'%s',
+					'%d'
 			);
 			$browserid = $this->wp_insights_db_utils->db_insert($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_BROWSERS, $browserdetails, $browserdetailsformat);
 		} else {
@@ -248,6 +266,10 @@ class WP_Insights_Recorder {
 	}
 
 	public function cache() {
+		
+		if(array_key_exists('isXDR',$_REQUEST) && $_REQUEST['isXDR'] == true) {
+			parse_str(file_get_contents('php://input'), $_POST);
+		}
 
 		if (empty($_POST)) {
 			exit;
@@ -255,11 +277,38 @@ class WP_Insights_Recorder {
 
 		$URL = $_POST['url'];
 		$recordingId = $_POST['uid'];
+		$html  = urldecode(stripslashes($_POST['html']));
+		$liveDom = $this->parseContent($html);
 		//error_log("URL is : ".$URL);
 		
 		$browserAndOSId = $this->getBrowserAndOSDetails();
 		
-
+		$ymddate = date("Ymd");
+		$hisdate = date("His");
+		$ext = ".html";
+		$dirPath = $this->cache_dir.$ymddate."/";
+		WP_Insights_Utils::createDirectory($dirPath);
+		// "March 10th 2006 @ 15h 16m 08s" should create the log file "20060310-151608.html"
+		$htmlfile  = (!is_file($dirPath.$hisdate.$ext)) ?
+		$hisdate.$ext :
+		$hisdate.'-'.mt_rand().$ext; // random seed to avoid duplicated files
+		file_put_contents(utf8_encode($dirPath.$htmlfile), $liveDom->saveHTML());
+		// insert new row on TBL_CACHE and look for inserted id
+		$cachelogdetails = array(
+				"file" => $ymddate."/".$htmlfile,
+				"url" => $URL,
+				"title" => $_POST['urltitle'],
+				"saved" => current_time('mysql')
+		);
+		$cachelogdetailsformat = array(
+				'%s',
+				'%s',
+				'%s',
+				'%s'
+		);
+		$cacheLogid = $this->wp_insights_db_utils->db_insert($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE, $cachelogdetails, $cachelogdetailsformat);
+		
+		/**
 		// check proxy requests
 		$pattern = "proxy/index.php?url=";
 		if (strpos($URL, $pattern)) {
@@ -359,7 +408,7 @@ class WP_Insights_Recorder {
 			//error_log("Cache expired");
 			// get HTML log id
 			$cacheLogid = $cachelog['id'];
-		}
+		}*/
 		
 		$recordsValues  = "cache_id = ".$cacheLogid.",";
 		$recordsValues .= "os_id = ".$browserAndOSId['os_id'].",";
@@ -371,6 +420,11 @@ class WP_Insights_Recorder {
 	}
 
 	public function append() {
+		
+		if(array_key_exists('isXDR',$_REQUEST) && $_REQUEST['isXDR'] == true) {
+			parse_str(file_get_contents('php://input'), $_POST);
+		}
+		
 		if (empty($_POST)) {
 			exit;
 		}
