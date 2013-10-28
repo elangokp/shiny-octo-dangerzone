@@ -246,6 +246,7 @@ class WP_Insights_Page_Stats_List_Table extends WPI_WP_List_Table {
     	$tableColumn .= '<a id="exitmap" href="javascript:void(0)" data-url="'.$views_url.'showheat.php?'.$displayId.'&hmtype=exit" class="button" target="_blank" title="Play">Exit Heatmap</a>'.PHP_EOL;
     	$tableColumn .= '<a id="mousepaths" href="javascript:void(0)" data-url="'.$views_url.'showheat.php?'.$displayId.'&hmtype=mp" class="button" target="_blank" title="Play">Mouse Paths</a>'.PHP_EOL;
     	$tableColumn .= '<a id="lostfocusmap" href="javascript:void(0)" data-url="'.$views_url.'showheat.php?'.$displayId.'&hmtype=lf" class="button" target="_blank" title="Play">Lost Focus Heatmap</a>'.PHP_EOL;
+    	$tableColumn .= '<a id="detailedStats" href="admin.php?page='.$_REQUEST['page'].'&'.$displayId.'" class="button" title="Play">Detailed Stats</a>'.PHP_EOL;
     	return $tableColumn;
     }
     

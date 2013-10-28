@@ -22,8 +22,11 @@ if(isset($_GET['pid'])) {
 		<div id="wp-insights-icon32-eye32" class="icon32">
 		<img src="<?php echo plugin_dir_url(dirname(__FILE__)).'assets/eye-32.png'?>"/>
 		</div>
-		<h2><?php echo esc_html( $WP_Insights_Detailed_Page_Stats_Instance->url); ?></h2>
-		<a href="">&lt;- Back to Pages List</a>
+		<h2>
+		<?php echo esc_html( $WP_Insights_Detailed_Page_Stats_Instance->url); ?>
+		<a href="<?php echo esc_html( $WP_Insights_Detailed_Page_Stats_Instance->url); ?>" target="_blank">Open</a>
+		</h2>
+		<a href="admin.php?page=<?php echo $_REQUEST['page']?>">&lt;- Back to Pages List</a>
 		<form id="wpi-detailed-page-stats" method="get">
 			<ul>       
 		        <li>
