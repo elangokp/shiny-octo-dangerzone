@@ -48,8 +48,6 @@
      */
     //trackingServer: "/smt2/",
     trackingUrl: "",
-    
-    wpAdminAjaxUrl: "",
     /**
      * URL to remote (smt)2 server, i.e., the site URL where the logs will be stored, and (of course) the CMS is installed.
      * If this value is empty, data will be posted to trackingServer URL.
@@ -276,12 +274,12 @@
       requestData += "&scrollPercentage=" + smtRec.scrollPercentage;
       requestData += "&action="    + "wpistore";
       requestData += "&remote="    + smtOpt.storageServer;
-      requestData += "&wpAdminAjaxUrl="    + smtOpt.wpAdminAjaxUrl;
+      
       var gatewayUrl = smtOpt.trackingUrl;
       if ('XDomainRequest' in window && window.XDomainRequest !== null) {
     	    // Use Microsoft XDR
     	    var xdr = new XDomainRequest();
-    	    xdr.open("post", gatewayUrl);
+    	    xdr.open("post", gatewayUrl+"?action=wpistore&isXDR=true");
     	    xdr.onload = function () {
     	    var responseData = xdr.responseText;
     	    if (responseData == null || typeof (responseData) == 'undefined')
@@ -328,20 +326,21 @@
     /** Send a request to server to cache the page. */
     cacheUserPage: function()
 	{
-		var requestData  = "uid="    + smtRec.userId;
+    	var requestData  = "uid="    + smtRec.userId;
 		requestData += "&action="    + "wpicachepage";
 		requestData += "&url="       + smtRec.url;
 		requestData += "&urltitle="  + document.title;
 		requestData += "&cookies="   + document.cookie;
+		requestData += "&html="      + smtRec.getDocumentHtml();
 		requestData += "&remote="    + smtOpt.storageServer;
-        requestData += "&wpAdminAjaxUrl="    + smtOpt.wpAdminAjaxUrl;
+		
 	    // send request
 	    var gatewayUrl = smtOpt.trackingUrl;
 	    
 	    if ('XDomainRequest' in window && window.XDomainRequest !== null) {
     	    // Use Microsoft XDR
     	    var xdr = new XDomainRequest();
-    	    xdr.open("post", gatewayUrl);
+    	    xdr.open("post", gatewayUrl+"?action=wpicachepage&isXDR=true");
     	    xdr.onload = function () {};
     	    xdr.onprogress = function(){};
     	    xdr.ontimeout = function(){};
@@ -357,6 +356,12 @@
     		});
     	}
 	},
+	
+	getDocumentHtml: function() {
+        for (var dt = window.document.doctype, de = window.document.documentElement, dt = (dt && null != dt ? "<!DOCTYPE " + dt.name + ("" != dt.publicId ? ' PUBLIC "' + dt.publicId + '" "' + dt.systemId + '"' : "") + ">\n" : "<!DOCTYPE html>\n") + "<html", attrId = 0; attrId < de.attributes.length; attrId++) 
+        	var h = de.attributes[attrId],  dt = dt + ("null" != h.value && "" != h.value ? " " + h.name + '="' + h.value + '"' : "");
+        return encodeURIComponent(dt += ">" + de.innerHTML + "</html>");
+    },
 	
     /** Gets current time (in seconds). */
     getTime: function()
@@ -415,14 +420,14 @@
 	      requestData += "&scrollPercentage=" + smtRec.scrollPercentage;
           requestData += "&action="    + "wpiappend";
           requestData += "&remote="    + smtOpt.storageServer;
-          requestData += "&wpAdminAjaxUrl="    + smtOpt.wpAdminAjaxUrl;
+          
       //alert("Inside append mouse data");
       // send request
       var gatewayUrl = smtOpt.trackingUrl;
       if ('XDomainRequest' in window && window.XDomainRequest !== null) {
   	    // Use Microsoft XDR
   	    var xdr = new XDomainRequest();
-  	    xdr.open("post", gatewayUrl);
+  	    xdr.open("post", gatewayUrl+"?action=wpiappend&isXDR=true");
   	    xdr.onload = function () {};
   	    xdr.onprogress = function(){};
   	    xdr.ontimeout = function(){};
@@ -465,14 +470,14 @@
 	      requestData += "&scrollPercentage=" + smtRec.scrollPercentage;
 	      requestData += "&action="    + "wpiexit";
 	      requestData += "&remote="    + smtOpt.storageServer;
-          requestData += "&wpAdminAjaxUrl="    + smtOpt.wpAdminAjaxUrl;
+	      
       //alert("Inside append mouse data");
       // send request
       var gatewayUrl = smtOpt.trackingUrl;
       if ('XDomainRequest' in window && window.XDomainRequest !== null) {
   	    // Use Microsoft XDR
   	    var xdr = new XDomainRequest();
-  	    xdr.open("post", gatewayUrl);
+  	    xdr.open("post", gatewayUrl+"?action=wpiexit&isXDR=true");
   	    xdr.onload = function () {};
   	    xdr.onprogress = function(){};
   	    xdr.ontimeout = function(){};
