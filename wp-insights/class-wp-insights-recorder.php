@@ -3,9 +3,12 @@
 require_once('class-wp-insights-utils.php');
 require_once('class-wp-insights-db-utils.php');
 require_once('class-browser.php');
+require_once('/utils/Browscap.php');
 class WP_Insights_Recorder {
 
 	protected $cache_dir = null;
+	
+	protected $browscap_cache_dir = null;
 
 	protected $wp_insights_db_utils = null;
 
@@ -31,8 +34,13 @@ class WP_Insights_Recorder {
 
 		return self::$instance;
 	}
+	
 	public function setCacheDir($dirPath) {
 		$this->cache_dir = $dirPath;
+	}
+	
+	public function setBrowscapCacheDir($dirPath) {
+		$this->browscap_cache_dir = $dirPath;
 	}
 
 	public function set_wp_insights_db_utils($given_wp_insights_db_utils) {
@@ -153,13 +161,15 @@ class WP_Insights_Recorder {
 	protected function getBrowserAndOSDetails() {
 		/* client browser stats ----------------------------------------------------- */
 		
-		$browser = new Browser();
+		//$browser = new Browser();
+		$bc = new Browscap($this->cache_dir."browscapcache/");
+		$current_browser = $bc->getBrowser();
 		
 		// save browser id
-		$bname = $this->wp_insights_db_utils->db_select($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_BROWSERS, "id", "name='".$browser->getBrowser()."'");
+		$bname = $this->wp_insights_db_utils->db_select($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_BROWSERS, "id", "name='".$current_browser->Parent."'");
 		if (!$bname) {
 			
-			$browserName = $browser->getBrowser();
+			$browserName = $current_browser->Parent;
 			$isBot = 0;
 			if (strpos($browserName, 'GoogleBot') !== FALSE) {
 				$isBot = 1;
@@ -170,7 +180,7 @@ class WP_Insights_Recorder {
 			}
 			
 			$browserdetails = array(
-					"name" => $browser->getBrowser(),
+					"name" => $current_browser->Parent,
 					"isBot" => $isBot
 			);
 			$browserdetailsformat = array(
@@ -184,10 +194,10 @@ class WP_Insights_Recorder {
 		
 		
 		// save OS id
-		$osname = $this->wp_insights_db_utils->db_select($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_OS, "id", "name='".$browser->getPlatform()."'");
+		$osname = $this->wp_insights_db_utils->db_select($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_OS, "id", "name='".$current_browser->Platform_Description."'");
 		if (!$osname) {
 			$osdetails = array(
-					"name" => $browser->getPlatform()
+					"name" => $current_browser->Platform_Description
 			);
 			$osdetailsformat = array(
 					'%s'
@@ -200,8 +210,8 @@ class WP_Insights_Recorder {
 		$browserAndOSId = array(
 				'browser_id' => $browserid,
 				'os_id' => $osid,
-				'browser_ver' => (float) $browser->getVersion(),
-				'user_agent' => $browser->getUserAgent()
+				'browser_ver' => (float) $current_browser->Version,
+				'user_agent' => $current_browser->browser_name
 		);
 		
 		return $browserAndOSId;

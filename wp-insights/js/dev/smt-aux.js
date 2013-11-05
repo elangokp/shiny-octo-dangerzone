@@ -530,13 +530,13 @@ var smt2fn = {
      */
     findDOMElement: function(e,callback)
     {
-     /* if (!e) { e = window.event; }
+      if (!e) { e = window.event; }
       // find the element
-      var t = e.target || e.srcElement;
+      //var t = e.target || e.srcElement;
       // defeat Safari bug
-      if (t.nodeType == 3) { t = t.parentNode; }
+      //if (t.nodeType == 3) { t = t.parentNode; }
       // if the element has no ID, travese the DOM in reverse (find its parents)
-      var check = (t.id) ? this.getID(t) : this.getParents(t);
+      /*var check = (t.id) ? this.getID(t) : this.getParents(t);
       if (check) {
         callback(check);
       }*/
@@ -544,22 +544,62 @@ var smt2fn = {
     },
     
     getMousePositionDetails: function(event) {
-    	var pageX = Math.round(event.pageX);
-    	var pageY = Math.round(event.pageY);
-    	var elementX = Math.round(jQuery_1_10_2(event.target).offset().left);
-    	var elementY = Math.round(jQuery_1_10_2(event.target).offset().top);
+    	var pageX = 0, pageY = 0;
+    	if (event.pageX || event.pageY) {
+    		pageX = event.pageX;
+    		pageY = event.pageY;
+    	}	else if (event.clientX || event.clientY) {
+    		pageX = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+    		pageY = event.clientY + document.body.scrollTop  + document.documentElement.scrollTop;
+    	}
+    	// in certain situations the mouse coordinates could be negative values (e.g. Opera)
+    	if (pageX < 0 || !pageX) pageX = 0;
+    	if (pageY < 0 || !pageY) pageY = 0;
+    	pageX = Math.round(pageX);
+    	//console.log(pageX);
+    	pageY = Math.round(pageY);
+    	//console.log(pageY);
+    	var target = event.target || event.srcElement;
+    	if (target.nodeType == 3) { target = target.parentNode; }
+    	//console.log(target);
+    	var elementX = Math.round(jQuery_1_10_2(target).offset().left);
+    	//console.log(elementX);
+    	var elementY = Math.round(jQuery_1_10_2(target).offset().top);
+    	//console.log(elementY);
         var mousePosition = {
-            csspath: jQuery_1_10_2(event.target).getcssPath(),
+            csspath: jQuery_1_10_2(target).getcssPath(),
             pageX: pageX,
             pageY: pageY,
             elementX: elementX,
             elementY: elementY,
             relX: pageX - elementX,
             relY: pageY - elementY,
-            width: jQuery_1_10_2(event.target).width(),
-            height: jQuery_1_10_2(event.target).height()
+            width: jQuery_1_10_2(target).width(),
+            height: jQuery_1_10_2(target).height()
         };
+        
+        //console.log(jQuery_1_10_2(target).getcssPath());
+        //console.log(jQuery_1_10_2(target).width());
+        //console.log(jQuery_1_10_2(target).height());
         return mousePosition;
+    },
+    
+    
+    getMouseCoords: function(e) 
+    {
+      if (!e) var e = window.event;
+      
+      var x = 0, y = 0;
+    	if (e.pageX || e.pageY) {
+    		x = e.pageX;
+    		y = e.pageY;
+    	}	else if (e.clientX || e.clientY) {
+    		x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+    		y = e.clientY + document.body.scrollTop  + document.documentElement.scrollTop;
+    	}
+      // in certain situations the mouse coordinates could be negative values (e.g. Opera)
+    	if (x < 0 || !x) x = 0;
+    	if (y < 0 || !y) y = 0;
     },
 
 

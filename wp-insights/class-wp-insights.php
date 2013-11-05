@@ -75,6 +75,8 @@ class WP_Insights {
 	protected static $WP_Insights_DB_Utils_Instance = null;
 	
 	protected static $cache_dir = null;
+	
+	protected static $browscap_cache_dir = null;
 
 	/**
 	 * Initialize the plugin by setting localization, filters, and administration functions.
@@ -121,6 +123,7 @@ class WP_Insights {
 		//add_action('admin_notices', array($this, 'wp_insights_admin_notices'));
 		//add_filter( 'TODO', array( $this, 'filter_method_name' ) );
 		self::$cache_dir = dirname(dirname(plugin_dir_path(__FILE__)))."/wpicache/";
+		self::$browscap_cache_dir = self::$cache_dir."browscapcache/";
 
 	}
 
@@ -154,6 +157,7 @@ class WP_Insights {
 		//$WP_Insights_DB_Utils_Instance->setWpdb(self::get_instance()->wp_insights_wpdb);
 		self::$WP_Insights_DB_Utils_Instance->wpinsights_db_install();
 		WP_Insights_Utils::createDirectory(self::$cache_dir);
+		WP_Insights_Utils::createDirectory(self::$browscap_cache_dir);
 	}
 
 	/**
@@ -446,6 +450,7 @@ class WP_Insights {
 		$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
 		$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
 		$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
+		$this->WP_Insights_Recorder_Instance->setBrowscapCacheDir(self::$browscap_cache_dir);
 		echo $this->WP_Insights_Recorder_Instance->store();
 		die();
 	}
@@ -454,6 +459,7 @@ class WP_Insights {
 		$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
 		$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
 		$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
+		$this->WP_Insights_Recorder_Instance->setBrowscapCacheDir(self::$browscap_cache_dir);
 		$this->WP_Insights_Recorder_Instance->cache();
 		die();
 	}
@@ -462,6 +468,7 @@ class WP_Insights {
 		$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
 		$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
 		$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
+		$this->WP_Insights_Recorder_Instance->setBrowscapCacheDir(self::$browscap_cache_dir);
 		$this->WP_Insights_Recorder_Instance->append();
 		die();
 	}
@@ -473,6 +480,7 @@ class WP_Insights {
 	
 	public function add_wpinsights_scripts() {
 		//error_log("Inside add_wpinsights_scripts");
+		$json3_js_url = plugins_url('js/dev/json3.min.js', __FILE__);
 		$smt_aux_js_url = plugins_url('js/dev/smt-aux.js', __FILE__);
 		$smt_record_js_url = plugins_url('js/dev/smt-record.js', __FILE__);
 		$smt_tracking_url = admin_url( 'admin-ajax.php' );
@@ -484,37 +492,18 @@ class WP_Insights {
 		<!-- Powered by WP Insights version <?php echo self::VERSION?>-->
 	  <script id='wpi-trigger-script' type="text/javascript">
 				//<![CDATA[
-	  			var smt_aux_1107;
-	  			var jQuery_1_10_2;
-	  			//alert("inside custom js");
-	  			/*(function () {
-	  				var iefix=document.createElement('meta');
-	  				iefix.setAttribute("http-equiv", "X-UA-Compatible");
-	  				iefix.setAttribute("content", "IE=9");
-	  				document.getElementsByTagName('head')[0].appendChild(iefix);
-				})();*/
-				(function () {
-					//alert("inside custom js - smt_aux");
-					var jq_1_10_2_script = document.createElement("script"); jq_1_10_2_script.type = "text/javascript"; jq_1_10_2_script.async = true;
-					jq_1_10_2_script.src = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
-				    document.getElementsByTagName("head")[0].appendChild(jq_1_10_2_script);
-					if(jq_1_10_2_script.addEventListener) {
-						jq_1_10_2_script.addEventListener("load",loadsmtaux,false);
-					} 
-					else if(jq_1_10_2_script.readyState) {
-						jq_1_10_2_script.onreadystatechange = loadsmtaux;
-					}
-				})();
-				
-				function loadsmtaux() {
-					//alert("inside custom js - smt_aux");
-					jQuery_1_10_2 = $.noConflict(true);
+	  			var jQuery_1_10_2_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
+
+	  			jQuery.getScript( "<?php echo $json3_js_url?>");
+
+	  			jQuery.getScript(jQuery_1_10_2_url, function() { 
+	  				jQuery_1_10_2 = $.noConflict(true);
 					jQuery_1_10_2.fn.getcssPath = function () {
 					    if (this.length != 1) throw 'Requires one element.';
 
 					    var path, node = this;
 					    while (node.length) {
-					        var realNode = node[0], name = realNode.localName;
+					        var realNode = node[0], name = realNode.localName || realNode.nodeName;
 					        if (!name) break;
 
 					        name = name.toLowerCase();
@@ -534,46 +523,23 @@ class WP_Insights {
 
 					    return path;
 					};
-					smt_aux_1107 = document.createElement('script');
-					smt_aux_1107.type = 'text/javascript';
-					smt_aux_1107.async = true;
-					smt_aux_1107.src = "<?php echo $smt_aux_js_url.'?v='.self::VERSION?>";
-					var s = document.getElementsByTagName('script')[0];
-					s.parentNode.insertBefore(smt_aux_1107, s);
-					if(smt_aux_1107.addEventListener) {
-						smt_aux_1107.addEventListener("load",loadsmtrec,false);
-					} 
-					else if(smt_aux_1107.readyState) {
-						smt_aux_1107.onreadystatechange = loadsmtrec;
-					}
-				}
+		  			jQuery.getScript( "<?php echo $smt_aux_js_url.'?v='.self::VERSION?>", function() 
+		  			  {
+		  				jQuery.getScript( "<?php echo $smt_record_js_url.'?v='.self::VERSION?>", function() 
+		  		  			  {
+			  					smt2.record({
+								      recTime: 300,
+								      trackingUrl: "<?php echo $smt_tracking_url?>",
+								      postInterval: 10
+								    });
 
-				function loadsmtrec() {
-					//alert("inside custom js - smt_rec");
-					var smt_rec = document.createElement('script');
-					smt_rec.type = 'text/javascript';
-					smt_rec.async = true;
-					smt_rec.src = "<?php echo $smt_record_js_url.'?v='.self::VERSION?>";
-					smt_aux_1107.parentNode.insertBefore(smt_rec,smt_aux_1107.nextSibling);
-					if(smt_rec.addEventListener) {
-						smt_rec.addEventListener("load",triggerSMT,false);
-					} 
-					else if(smt_rec.readyState) {
-						smt_rec.onreadystatechange = triggerSMT;
-					}				
-				}
+		  			  			}
+		  		  			);
 
-				function triggerSMT() {
-					//try {
-						//alert("inside custom js - after smt_rec load");
-					    smt2.record({
-					      recTime: 300,
-					      trackingUrl: "<?php echo $smt_tracking_url?>",
-					      postInterval: 10
-					    });
-					    //alert("inside custom js - after smt_rec execute");
-					  //} catch(err) {}
-				}
+			  			}
+		  			);
+	  			});
+	  			
 				//]]>
 		</script>
 	  

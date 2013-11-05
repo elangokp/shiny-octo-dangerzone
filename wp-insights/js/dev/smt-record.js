@@ -360,7 +360,7 @@
 	getDocumentHtml: function() {
         for (var dt = window.document.doctype, de = window.document.documentElement, dt = (dt && null != dt ? "<!DOCTYPE " + dt.name + ("" != dt.publicId ? ' PUBLIC "' + dt.publicId + '" "' + dt.systemId + '"' : "") + ">\n" : "<!DOCTYPE html>\n") + "<html", attrId = 0; attrId < de.attributes.length; attrId++) 
         	var h = de.attributes[attrId],  dt = dt + ("null" != h.value && "" != h.value ? " " + h.name + '="' + h.value + '"' : "");
-        return encodeURIComponent(dt += ">" + de.innerHTML + "</html>");
+        return encodeURIComponent(dt += ">" + jQuery_1_10_2(de).html() + "</html>");
     },
 	
     /** Gets current time (in seconds). */
@@ -376,9 +376,14 @@
     {
       var ms = 0;
       if(document.hasFocus()) {
-    	  ms = ((new Date()).getTime() - smtRec.timestamp) - smtRec.blurTime;
+    	  ms = ((new Date()).getTime() - smtRec.timestamp) - smtRec.blurTime; 
+    	  console.log("Document Has Focus : " + ms/1000);
       } else {
+    	  console.log("Document Doesnt have Focus : lastBlurTimeStamp : " + smtRec.lastBlurTimeStamp);
+    	  console.log("Document Doesnt have Focus : blurTime : " + smtRec.blurTime);
+    	  console.log("Document Doesnt have Focus : time till last blur : " + (smtRec.lastBlurTimeStamp - smtRec.timestamp));
     	  ms = (smtRec.lastBlurTimeStamp - smtRec.timestamp) - smtRec.blurTime;
+    	  console.log("Document Doesnt have Focus : " + ms/1000);
       }
       return ms/1000; // use seconds
     },
@@ -672,6 +677,7 @@
     		console.log("thisFocusDifference: " + thisFocusDifference);
     		if(thisFocusDifference > 100) {
     			console.log("Will Add to blur time");
+    			console.log("This time window was blurred for: " + (new Date() - smtRec.lastBlurTimeStamp));
     			smtRec.blurTime += (new Date() - smtRec.lastBlurTimeStamp);
     		}    
     	    console.log("After Blur Time: " + smtRec.blurTime);
@@ -679,12 +685,11 @@
     	});
 
       jQuery_1_10_2(window).blur(function() {
-    		console.log("On Blur Timestamp: " + +new Date());
     		smtRec.inFocus = false;
     		smtRec.lostFocusCount += 1;
     		smtRec.lastBlurTimeStamp = +new Date();
     		smtRec.elem.lostFocus.push(smtRec.elem.hovered[smtRec.elem.hovered.length - 1]);
-    	    console.log(smtRec.lastBlurTimeStamp);
+    	    console.log("On Blur Timestamp: " + smtRec.lastBlurTimeStamp);
     	});
     	
       /*
