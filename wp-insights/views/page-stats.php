@@ -30,7 +30,13 @@ if(isset($_GET['pid'])) {
 		<form id="wpi-detailed-page-stats" method="get">
 			<ul>       
 		        <li>
-			        <label for="change_recorder_status">Change Recorder Status: </label>
+		        	<label for="pageViews">Page Views: </label>
+			        <label for="timeOnPage">Avg. Time on Page: </label>
+			        <label for="focusedTimeOnPage">Avg. Focused Time on Page: </label>
+			        <label for="attention">Attention %: </label>
+			        <label for="interest">Interest %: </label>
+			        <label for="desire">Desire %: </label>
+			        <label for="passion">Passion %: </label>
             	</li>
             	
             	<li><?php submit_button("Save Options", "primary", "submit")?></li>
