@@ -253,32 +253,32 @@ class WP_Insights_DB_Utils {
 		/* create records table ----------------------------------------------------- */
 	
 		$records_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_RECORDS;
-              $records_table_sql  = "CREATE TABLE $records_table (
-              id           BIGINT        unsigned  NOT NULL auto_increment,
-              client_id    VARCHAR(20)             NOT NULL,
-              cache_id     BIGINT        unsigned  NOT NULL,
-              os_id        TINYINT       unsigned  NOT NULL,
-              browser_id   TINYINT       unsigned  NOT NULL,
-              browser_ver  FLOAT(2,1)    unsigned  NOT NULL,
-              user_agent   VARCHAR(255)            NOT NULL,
-              ftu          TINYINT(1)              NOT NULL,
-              ip           VARCHAR(15)             NOT NULL,
-              scr_width    SMALLINT      unsigned  NOT NULL,
-              scr_height   SMALLINT      unsigned  NOT NULL,
-              vp_width     SMALLINT      unsigned  NOT NULL,
-              vp_height    SMALLINT      unsigned  NOT NULL,
-              sess_date    TIMESTAMP     default   CURRENT_TIMESTAMP,
-              sess_time    FLOAT(7,2)    unsigned  NOT NULL,
-              focus_time   FLOAT(7,2)    unsigned  NULL,
-              lost_focus_count  TINYINT  unsigned  NULL,
-              fps          TINYINT       unsigned  NOT NULL,
-              coords_x     MEDIUMTEXT              NOT NULL,
-              coords_y     MEDIUMTEXT              NOT NULL,
-              clicks       MEDIUMTEXT              NOT NULL,
-              hovered      LONGTEXT                NOT NULL,
-              clicked      LONGTEXT                NOT NULL
-              lost_focus   LONGTEXT                NULL,
-              PRIMARY KEY  (id) ) DEFAULT CHARSET utf8;";
+        $records_table_sql  = "CREATE TABLE $records_table (
+        id           BIGINT        unsigned  NOT NULL auto_increment,
+        client_id    VARCHAR(20)             NOT NULL,
+        cache_id     BIGINT        unsigned  NOT NULL,
+        os_id        TINYINT       unsigned  NOT NULL,
+        browser_id   TINYINT       unsigned  NOT NULL,
+        browser_ver  FLOAT(2,1)    unsigned  NOT NULL,
+        user_agent   VARCHAR(255)            NOT NULL,
+        ftu          TINYINT(1)              NOT NULL,
+        ip           VARCHAR(15)             NOT NULL,
+        scr_width    SMALLINT      unsigned  NOT NULL,
+        scr_height   SMALLINT      unsigned  NOT NULL,
+        vp_width     SMALLINT      unsigned  NOT NULL,
+        vp_height    SMALLINT      unsigned  NOT NULL,
+        sess_date    TIMESTAMP     default   CURRENT_TIMESTAMP,
+        sess_time    FLOAT(7,2)    unsigned  NOT NULL,
+        focus_time   FLOAT(7,2)    unsigned  NULL,
+        lost_focus_count  TINYINT  unsigned  NULL,
+        fps          TINYINT       unsigned  NOT NULL,
+        coords_x     MEDIUMTEXT              NOT NULL,
+        coords_y     MEDIUMTEXT              NOT NULL,
+        clicks       MEDIUMTEXT              NOT NULL,
+        hovered      LONGTEXT                NOT NULL,
+        clicked      LONGTEXT                NOT NULL,
+        lost_focus   LONGTEXT                NULL,
+        PRIMARY KEY  (id) ) DEFAULT CHARSET utf8";
               
 		dbDelta( $records_table_sql );
 	

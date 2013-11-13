@@ -4,17 +4,21 @@
     </description>
   <!-- set global properties for this build -->
   <property name="plugin-name" value="wp-insights"/>
-  <property name="local" location="wp-insights"/>
   <property name="plugins-folder" location="D:\Setups\Xampp\htdocs\wordpress\wp-content\plugins"/>
+  <property name="exports-folder" location="C:\Users\Elango\Desktop\exports-folder"/>
 
   <target name="clean" description="clean up" >
     <delete dir="${plugins-folder}\${plugin-name}"/>
   </target>
   
+  <target name="clean-exports" description="clean up exports folder" >
+    <delete dir="${exports-folder}"/>
+    <mkdir dir="${exports-folder}"/>
+  </target>
+  
   <target name="deploy" depends="clean">
     <!-- Create the time stamp -->
     <tstamp/>
-    <echo>${local}</echo>
     <mkdir dir="${plugins-folder}\${plugin-name}"/>
     <copy todir="${plugins-folder}\${plugin-name}">
     	<fileset dir="../">
@@ -25,6 +29,19 @@
     	</fileset>
  	</copy>
   </target>
+  
+  <target name="build-zip" depends="clean-exports">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <zip destfile="${exports-folder}/wp-insights.zip">
+    	<fileset dir="../">
+    	    <exclude name="**/.settings/**" />
+    	    <exclude name=".buildpath" />
+    	    <exclude name=".project" />
+    	    <exclude name="**/build/**" />
+    	</fileset>
+ 	</zip>
+  </target>  
 
 
 </project>
