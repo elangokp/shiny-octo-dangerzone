@@ -3,7 +3,7 @@
 require_once('class-wp-insights-utils.php');
 require_once('class-wp-insights-db-utils.php');
 require_once('class-browser.php');
-require_once('/utils/Browscap.php');
+require_once('utils/Browscap.php');
 class WP_Insights_Recorder {
 
 	protected $cache_dir = null;
@@ -149,8 +149,8 @@ class WP_Insights_Recorder {
 			array_push($recorddetailsformat,"%s");
 		}
 		
-		error_log(print_r($recorddetails, true));
-		error_log(print_r($recorddetailsformat, true));
+		//error_log(print_r($recorddetails, true));
+		//error_log(print_r($recorddetailsformat, true));
 
 		$uid = $this->wp_insights_db_utils->db_insert($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS, $recorddetails, $recorddetailsformat);
 
@@ -317,7 +317,7 @@ class WP_Insights_Recorder {
 
 		$URL = $_POST['url'];
 		$recordingId = $_POST['uid'];
-		$html  = urldecode(stripslashes($_POST['html']));
+		$html  = rawurldecode(stripslashes($_POST['html']));
 		$liveDom = $this->parseContent($html);
 		//error_log("URL is : ".$URL);
 		

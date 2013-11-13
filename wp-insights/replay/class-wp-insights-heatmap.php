@@ -102,38 +102,27 @@ class WP_Insights_Heatmap {
 				if($eachUserhoverClickData != "" && $jsonArrayString != "") {
 					$jsonArrayString = ltrim($jsonArrayString, "[");
 					$eachUserhoverClickData = rtrim($eachUserhoverClickData, "]");
-					$eachUserhoverClickData .= ",";
+					$eachUserhoverClickData = $eachUserhoverClickData.",";
 				}
-				$eachUserhoverClickData .= $jsonArrayString;
+				$eachUserhoverClickData = $eachUserhoverClickData.$jsonArrayString;
 			}
 			if($eachUserhoverClickData != "") {
-				$this->hoverClickData .= $eachUserhoverClickData;
-				$this->hoverClickData .= ",";
+				$this->hoverClickData = $this->hoverClickData.$eachUserhoverClickData;
+				$this->hoverClickData = $this->hoverClickData.",";
 			}			
 		}
 		$this->hoverClickData = rtrim($this->hoverClickData, ",");
-		$this->hoverClickData .= "]";
+		$this->hoverClickData = $this->hoverClickData."]";
 	}
 	
 	public function getMouseMovementDataByPage(){
 		$records = $this->wp_insights_db_utils->db_select_all(
 				$this->recordsTable." AS R"." INNER JOIN ".$this->cacheTable." AS C1"." ON R.cache_id = C1.id"
 				." INNER JOIN ".$this->cacheTable." AS C2"." ON C2.url = C1.url",
-				"R.hovered",
+				"R.id as id,R.hovered as mousepositions",
 				"C2.id = ".$this->pid);
 	
-		foreach ($records as $i => $record)
-		{
-			$this->hoverClickData="[";
-			foreach(explode("|~|",$record['hovered']) as $j => $jsonArrayString){
-				if($this->hoverClickData != "" && $jsonArrayString != "") {
-					$jsonArrayString = ltrim($jsonArrayString, "[");
-					$this->hoverClickData = rtrim($this->hoverClickData, "]");
-					$this->hoverClickData .= ",";
-				}
-				$this->hoverClickData .= $jsonArrayString;
-			}
-		}
+		$this->constructHeatmapString($records);
 	
 	}
 	
@@ -141,20 +130,10 @@ class WP_Insights_Heatmap {
 		$records = $this->wp_insights_db_utils->db_select_all(
 				$this->recordsTable." AS R"." INNER JOIN ".$this->cacheTable." AS C1"." ON R.cache_id = C1.id"
 				." INNER JOIN ".$this->cacheTable." AS C2"." ON C2.url = C1.url",
-				"R.clicked",
+				"R.id as id,R.clicked as mousepositions",
 				"C2.id = ".$this->pid);
-	
-		foreach ($records as $i => $record)
-		{
-			foreach(explode("|~|",$record['clicked']) as $j => $jsonArrayString){
-				if($this->hoverClickData != "" && $jsonArrayString != "") {
-					$jsonArrayString = ltrim($jsonArrayString, "[");
-					$this->hoverClickData = rtrim($this->hoverClickData, "]");
-					$this->hoverClickData .= ",";
-				}
-				$this->hoverClickData .= $jsonArrayString;
-			}
-		}
+		
+		$this->constructHeatmapString($records);
 	
 	}
 	
@@ -162,20 +141,10 @@ class WP_Insights_Heatmap {
 		$records = $this->wp_insights_db_utils->db_select_all(
 				$this->recordsTable." AS R"." INNER JOIN ".$this->cacheTable." AS C1"." ON R.cache_id = C1.id"
 				." INNER JOIN ".$this->cacheTable." AS C2"." ON C2.url = C1.url",
-				"R.lost_focus",
+				"R.id as id, R.lost_focus as mousepositions",
 				"C2.id = ".$this->pid);
-	
-		foreach ($records as $i => $record)
-		{
-			foreach(explode("|~|",$record['lost_focus']) as $j => $jsonArrayString){
-				if($this->hoverClickData != "" && $jsonArrayString != "") {
-					$jsonArrayString = ltrim($jsonArrayString, "[");
-					$this->hoverClickData = rtrim($this->hoverClickData, "]");
-					$this->hoverClickData .= ",";
-				}
-				$this->hoverClickData .= $jsonArrayString;
-			}
-		}
+		
+		$this->constructHeatmapString($records);
 	
 	}
 	
@@ -190,27 +159,47 @@ class WP_Insights_Heatmap {
 		{
 			if($record['hovered'] != ""){
 				$lastJsonArrayString = end(explode("|~|",$record['hovered']));
-				error_log(print_r($lastJsonArrayString, true));
+				//error_log(print_r($lastJsonArrayString, true));
 				if($lastJsonArrayString != "") {					
 					if(strpos($lastJsonArrayString, "},{") !== false){
 						$exitPointJson = end(explode("},{",$lastJsonArrayString));
-						error_log(print_r($exitPointJson, true));
+						//error_log(print_r($exitPointJson, true));
 						$exitPointJson = "{".rtrim($exitPointJson, "]");
-						error_log(print_r($exitPointJson, true));
-						$this->hoverClickData .= $exitPointJson;
-						$this->hoverClickData .= ",";
+						//error_log(print_r($exitPointJson, true));
+						$this->hoverClickData = $this->hoverClickData.$exitPointJson;
+						$this->hoverClickData = $this->hoverClickData.",";
 					} else {
 						$exitPointJson = rtrim(ltrim($lastJsonArrayString, "["), "]");
-						error_log(print_r($exitPointJson, true));
-						$this->hoverClickData .= $exitPointJson;
-						$this->hoverClickData .= ",";
+						//error_log(print_r($exitPointJson, true));
+						$this->hoverClickData = $this->hoverClickData.$exitPointJson;
+						$this->hoverClickData = $this->hoverClickData.",";
 					}
 				}
 			}
 			
 		}
 		$this->hoverClickData = rtrim($this->hoverClickData, ",");
-		$this->hoverClickData .= "]";
+		$this->hoverClickData = $this->hoverClickData."]";
+	}
+	
+	protected function constructHeatmapString($records) {
+		$this->hoverClickData="[";
+		foreach ($records as $i => $record)
+		{
+			error_log($record['id'] . "=>" . $record['mousepositions']);
+			foreach(explode("|~|",$record['mousepositions']) as $j => $jsonArrayString){
+				error_log("   " . $j . " => " . $jsonArrayString);
+				if($this->hoverClickData != "" && $jsonArrayString != "") {
+					$jsonArrayString = ltrim($jsonArrayString, "[");
+					$this->hoverClickData = rtrim($this->hoverClickData, "]");
+					if(strlen($this->hoverClickData)>1){
+						$this->hoverClickData = $this->hoverClickData.",";
+					}
+					$this->hoverClickData = $this->hoverClickData.$jsonArrayString;
+				}
+		
+			}
+		}
 	}
 	
 	/* public function getMouseMovementDataByPage(){
@@ -360,6 +349,8 @@ class WP_Insights_Heatmap {
 			var xx = h337.create({"element":document.getElementsByTagName("body")[0], "radius":10, "visible":true});
 			xx.store.setDataSet('.$this->heatMapDataString.');	
 		};';*/
+		
+		error_log($this->hoverClickData);
 		
 		
 		$cdata = 'window.onload = function(){

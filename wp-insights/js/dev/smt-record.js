@@ -628,7 +628,7 @@
       // allow mouse tracking over Flash animations
       aux.allowTrackingOnFlashObjects(document);
       // get mouse coords also on iframes
-      smtRec.trackIFrames(document);
+      //smtRec.trackIFrames(document);
       // reuse these functions for mobile clients
       var onMove = function(e) {
         if (e.touches) { e = e.touches[0] || e.targetTouches[0]; }
