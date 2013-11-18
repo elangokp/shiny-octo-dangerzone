@@ -567,15 +567,15 @@ var smt2fn = {
     	var elementY = Math.round(jQuery_1_10_2(target).offset().top);
     	//console.log(elementY);
         var mousePosition = {
-            csspath: jQuery_1_10_2(target).getcssPath(),
-            pageX: pageX,
-            pageY: pageY,
-            elementX: elementX,
-            elementY: elementY,
-            relX: pageX - elementX,
-            relY: pageY - elementY,
-            width: jQuery_1_10_2(target).width(),
-            height: jQuery_1_10_2(target).height()
+            cp: jQuery_1_10_2(target).getcssPath(),//csspath
+            pX: pageX,//pageX
+            pY: pageY,//pageY
+            eX: elementX,//eX
+            eY: elementY,//eY
+            rX: pageX - elementX,//rX
+            rY: pageY - elementY,//rY
+            w: jQuery_1_10_2(target).width(),//w
+            h: jQuery_1_10_2(target).height()//h
         };
         
         //console.log(jQuery_1_10_2(target).getcssPath());

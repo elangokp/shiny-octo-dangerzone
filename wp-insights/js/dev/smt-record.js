@@ -263,12 +263,12 @@
       requestData += "&time="      + smtRec.getTime();
       requestData += "&fps="       + smtOpt.fps;
       requestData += "&ftu="       + smtRec.ftu;
-      requestData += "&xcoords="   + smtRec.coords.x;
-      requestData += "&ycoords="   + smtRec.coords.y;
-      requestData += "&clicks="    + smtRec.coords.p;
-      requestData += "&elhovered=" + encodeURIComponent(JSON.stringify(smtRec.elem.hovered));
-      requestData += "&elclicked=" + encodeURIComponent(JSON.stringify(smtRec.elem.clicked));
-      requestData += "&ellostfocus=" + encodeURIComponent(JSON.stringify(smtRec.elem.lostFocus));
+      //requestData += "&xcoords="   + smtRec.coords.x;
+      //requestData += "&ycoords="   + smtRec.coords.y;
+      //requestData += "&clicks="    + smtRec.coords.p;
+      //requestData += "&elhovered=" + encodeURIComponent(JSON.stringify(smtRec.elem.hovered));
+      //requestData += "&elclicked=" + encodeURIComponent(JSON.stringify(smtRec.elem.clicked));
+      //requestData += "&ellostfocus=" + encodeURIComponent(JSON.stringify(smtRec.elem.lostFocus));
       requestData += "&lostFocusCount=" + smtRec.lostFocusCount;
       requestData += "&focusedTime=" + smtRec.getFocusTime();
       requestData += "&scrollPercentage=" + smtRec.scrollPercentage;
@@ -276,7 +276,7 @@
       requestData += "&remote="    + smtOpt.storageServer;
       
       var gatewayUrl = smtOpt.trackingUrl;
-      if ('XDomainRequest' in window && window.XDomainRequest !== null) {
+      /*if ('XDomainRequest' in window && window.XDomainRequest !== null) {
     	    // Use Microsoft XDR
     	    var xdr = new XDomainRequest();
     	    xdr.open("post", gatewayUrl+"?action=wpistore&isXDR=true");
@@ -303,10 +303,19 @@
       			  smtRec.setUserId(data);
       		  }
     		});
-    	}
+    	}*/
+      
+      jQuery_1_10_2.ajax({
+  		  type: "GET",
+  		  url:  gatewayUrl,
+  		  data: requestData,
+  		  success: function(data) {
+  			  smtRec.setUserId(data);
+  		  }
+		});
       
       // clean
-      smtRec.clearMouseData();
+      //smtRec.clearMouseData();
     },
     /**
      * Sets the user ID.
@@ -337,7 +346,7 @@
 	    // send request
 	    var gatewayUrl = smtOpt.trackingUrl;
 	    
-	    if ('XDomainRequest' in window && window.XDomainRequest !== null) {
+	    /*if ('XDomainRequest' in window && window.XDomainRequest !== null) {
     	    // Use Microsoft XDR
     	    var xdr = new XDomainRequest();
     	    xdr.open("post", gatewayUrl+"?action=wpicachepage&isXDR=true");
@@ -354,7 +363,12 @@
       		  url:  gatewayUrl,
       		  data: requestData
     		});
-    	}
+    	}*/
+	    jQuery_1_10_2.ajax({
+    		  type: "POST",
+    		  url:  gatewayUrl,
+    		  data: requestData
+  		});
 	},
 	
 	getDocumentHtml: function() {
@@ -429,7 +443,7 @@
       //alert("Inside append mouse data");
       // send request
       var gatewayUrl = smtOpt.trackingUrl;
-      if ('XDomainRequest' in window && window.XDomainRequest !== null) {
+      /*if ('XDomainRequest' in window && window.XDomainRequest !== null) {
   	    // Use Microsoft XDR
   	    var xdr = new XDomainRequest();
   	    xdr.open("post", gatewayUrl+"?action=wpiappend&isXDR=true");
@@ -446,7 +460,13 @@
 			  url:  gatewayUrl,
 			  data: requestData
 		});
-	}
+	}*/
+      
+      jQuery_1_10_2.ajax({
+		  type: "POST",
+		  url:  gatewayUrl,
+		  data: requestData
+	});
       // clean
       smtRec.clearMouseData();
     },
@@ -479,7 +499,7 @@
       //alert("Inside append mouse data");
       // send request
       var gatewayUrl = smtOpt.trackingUrl;
-      if ('XDomainRequest' in window && window.XDomainRequest !== null) {
+      /*if ('XDomainRequest' in window && window.XDomainRequest !== null) {
   	    // Use Microsoft XDR
   	    var xdr = new XDomainRequest();
   	    xdr.open("post", gatewayUrl+"?action=wpiexit&isXDR=true");
@@ -496,7 +516,13 @@
 			  url:  gatewayUrl,
 			  data: requestData
 		});
-	}
+	}*/
+      
+      jQuery_1_10_2.ajax({
+		  type: "POST",
+		  url:  gatewayUrl,
+		  data: requestData
+	});
       // clean
       smtRec.clearMouseData();
     },
