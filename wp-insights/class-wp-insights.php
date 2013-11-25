@@ -451,7 +451,6 @@ class WP_Insights {
 		$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
 		$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
 		$this->WP_Insights_Recorder_Instance->setBrowscapCacheDir(self::$browscap_cache_dir);
-		header("Content-Type: text/html; charset=iso-8859-1");
 		echo $this->WP_Insights_Recorder_Instance->store();
 		die();
 	}
