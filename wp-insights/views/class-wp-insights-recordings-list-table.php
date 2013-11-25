@@ -193,6 +193,13 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
     	);
     }
     
+    function column_last_visit($item){
+    	 
+    	return sprintf('%1$s',
+    			WP_Insights_Utils::timeago($item['unix_sess_date'])
+    	);
+    }
+    
     function column_display_date($item){
     	
     	return sprintf('%1$s',
@@ -203,7 +210,7 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
     function column_browsing_time($item){
     
     	return sprintf('%1$s',
-    			$item['sess_time']
+    			$item['browser_open_time']
     	);
     }
     
@@ -224,7 +231,7 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
     function column_focused_time($item){
     
     	return sprintf('%1$s',
-    			$item['focus_time']
+    			$item['focused_browsing_time']
     	);
     }
     
@@ -305,12 +312,13 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         	'url' => 'url',
         	'browser' => 'Browser',
         	'os' => 'OS',
+        	'last_visit'  => 'Last Visit',
             'display_date'  => 'Display Date',
-        	'browsing_time' => 'Browsing Time',
+        	'browsing_time' => 'Browser Open Time',
         	//'interaction_time' => 'Interaction Time',
-        	'no_of_clicks' => '# Clicks',
+        	//'no_of_clicks' => '# Clicks',
         	'lost_focus_count' => 'Lost Focus Count',
-        	'focused_time' => 'Focused Time'
+        	'focused_time' => 'Focused Browsing Time'
         	//'replay' => 'Replay'
         );
         return $columns;
@@ -483,7 +491,20 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         ); */
         
         $sql = "SELECT 
-        records.*,
+        records.id,
+        records.cache_id,
+        records.os_id,
+        records.browser_id,
+        records.browser_ver,
+        records.user_agent,
+        records.ip,
+        records.sess_date,
+        UNIX_TIMESTAMP(records.sess_date) as unix_sess_date,
+        records.sess_time,
+        SEC_TO_TIME(records.sess_time) as browser_open_time,
+        records.lost_focus_count,
+        records.focus_time,
+        SEC_TO_TIME(records.focus_time) as focused_browsing_time,
         browsers.name as browser_name,
         oses.name as os_name,
         caches.url as url

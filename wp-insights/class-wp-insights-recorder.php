@@ -53,7 +53,7 @@ class WP_Insights_Recorder {
 			parse_str(file_get_contents('php://input'), $_POST);
 		}
 		
-		if (empty($_POST)) {
+		if (empty($_REQUEST)) {
 			exit;
 		}
 		
@@ -65,21 +65,21 @@ class WP_Insights_Recorder {
 				"browser_id" => 0,
 				"browser_ver" => 0,
 				"user_agent" => 0,
-				"ftu" => (int) $_POST['ftu'],
+				"ftu" => (int) $_REQUEST['ftu'],
 				"ip" => WP_Insights_Utils::get_client_ip() ,
-				"scr_width" => (int) $_POST['screenw'],
-				"scr_height" => (int) $_POST['screenh'],
-				"vp_width" => (int) $_POST['pagew'],
-				"vp_height" => (int) $_POST['pageh'],
-				"sess_date" => current_time('mysql'),
+				"scr_width" => (int) $_REQUEST['screenw'],
+				"scr_height" => (int) $_REQUEST['screenh'],
+				"vp_width" => (int) $_REQUEST['pagew'],
+				"vp_height" => (int) $_REQUEST['pageh'],
+				//"sess_date" => current_time('mysql'),
 				//"sess_date" => 'NOW()',
-				"sess_time" => (float) $_POST['time'],
-				"fps" => (int)   $_POST['fps'],
-				"coords_x" => $_POST['xcoords'],
-				"coords_y" => $_POST['ycoords'],
-				"clicks" => $_POST['clicks'],
-				"focus_time" => $_POST['focusedTime'],
-				"lost_focus_count" => $_POST['lostFocusCount']
+				"sess_time" => (float) $_REQUEST['time'],
+				"fps" => (int)   $_REQUEST['fps'],
+				//"coords_x" => $_REQUEST['xcoords'],
+				//"coords_y" => $_REQUEST['ycoords'],
+				//"clicks" => $_REQUEST['clicks'],
+				"focus_time" => $_REQUEST['focusedTime'],
+				"lost_focus_count" => $_REQUEST['lostFocusCount']
 		);
 		$recorddetailsformat = array(
 				'%s',
@@ -94,12 +94,8 @@ class WP_Insights_Recorder {
 				'%d',
 				'%d',
 				'%d',
-				'%s',
 				'%f',
 				'%d',
-				'%s',
-				'%s',
-				'%s',
 				'%f',
 				'%d'
 		);
@@ -112,9 +108,7 @@ class WP_Insights_Recorder {
 			$hovered_json = urldecode($_POST['elhovered']);
 			$clicked_json = urldecode($_POST['elclicked']);
 		} */
-		$hovered_json = urldecode(stripslashes($_POST['elhovered']));
-		$clicked_json = urldecode(stripslashes($_POST['elclicked']));
-		$lostFocus_json = urldecode(stripslashes($_POST['ellostfocus']));
+
 		/* $hovered = json_decode($hovered_json, true);
 		$clicked = json_decode($clicked_json, true);
 		error_log("Store");
@@ -124,6 +118,10 @@ class WP_Insights_Recorder {
 		error_log($_POST['elclicked']);
 		error_log($clicked_json);
 		error_log(print_r($clicked,true)); */
+		
+		/* $hovered_json = urldecode(stripslashes($_REQUEST['elhovered']));
+		$clicked_json = urldecode(stripslashes($_REQUEST['elclicked']));
+		$lostFocus_json = urldecode(stripslashes($_REQUEST['ellostfocus']));
 		
 		if(!empty($hovered_json) && strlen($hovered_json)>2) {
 			error_log("Store Inside not empty hovered");
@@ -147,7 +145,7 @@ class WP_Insights_Recorder {
 					"lost_focus" => $lostFocus_json
 			));
 			array_push($recorddetailsformat,"%s");
-		}
+		} */
 		
 		//error_log(print_r($recorddetails, true));
 		//error_log(print_r($recorddetailsformat, true));

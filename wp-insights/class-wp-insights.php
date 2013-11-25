@@ -457,6 +457,7 @@ class WP_Insights {
 	}
 	
 	public function cache_user_page() {
+		error_log("Inside cache_user_page");
 		$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
 		$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
 		$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
@@ -466,6 +467,7 @@ class WP_Insights {
 	}
 	
 	public function append_user_data() {
+		error_log("Inside append_user_data");
 		$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
 		$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
 		$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
