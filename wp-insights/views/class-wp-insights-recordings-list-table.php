@@ -34,6 +34,7 @@
     require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 } */
 require_once(plugin_dir_path(__FILE__).'class-wpi-wp-list-table.php');
+require_once(plugin_dir_path(__FILE__).'class-wp-insights-client-recording-list-table.php');
 require_once(plugin_dir_path(dirname(__FILE__)).'class-wp-insights-db-utils.php');
 require_once(plugin_dir_path(dirname(__FILE__)).'class-wp-insights-utils.php');
 
@@ -242,54 +243,24 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
     	);
     }
     
-     function full_row_actions($item) {
-    	$displayId = 'id='.$item['id'];
-    	// wait for very recent visits
-    	$timeDiff = time() - (strtotime($item['sess_date']) + $item['sess_time']);
-    	$receivingData = ($timeDiff > -10 && $timeDiff < 30);
-    	$rowActions = "<div>";
-    	if (!$receivingData)
-    	{
-    		$rowActions .= '<a href="'.$this->views_url.'track.php?'.$displayId.'&api=js" class="button" target="_blank" title="Play">Realtime Replay</a>'.PHP_EOL;
-    		$rowActions .= '<a href="'.$this->views_url.'track.php?'.$displayId.'&api=js&realTime=0" class="button" target="_blank" title="Show">Show Mouse Path</a>'.PHP_EOL;
-    		$rowActions .= '<a href="'.$this->views_url.'track.php?'.$displayId.'&api=swf" class="button" target="_blank" title="Play (Experimental)">Replay in Flash</a>'.PHP_EOL;
-
-    	}
-    	else
-    	{
-    		$rowActions .= '<em>Recording in Progress... Play buttons will be available shortly after the visitor closes his/her browser</em>';
-    	}
-    	$rowActions.='</div>';
-    	return $rowActions;
-    } 
-    
-    function column_replay($item){
-    	
-    	$displayId = 'id='.$item['id'];  
-    	// wait for very recent visits
-    	$timeDiff = time() - (strtotime($item['sess_date']) + $item['sess_time']);
-    	//$tableColumn = time().','.$timeDiff.','.strtotime($item['sess_date']);
-    	$receivingData = ($timeDiff > -10 && $timeDiff < 30);
-    	$assets_url = plugins_url('/../assets/', __FILE__);
-    	$views_url = plugins_url('/../views/', __FILE__);
-    	$tableColumn = '<span style="color:silver">';
-    	if (!$receivingData)
-    	{
-    		// append dynamically the API to the query string, based on browser capabilities
-    		$tableColumn .= '<a href="'.$views_url.'track.php?'.$displayId.'&api=js" class="green-gradient-button" target="_blank" title="Play">Realtime</a>'.PHP_EOL;    	
-    		$tableColumn .= '<a href="'.$views_url.'track.php?'.$displayId.'&api=js&realTime=0" class="green-gradient-button" target="_blank" title="Play">Static</a>'.PHP_EOL;
-    		$tableColumn .= '<a href="'.$views_url.'track.php?'.$displayId.'&api=swf" class="green-gradient-button" target="_blank" title="Play">As Flash</a>'.PHP_EOL;
-    		//$tableColumn .= ' <a href="analyze.php?'.$displayId.'" title="Analyze log"><img src="'.$assets_url.'track-analyze.png" alt="analyze"/></a>'.PHP_EOL;
-    		//$tableColumn .= ' <a href="download.php?'.$displayId.'" title="Download log"><img src="'.$assets_url.'track-download.png" alt="download"/></a>'.PHP_EOL;
-    		//$tableColumn .= ' <a href="delete.php?'.$displayId.'" class="del" title="Delete log"><img src="'.$assets_url.'track-remove.png" alt="delete"/></a>'.PHP_EOL;
-    	}
-    	else
-    	{
-    		$tableColumn .= '<em>receiving data...</em>';
-    	}
-    	$tableColumn.='</span>';
-    	return $tableColumn;
+    function full_row_actions($item) {?>
+	     <div id="wpi-client-id-<?php  echo $item['client_id']?>-recordings" class="wpi-client-recordings" style="display:none">
+	    <?php
+	    $WP_Insights_Client_Recording_List_Table_Instance = new WP_Insights_Client_Recording_List_Table($item['client_id']);
+	    $WP_Insights_Client_Recording_List_Table_Instance->prepare_items();
+	    $WP_Insights_Client_Recording_List_Table_Instance->display();
+	    ?>
+	    </div>
+	    <?php
     }
+    
+    function column_actions($item){
+    
+    	return sprintf('%1$s',
+    	 '<a id="wpi-client-id-'.$item['client_id'].'-recordings-link" href="#" class="button wpi-client-recordings-link"  data-val="'.$item['client_id'].'" data-status="show" title="Show Recordings">Show Recordings</a>'.PHP_EOL
+    	);
+    }
+    
     
     /** ************************************************************************
      * REQUIRED! This method dictates the table's columns and titles. This should
@@ -309,7 +280,7 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
             //'cb'        => '<input type="checkbox" />', //Render a checkbox instead of text
             'recording_id'     => 'ID',
             'ip'    => 'IP',
-        	'url' => 'url',
+        	//'url' => 'url',
         	'browser' => 'Browser',
         	'os' => 'OS',
         	'last_visit'  => 'Last Visit',
@@ -317,9 +288,10 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         	'browsing_time' => 'Browser Open Time',
         	//'interaction_time' => 'Interaction Time',
         	//'no_of_clicks' => '# Clicks',
-        	'lost_focus_count' => 'Lost Focus Count',
-        	'focused_time' => 'Focused Browsing Time'
-        	//'replay' => 'Replay'
+        	//'lost_focus_count' => 'Lost Focus Count',
+        	'focused_time' => 'Focused Browsing Time',
+        	//'replay' => 'Replay',
+        	'actions' => 'Actions'
         );
         return $columns;
     }
@@ -491,20 +463,20 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         ); */
         
         $sql = "SELECT 
-        records.id,
+        records.client_id,
+        MAX(records.id) as id,
         records.cache_id,
         records.os_id,
         records.browser_id,
         records.browser_ver,
         records.user_agent,
         records.ip,
-        records.sess_date,
-        UNIX_TIMESTAMP(records.sess_date) as unix_sess_date,
-        records.sess_time,
-        SEC_TO_TIME(records.sess_time) as browser_open_time,
-        records.lost_focus_count,
-        records.focus_time,
-        SEC_TO_TIME(records.focus_time) as focused_browsing_time,
+        MAX(records.sess_date) as sess_date,
+        UNIX_TIMESTAMP(MAX(records.sess_date)) as unix_sess_date,
+        SUM( records.sess_time ) as sess_time, 
+		SEC_TO_TIME( SUM( records.sess_time ) ) AS browser_open_time, 
+		SUM( records.focus_time ) as focus_time, 
+		SEC_TO_TIME( SUM( records.focus_time ) ) AS focused_browsing_time,
         browsers.name as browser_name,
         oses.name as os_name,
         caches.url as url
@@ -513,7 +485,8 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         LEFT OUTER JOIN $osTable as oses ON records.os_id = oses.id
         LEFT OUTER JOIN $cacheTable as caches ON records.cache_id = caches.id
         where records.cache_id != 0
-        ORDER BY records.id desc, records.client_id
+        GROUP BY records.client_id
+        ORDER BY records.id desc
         LIMIT ".($current_page-1)*$per_page.",".$per_page;
                 
         

@@ -76,9 +76,14 @@ var smt2fn = {
   log: function()
   {
     // check if console is available
-    if (!window.console && !window.console.log) { return false; }
+    if (window.console && window.console.log) { 
+    	console.log(arguments);
+    } else {
+    	return false;
+    }
+    
     // display messages in the console
-    console.log(arguments);
+    
   },
   
   /**
@@ -556,16 +561,16 @@ var smt2fn = {
     	if (pageX < 0 || !pageX) pageX = 0;
     	if (pageY < 0 || !pageY) pageY = 0;
     	pageX = Math.round(pageX);
-    	//console.log(pageX);
+    	//smt2fn.log(pageX);
     	pageY = Math.round(pageY);
-    	//console.log(pageY);
+    	//smt2fn.log(pageY);
     	var target = event.target || event.srcElement;
     	if (target.nodeType == 3) { target = target.parentNode; }
-    	//console.log(target);
+    	//smt2fn.log(target);
     	var elementX = Math.round(jQuery_1_10_2(target).offset().left);
-    	//console.log(elementX);
+    	//smt2fn.log(elementX);
     	var elementY = Math.round(jQuery_1_10_2(target).offset().top);
-    	//console.log(elementY);
+    	//smt2fn.log(elementY);
         var mousePosition = {
             cp: jQuery_1_10_2(target).getcssPath(),//csspath
             pX: pageX,//pageX
@@ -578,9 +583,9 @@ var smt2fn = {
             h: jQuery_1_10_2(target).height()//h
         };
         
-        //console.log(jQuery_1_10_2(target).getcssPath());
-        //console.log(jQuery_1_10_2(target).width());
-        //console.log(jQuery_1_10_2(target).height());
+        //smt2fn.log(jQuery_1_10_2(target).getcssPath());
+        //smt2fn.log(jQuery_1_10_2(target).width());
+        //smt2fn.log(jQuery_1_10_2(target).height());
         return mousePosition;
     },
     

@@ -1,21 +1,21 @@
 (function ($) {
 	"use strict";
 	$(function () {
-		$(".wpi-cache-stats-link").click(function() {
+		$(".wpi-client-recordings-link").click(function() {
 			//alert($(this).data('val'));
 			//$("div.wpi-cache-stats-details").show();
 			if($(this).data('status') == 'show') {
-				$("#wpi-cache-id-"+$(this).data('val')+"-stats-details").show();
-				$(this).text('Hide Versions');
+				$("#wpi-client-id-"+$(this).data('val')+"-recordings").show();
+				$(this).text('Hide Recordings');
 				$(this).data('status','hide');
 			} else if($(this).data('status') == 'hide') {
-				$("#wpi-cache-id-"+$(this).data('val')+"-stats-details").hide();
-				$(this).text('Show Versions');
+				$("#wpi-client-id-"+$(this).data('val')+"-recordings").hide();
+				$(this).text('Show Recordings');
 				$(this).data('status','show');
 			}
 		});
 		
-		$("div.wpi-cache-stats-details").hide();
+		$("div.wpi-client-recordings").hide();
 		
 		$("a#mvmap").click(function() {
 			var url = $(this).data('url') + "&scrx=" + screen.width + "&scry=" + screen.height;

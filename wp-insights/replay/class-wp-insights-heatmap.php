@@ -359,20 +359,20 @@ class WP_Insights_Heatmap {
 			var hoverClickObjects = '.$this->hoverClickData.';
 			jQuery.each(hoverClickObjects, function (index, value) {
 					try {
-						//console.log(value.csspath + " " + value.width + " " + value.height);
-						var element = jQuery( document ).find(value.csspath);
+						//console.log(value.cp + " " + value.w + " " + value.h);
+						var element = jQuery( document ).find(value.cp);
 						if(typeof element != undefined) {
-							var xdiscrepancy = jQuery(element).width()/value.width;
-							//console.log(jQuery(element).width() + " " + value.width + " " + xdiscrepancy);
-							var ydiscrepancy = jQuery(element).height()/value.height;
-							//console.log(jQuery(element).height() + " " + value.height + " " + ydiscrepancy);
+							var xdiscrepancy = jQuery(element).width()/value.w;
+							//console.log(jQuery(element).width() + " " + value.w + " " + xdiscrepancy);
+							var ydiscrepancy = jQuery(element).height()/value.h;
+							//console.log(jQuery(element).height() + " " + value.h + " " + ydiscrepancy);
 							//xdiscrepancy = 1;
 							//ydiscrepancy = 1;
-							var x = jQuery(element).offset().left + (value.relX * xdiscrepancy);
-							var y = jQuery(element).offset().top + (value.relY * ydiscrepancy);
+							var x = jQuery(element).offset().left + (value.rX * xdiscrepancy);
+							var y = jQuery(element).offset().top + (value.rY * ydiscrepancy);
 						} else {
-							var x = value.pageX;
-							var y = value.pageY;
+							var x = value.pX;
+							var y = value.pY;
 						}
 						
 						heatmap.store.addDataPoint(Math.round(x), Math.round(y), 1);
@@ -424,16 +424,16 @@ class WP_Insights_Heatmap {
 						var singleRecordMousepathPoints = new Array();
 						jQuery.each(singleRecordHoverClickObjects, function (index, value) {
 							try {
-								//console.log(value.csspath + " " + value.width + " " + value.height);
-								var element = jQuery( document ).find(value.csspath);
-								var xdiscrepancy = jQuery(element).width()/value.width;
-								//console.log(jQuery(element).width() + " " + value.width + " " + xdiscrepancy);
-								var ydiscrepancy = jQuery(element).height()/value.height;
-								//console.log(jQuery(element).height() + " " + value.height + " " + ydiscrepancy);
+								//console.log(value.cp + " " + value.w + " " + value.h);
+								var element = jQuery( document ).find(value.cp);
+								var xdiscrepancy = jQuery(element).width()/value.w;
+								//console.log(jQuery(element).width() + " " + value.w + " " + xdiscrepancy);
+								var ydiscrepancy = jQuery(element).height()/value.h;
+								//console.log(jQuery(element).height() + " " + value.h + " " + ydiscrepancy);
 								//xdiscrepancy = 1;
 								//ydiscrepancy = 1;
-								var x = jQuery(element).offset().left + (value.relX * xdiscrepancy);
-								var y = jQuery(element).offset().top + (value.relY * ydiscrepancy);
+								var x = jQuery(element).offset().left + (value.rX * xdiscrepancy);
+								var y = jQuery(element).offset().top + (value.rY * ydiscrepancy);
 								singleRecordMousepathPoints.push(Math.round(x));
 								singleRecordMousepathPoints.push(Math.round(y));
 								var mousePathLine = new Kinetic.Line({

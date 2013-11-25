@@ -160,7 +160,7 @@ class WP_Insights_Recorder {
 		/* client browser stats ----------------------------------------------------- */
 		
 		//$browser = new Browser();
-		$bc = new Browscap($this->cache_dir."browscapcache/");
+		$bc = new Browscap($this->cache_dir."browscapcache/",plugin_dir_path(__FILE__)."utils/full_php_browscap.ini");
 		$current_browser = $bc->getBrowser();
 		
 		// save browser id

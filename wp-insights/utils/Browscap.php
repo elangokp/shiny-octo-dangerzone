@@ -102,9 +102,9 @@ class Browscap
      * is MINIMAL, so there is no reason to use the standard file whatsoever. Either go for light,
      * which is blazing fast, or get the full one. (note: light version doesn't work, a fix is on its way)
      */
-    public $remoteIniUrl = 'http://tempdownloads.browserscap.com/stream.php?Full_PHP_BrowscapINI';
+    public $remoteIniUrl = 'http://tempdownloads.browserscap.com/stream.asp?Full_PHP_BrowscapINI';
     public $remoteVerUrl = 'http://tempdownloads.browserscap.com/versions/version-date.php';
-    public $timeout = 5;
+    public $timeout = 50;
     public $updateInterval = 432000;  // 5 days
     public $errorInterval = 7200;  // 2 hours
     public $doAutoUpdate = true;
@@ -212,11 +212,14 @@ class Browscap
      * @param string $cache_dir
      * @throws Exception
      */
-    public function __construct($cache_dir)
+    public function __construct($cache_dir,$localIniFilepath=null)
     {
         // has to be set to reach E_STRICT compatibility, does not affect system/app settings
         date_default_timezone_set(date_default_timezone_get());
 
+        if(null !== $localIniFilepath) {
+        	$this->localFile = $localIniFilepath;
+        }
         if (!isset($cache_dir)) {
             throw new Exception(
                 'You have to provide a path to read/store the browscap cache file'

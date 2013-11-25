@@ -327,7 +327,7 @@ class WP_Insights {
 				'Recordings',
 				'manage_options',
 				$this->plugin_slug.'-admin-main-menu',
-				array( $this, 'display_wp_insights_recordings_pages' )
+				array( $this, 'display_wp_insights_recordings_page' )
 		); 
 		
 		$this->wp_insights_page_stats_sub_menu_hook_suffix = add_submenu_page(

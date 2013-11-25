@@ -391,13 +391,13 @@
       var ms = 0;
       if(document.hasFocus()) {
     	  ms = ((new Date()).getTime() - smtRec.timestamp) - smtRec.blurTime; 
-    	  console.log("Document Has Focus : " + ms/1000);
+    	  smt2fn.log("Document Has Focus : " + ms/1000);
       } else {
-    	  console.log("Document Doesnt have Focus : lastBlurTimeStamp : " + smtRec.lastBlurTimeStamp);
-    	  console.log("Document Doesnt have Focus : blurTime : " + smtRec.blurTime);
-    	  console.log("Document Doesnt have Focus : time till last blur : " + (smtRec.lastBlurTimeStamp - smtRec.timestamp));
+    	  smt2fn.log("Document Doesnt have Focus : lastBlurTimeStamp : " + smtRec.lastBlurTimeStamp);
+    	  smt2fn.log("Document Doesnt have Focus : blurTime : " + smtRec.blurTime);
+    	  smt2fn.log("Document Doesnt have Focus : time till last blur : " + (smtRec.lastBlurTimeStamp - smtRec.timestamp));
     	  ms = (smtRec.lastBlurTimeStamp - smtRec.timestamp) - smtRec.blurTime;
-    	  console.log("Document Doesnt have Focus : " + ms/1000);
+    	  smt2fn.log("Document Doesnt have Focus : " + ms/1000);
       }
       return ms/1000; // use seconds
     },
@@ -549,10 +549,10 @@
       aux.widget.findDOMElement(e, function(name){
         if (e.type == "mousedown" || e.type == "touchstart") {
           smtRec.elem.clicked.push(name);
-          //console.log(JSON.stringify(smtRec.elem.clicked));
+          //smt2fn.log(JSON.stringify(smtRec.elem.clicked));
         } else if (e.type == "mousemove" || e.type == "touchmove") {
           smtRec.elem.hovered.push(name);
-          //console.log(JSON.stringify(smtRec.elem.hovered));
+          //smt2fn.log(JSON.stringify(smtRec.elem.hovered));
         }
       });
     },
@@ -696,17 +696,17 @@
       jQuery_1_10_2(window).focus(function() {
     		var thisFocusTimeStamp = new Date();
     		smtRec.inFocus = true;
-    		console.log("On Focus Timestamp: " + +thisFocusTimeStamp);
-    	    console.log("Previous Blur Time: " + smtRec.blurTime);
+    		smt2fn.log("On Focus Timestamp: " + +thisFocusTimeStamp);
+    		smt2fn.log("Previous Blur Time: " + smtRec.blurTime);
     		//To avoid the effect of double fires on focus event in chrome
     		var thisFocusDifference = thisFocusTimeStamp - smtRec.lastFocusTimeStamp;
-    		console.log("thisFocusDifference: " + thisFocusDifference);
+    		smt2fn.log("thisFocusDifference: " + thisFocusDifference);
     		if(thisFocusDifference > 100) {
-    			console.log("Will Add to blur time");
-    			console.log("This time window was blurred for: " + (new Date() - smtRec.lastBlurTimeStamp));
+    			smt2fn.log("Will Add to blur time");
+    			smt2fn.log("This time window was blurred for: " + (new Date() - smtRec.lastBlurTimeStamp));
     			smtRec.blurTime += (new Date() - smtRec.lastBlurTimeStamp);
     		}    
-    	    console.log("After Blur Time: " + smtRec.blurTime);
+    		smt2fn.log("After Blur Time: " + smtRec.blurTime);
     	    smtRec.lastFocusTimeStamp = new Date();
     	});
 
@@ -715,7 +715,7 @@
     		smtRec.lostFocusCount += 1;
     		smtRec.lastBlurTimeStamp = +new Date();
     		smtRec.elem.lostFocus.push(smtRec.elem.hovered[smtRec.elem.hovered.length - 1]);
-    	    console.log("On Blur Timestamp: " + smtRec.lastBlurTimeStamp);
+    		smt2fn.log("On Blur Timestamp: " + smtRec.lastBlurTimeStamp);
     	});
     	
       /*
