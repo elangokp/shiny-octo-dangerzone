@@ -182,7 +182,7 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
     function column_url($item){
 
     	return sprintf('<a href="%1$s" target="_blank">%1$s</a>',
-    			$item['url']
+    			$item['raw_url']
    		);
     	 
     }
@@ -260,7 +260,7 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
     	$rowActions = "<div>";
     	if (!$receivingData)
     	{
-    		if($item['cache_id'] != 0) {
+    		if($item['file'] != "0") {
     			$rowActions .= '<a href="'.$this->views_url.'track.php?'.$displayId.'&api=js" class="button" target="_blank" title="Play">Realtime Replay</a>'.PHP_EOL;
     			$rowActions .= '<a href="'.$this->views_url.'track.php?'.$displayId.'&api=js&realTime=0" class="button" target="_blank" title="Show">Show Mouse Path</a>'.PHP_EOL;
     			$rowActions .= '<a href="'.$this->views_url.'track.php?'.$displayId.'&api=swf" class="button" target="_blank" title="Play (Experimental)">Replay in Flash</a>'.PHP_EOL;
@@ -494,7 +494,7 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
         
         //$where = (!empty($_SESSION['filterquery'])) ? $_SESSION['filterquery'] : "1"; // will group by log id
         
-        $where = $recordsTable.".cache_id != 0";
+        //$where = $recordsTable.".cache_id != 0";
         
         /* $data = $WP_Insights_DB_Utils_Instance->db_select_all(
         		$recordsTable
@@ -508,7 +508,9 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
         
         $sql = "SELECT 
         records.id,
-        records.cache_id,
+        records.file,
+        records.raw_url,
+        records.cleansed_url,
         records.os_id,
         records.browser_id,
         records.browser_ver,
@@ -522,12 +524,10 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
         records.focus_time,
         SEC_TO_TIME(records.focus_time) as focused_browsing_time,
         browsers.name as browser_name,
-        oses.name as os_name,
-        caches.url as url
+        oses.name as os_name
         FROM $recordsTable as records
         LEFT OUTER JOIN $browsersTable as browsers ON records.browser_id = browsers.id
         LEFT OUTER JOIN $osTable as oses ON records.os_id = oses.id
-        LEFT OUTER JOIN $cacheTable as caches ON records.cache_id = caches.id
         where records.client_id = '$this->client_id'
         ORDER BY records.id desc
         LIMIT ".($current_page-1)*$per_page.",".$per_page;

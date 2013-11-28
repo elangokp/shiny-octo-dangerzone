@@ -256,7 +256,9 @@ class WP_Insights_DB_Utils {
         $records_table_sql  = "CREATE TABLE $records_table (
         id           BIGINT        unsigned  NOT NULL auto_increment,
         client_id    VARCHAR(20)             NOT NULL,
-        cache_id     BIGINT        unsigned  NOT NULL,
+        file     	 VARCHAR(255)            NOT NULL,
+        raw_url      VARCHAR(255)            NOT NULL,
+        cleansed_url VARCHAR(255)            NOT NULL,
         os_id        TINYINT       unsigned  NOT NULL,
         browser_id   TINYINT       unsigned  NOT NULL,
         browser_ver  FLOAT(2,1)    unsigned  NOT NULL,

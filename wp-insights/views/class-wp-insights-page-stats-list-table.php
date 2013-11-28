@@ -240,7 +240,7 @@ class WP_Insights_Page_Stats_List_Table extends WPI_WP_List_Table {
     			'<a id="wpi-cache-id-'.$item['cache_id'].'-stats-link" href="#" class="button wpi-cache-stats-link"  data-val="'.$item['cache_id'].'" data-status="show" title="Show Versions">Show Versions</a>'.PHP_EOL
     	); */
     	$views_url = plugins_url('/../views/', __FILE__);
-    	$displayId = 'pid='.$item['cache_id'];
+    	$displayId = 'lrid='.$item['latest_record_id'];
     	$tableColumn = '<a id="detailedStats" href="admin.php?page='.$_REQUEST['page'].'&'.$displayId.'" class="button" title="Play">Detailed Stats</a>'.PHP_EOL;
     	return $tableColumn;
     }
@@ -453,24 +453,23 @@ class WP_Insights_Page_Stats_List_Table extends WPI_WP_List_Table {
         		$where." GROUP BY ".$cacheTable.".url"." ORDER BY visits DESC, ".$cacheTable.".url LIMIT ".($current_page-1)*$per_page.",".$per_page
         ); */
 
-		$sql = "SELECT cache.url as url, 
-    			max(cache.id) as cache_id,
+		$sql = "SELECT records.cleansed_url as url, 
+    			max(records.id) as latest_record_id,
     			COUNT(records.id ) AS visits, 
     			ROUND((COUNT(records1.id)/COUNT(records.id)*100),2) AS attention,
 				ROUND((COUNT(records2.id)/COUNT(records.id)*100),2) AS interest,
 				ROUND((COUNT(records3.id)/COUNT(records.id)*100),2) AS desire,
 				ROUND((COUNT(records4.id)/COUNT(records.id)*100),2) AS passion,
     			SEC_TO_TIME(AVG( records.sess_time )) AS browsing_time,
-    			SEC_TO_TIME( STD( records.sess_time ) ) AS std_browsing_time, 
-			    SEC_TO_TIME( MIN( records.sess_time ) ) AS min_browsing_time, 
-			    SEC_TO_TIME( MAX( records.sess_time ) ) AS max_browsing_time
+    			SEC_TO_TIME(STD( records.sess_time )) AS std_browsing_time, 
+			    SEC_TO_TIME(MIN( records.sess_time )) AS min_browsing_time, 
+			    SEC_TO_TIME(MAX( records.sess_time )) AS max_browsing_time
 				FROM $recordsTable AS records
-				INNER JOIN $cacheTable AS cache ON records.cache_id = cache.id
 				LEFT OUTER JOIN $recordsTable AS records1 ON records.id = records1.id and records1.focus_time>60
 				LEFT OUTER JOIN $recordsTable AS records2 ON records.id = records2.id and records2.focus_time>120
 				LEFT OUTER JOIN $recordsTable AS records3 ON records.id = records3.id and records3.focus_time>300
 				LEFT OUTER JOIN $recordsTable AS records4 ON records.id = records4.id and records4.focus_time>600
-				GROUP BY cache.url
+				GROUP BY records.cleansed_url
 				ORDER BY visits desc 
         		LIMIT ".($current_page-1)*$per_page.",".$per_page;
 		

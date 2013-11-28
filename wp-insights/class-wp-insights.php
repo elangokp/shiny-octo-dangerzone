@@ -21,6 +21,7 @@
 require_once('class-wp-insights-db-utils.php');
 require_once('class-wp-insights-utils.php');
 require_once('class-wp-insights-recorder.php');
+require_once(plugin_dir_path(__FILE__).'replay/class-wp-insights-event-data.php');
 class WP_Insights {
 
 	/**
@@ -112,11 +113,13 @@ class WP_Insights {
 		add_action('wp_ajax_nopriv_wpicachepage', array( $this, 'cache_user_page' ) );
 		add_action('wp_ajax_nopriv_wpiappend', array( $this, 'append_user_data' ) );
 		add_action('wp_ajax_nopriv_wpiexit', array( $this, 'exit_user_data' ) );
+		add_action('wp_ajax_nopriv_wpimouseeventdata', array( $this, 'get_mouse_event_data' ) );
 		
 		add_action('wp_ajax_wpistore', array( $this, 'store_user_data' ) );
 		add_action('wp_ajax_wpicachepage', array( $this, 'cache_user_page' ) );
 		add_action('wp_ajax_wpiappend', array( $this, 'append_user_data' ) );
 		add_action('wp_ajax_wpiexit', array( $this, 'exit_user_data' ) );
+		add_action('wp_ajax_wpimouseeventdata', array( $this, 'get_mouse_event_data' ) );
 		
 		add_action('wp_head', array($this, 'add_IE9_Compatibility_Meta_Tag'));
 		add_action('plugins_loaded', array($this, 'setRecorderStatus'));
@@ -478,6 +481,15 @@ class WP_Insights {
 	public function exit_user_data() {
 		//error_log("Exit call triggered");
 		$this->append_user_data();
+	}
+	
+	public function get_mouse_event_data() {
+		error_log("Inside get_mouse_event_data");
+		$lrid = $_GET['lrid'];
+		$hmtype = $_GET['hmtype'];
+		$WP_Insights_Event_Data_Instance = new WP_Insights_Event_Data($lrid,$hmtype);
+		echo $WP_Insights_Event_Data_Instance->getMouseMovementDataByPage();
+		die();
 	}
 	
 	public function add_wpinsights_scripts() {

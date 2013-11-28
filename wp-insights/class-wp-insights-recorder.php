@@ -60,7 +60,9 @@ class WP_Insights_Recorder {
 		/* create database entry ---------------------------------------------------- */
 		$recorddetails = array(
 				"client_id" => WP_Insights_Utils::get_client_id(),
-				"cache_id" => 0,
+				"file" => "0",
+				"raw_url" => $_REQUEST['url'],
+				"cleansed_url" => $_REQUEST['url'],
 				"os_id" => 0,
 				"browser_id" => 0,
 				"browser_ver" => 0,
@@ -83,7 +85,9 @@ class WP_Insights_Recorder {
 		);
 		$recorddetailsformat = array(
 				'%s',
-				'%d',
+				'%s',
+				'%s',
+				'%s',
 				'%d',
 				'%d',
 				'%f',
@@ -216,7 +220,7 @@ class WP_Insights_Recorder {
 		
 	}
 	
-	protected function hasDOMChanged($liveDom, $cachedDom) {
+	/* protected function hasDOMChanged($liveDom, $cachedDom) {
 		//$liveDom->encoding = 'utf-8';
 		//$liveHTMLString = $liveDom->C14N(false, true);
 		//$cachedHTMLString = $cachedDom->C14N(false, true);
@@ -242,7 +246,7 @@ class WP_Insights_Recorder {
 			error_log("DOM files are not equal");
 			return true;
 		}
-	} 
+	}  */
 	
 	protected function parseContent($webpage) {
 		// use the DOM to parse webpage contents
@@ -262,7 +266,7 @@ class WP_Insights_Recorder {
 		return $dom;
 	}
 	
-	protected function getCachedDOM($cachelog) {
+	/* protected function getCachedDOM($cachelog) {
 		$cachedWebpageFilePath = $this->cache_dir.$cachelog['file'];
 		//error_log($cachedWebpageFilePath);
 		if(is_file($cachedWebpageFilePath)) {
@@ -274,7 +278,7 @@ class WP_Insights_Recorder {
 			//error_log("Cached html is not a file");
 			return false;
 		}		
-	}
+	} */
 	
 	protected function removejscssfile($dom, $filename, $filetype){
 		if($filetype === "js"){
@@ -313,26 +317,35 @@ class WP_Insights_Recorder {
 			exit;
 		}
 
-		$URL = $_POST['url'];
 		$recordingId = $_POST['uid'];
 		$html  = rawurldecode(stripslashes($_POST['html']));
 		$liveDom = $this->parseContent($html);
-		//error_log("URL is : ".$URL);
 		
 		$browserAndOSId = $this->getBrowserAndOSDetails();
 		
-		$ymddate = date("Ymd");
-		$hisdate = date("His");
+		$year = date("Y");
+		$month = date("M");
+		$day = date("d");
+		$hisdate = date("H-i-s");
 		$ext = ".html";
-		$dirPath = $this->cache_dir.$ymddate."/";
+		$dirPath = $this->cache_dir.$year."/".$month."/".$day."/";
 		WP_Insights_Utils::createDirectory($dirPath);
 		// "March 10th 2006 @ 15h 16m 08s" should create the log file "20060310-151608.html"
 		$htmlfile  = (!is_file($dirPath.$hisdate.$ext)) ?
 		$hisdate.$ext :
 		$hisdate.'-'.mt_rand().$ext; // random seed to avoid duplicated files
-		file_put_contents(utf8_encode($dirPath.$htmlfile), $liveDom->saveHTML());
+		$filepath = $dirPath.$htmlfile;
+		file_put_contents(utf8_encode($filepath), $liveDom->saveHTML());
+				
+		$recordsValues  = "file = '".$filepath."',";
+		$recordsValues .= "os_id = ".$browserAndOSId['os_id'].",";
+		$recordsValues .= "browser_id = ".$browserAndOSId['browser_id'].",";
+		$recordsValues .= "browser_ver = '".$browserAndOSId['browser_ver']."',";
+		$recordsValues .= "user_agent = '".$browserAndOSId['user_agent']."'";
+		$this->wp_insights_db_utils->db_update($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS, $recordsValues, "id='".$recordingId."'");
+		
 		// insert new row on TBL_CACHE and look for inserted id
-		$cachelogdetails = array(
+		/*$cachelogdetails = array(
 				"file" => $ymddate."/".$htmlfile,
 				"url" => $URL,
 				"title" => $_POST['urltitle'],
@@ -346,7 +359,7 @@ class WP_Insights_Recorder {
 		);
 		$cacheLogid = $this->wp_insights_db_utils->db_insert($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE, $cachelogdetails, $cachelogdetailsformat);
 		
-		/**
+		
 		// check proxy requests
 		$pattern = "proxy/index.php?url=";
 		if (strpos($URL, $pattern)) {
@@ -446,14 +459,8 @@ class WP_Insights_Recorder {
 			//error_log("Cache expired");
 			// get HTML log id
 			$cacheLogid = $cachelog['id'];
-		}*/
+		}*/		
 		
-		$recordsValues  = "cache_id = ".$cacheLogid.",";
-		$recordsValues .= "os_id = ".$browserAndOSId['os_id'].",";
-		$recordsValues .= "browser_id = ".$browserAndOSId['browser_id'].",";
-		$recordsValues .= "browser_ver = '".$browserAndOSId['browser_ver']."',";
-		$recordsValues .= "user_agent = '".$browserAndOSId['user_agent']."'";
-		$this->wp_insights_db_utils->db_update($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS, $recordsValues, "id='".$recordingId."'");
 		
 	}
 

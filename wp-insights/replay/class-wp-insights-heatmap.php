@@ -7,7 +7,7 @@ require_once(plugin_dir_path(dirname(__FILE__)).'utils/class-domutil.php');
 
 class WP_Insights_Heatmap {
 	
-	protected $pid = null;
+	protected $lrid = null;
 	
 	protected $hmtype = null;
 	
@@ -39,9 +39,9 @@ class WP_Insights_Heatmap {
 	
 	protected $hoverClickData = "";
 	
-	public function __construct($pid, $hmtype, $scrx, $scry, $version) {
+	public function __construct($lrid, $hmtype, $scrx, $scry, $version) {
 		global $wpdb;
-		$this->pid = $pid;
+		$this->lrid = $lrid;
 		$this->hmtype = $hmtype;
 		$this->scrx = $scrx;
 		$this->scry = $scry;
@@ -89,10 +89,10 @@ class WP_Insights_Heatmap {
 	
 	public function getMouseMovementDataByUserByPage(){
 		$records = $this->wp_insights_db_utils->db_select_all(
-				$this->recordsTable." AS R"." INNER JOIN ".$this->cacheTable." AS C1"." ON R.cache_id = C1.id"
-				." INNER JOIN ".$this->cacheTable." AS C2"." ON C2.url = C1.url",
-				"R.hovered",
-				"C2.id = ".$this->pid);
+				$this->recordsTable." AS R"
+				." RIGHT OUTER JOIN ".$this->recordsTable." AS R1"." ON R.cleansed_url = R1.cleansed_url",
+				"R1.id as id,R1.hovered as mousepositions",
+				"R.id = ".$this->lrid);
 	
 		$this->hoverClickData = "[";
 		foreach ($records as $i => $record)
@@ -117,10 +117,10 @@ class WP_Insights_Heatmap {
 	
 	public function getMouseMovementDataByPage(){
 		$records = $this->wp_insights_db_utils->db_select_all(
-				$this->recordsTable." AS R"." INNER JOIN ".$this->cacheTable." AS C1"." ON R.cache_id = C1.id"
-				." INNER JOIN ".$this->cacheTable." AS C2"." ON C2.url = C1.url",
-				"R.id as id,R.hovered as mousepositions",
-				"C2.id = ".$this->pid);
+				$this->recordsTable." AS R"
+				." RIGHT OUTER JOIN ".$this->recordsTable." AS R1"." ON R.cleansed_url = R1.cleansed_url",
+				"R1.id as id,R1.hovered as mousepositions",
+				"R.id = ".$this->lrid);
 	
 		$this->constructHeatmapString($records);
 	
@@ -128,10 +128,10 @@ class WP_Insights_Heatmap {
 	
 	public function getClickDataByPage(){
 		$records = $this->wp_insights_db_utils->db_select_all(
-				$this->recordsTable." AS R"." INNER JOIN ".$this->cacheTable." AS C1"." ON R.cache_id = C1.id"
-				." INNER JOIN ".$this->cacheTable." AS C2"." ON C2.url = C1.url",
-				"R.id as id,R.clicked as mousepositions",
-				"C2.id = ".$this->pid);
+				$this->recordsTable." AS R"
+				." RIGHT OUTER JOIN ".$this->recordsTable." AS R1"." ON R.cleansed_url = R1.cleansed_url",
+				"R1.id as id,R1.clicked as mousepositions",
+				"R.id = ".$this->lrid);
 		
 		$this->constructHeatmapString($records);
 	
@@ -139,10 +139,10 @@ class WP_Insights_Heatmap {
 	
 	public function getLostFocusDataByPage(){
 		$records = $this->wp_insights_db_utils->db_select_all(
-				$this->recordsTable." AS R"." INNER JOIN ".$this->cacheTable." AS C1"." ON R.cache_id = C1.id"
-				." INNER JOIN ".$this->cacheTable." AS C2"." ON C2.url = C1.url",
-				"R.id as id, R.lost_focus as mousepositions",
-				"C2.id = ".$this->pid);
+				$this->recordsTable." AS R"
+				." RIGHT OUTER JOIN ".$this->recordsTable." AS R1"." ON R.cleansed_url = R1.cleansed_url",
+				"R1.id as id,R1.lost_focus as mousepositions",
+				"R.id = ".$this->lrid);
 		
 		$this->constructHeatmapString($records);
 	
@@ -150,15 +150,16 @@ class WP_Insights_Heatmap {
 	
 	public function getExitDataByPage(){
 		$records = $this->wp_insights_db_utils->db_select_all(
-				$this->recordsTable." AS R"." INNER JOIN ".$this->cacheTable." AS C1"." ON R.cache_id = C1.id"
-				." INNER JOIN ".$this->cacheTable." AS C2"." ON C2.url = C1.url",
-				"R.hovered",
-				"C2.id = ".$this->pid);
+				$this->recordsTable." AS R"
+				." RIGHT OUTER JOIN ".$this->recordsTable." AS R1"." ON R.cleansed_url = R1.cleansed_url",
+				"R1.id as id,R1.hovered as mousepositions",
+				"R.id = ".$this->lrid);
+		
 		$this->hoverClickData = "[";
 		foreach ($records as $i => $record)
 		{
-			if($record['hovered'] != ""){
-				$lastJsonArrayString = end(explode("|~|",$record['hovered']));
+			if($record['mousepositions'] != ""){
+				$lastJsonArrayString = end(explode("|~|",$record['mousepositions']));
 				//error_log(print_r($lastJsonArrayString, true));
 				if($lastJsonArrayString != "") {					
 					if(strpos($lastJsonArrayString, "},{") !== false){

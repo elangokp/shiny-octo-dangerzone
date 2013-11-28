@@ -11,11 +11,11 @@
  * @link      http://www.cybermint.com
  * @copyright 2013 CyberMint
  */
-if(isset($_GET['pid'])) {
-	$pid = $_GET['pid'];
+if(isset($_GET['lrid'])) {
+	$lrid = $_GET['lrid'];
 	$views_url = plugins_url('/../views/', __FILE__);
 	require_once(plugin_dir_path(__FILE__).'class-wp-insights-detailed-page-stats.php');
-	$WP_Insights_Detailed_Page_Stats_Instance = new WP_Insights_Detailed_Page_Stats($pid);
+	$WP_Insights_Detailed_Page_Stats_Instance = new WP_Insights_Detailed_Page_Stats($lrid);
 	//$WP_Insights_Detailed_Page_Stats_Instance->process_stats();
 	?>
 <div class="wrap">
@@ -63,19 +63,19 @@ if(isset($_GET['pid'])) {
 			<label><?php echo $WP_Insights_Detailed_Page_Stats_Instance->getPassion();?></label>
 		</div>
 		<div id="movementMap">
-			<a id="mvmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?pid=<?php echo $pid;?>&hmtype=mv" class="button" target="_blank" title="Movement Heatmap">Movement Heatmap</a>
+			<a id="mvmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?lrid=<?php echo $lrid;?>&hmtype=mv" class="button" target="_blank" title="Movement Heatmap">Movement Heatmap</a>
 		</div>
 		<div id="clickmap">
-			<a id="clickmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?pid=<?php echo $pid;?>&hmtype=click" class="button" target="_blank" title="Click Heatmap">Click Heatmap</a>
+			<a id="clickmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?lrid=<?php echo $lrid;?>&hmtype=click" class="button" target="_blank" title="Click Heatmap">Click Heatmap</a>
 		</div>
 		<div id="exitmap">
-			<a id="exitmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?pid=<?php echo $pid;?>&hmtype=exit" class="button" target="_blank" title="Exit Heatmap">Exit Heatmap</a>
+			<a id="exitmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?lrid=<?php echo $lrid;?>&hmtype=exit" class="button" target="_blank" title="Exit Heatmap">Exit Heatmap</a>
 		</div>
 		<div id="mousepaths">
-			<a id="mousepaths" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?pid=<?php echo $pid;?>&hmtype=mp" class="button" target="_blank" title="Mouse Paths">Mouse Paths</a>
+			<a id="mousepaths" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?lrid=<?php echo $lrid;?>&hmtype=mp" class="button" target="_blank" title="Mouse Paths">Mouse Paths</a>
 		</div>
 		<div id="lostfocusmap">
-			<a id="lostfocusmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?pid=<?php echo $pid;?>&hmtype=lf" class="button" target="_blank" title="Lost Focus Heatmap">Lost Focus Heatmap</a>
+			<a id="lostfocusmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?lrid=<?php echo $lrid;?>&hmtype=lf" class="button" target="_blank" title="Lost Focus Heatmap">Lost Focus Heatmap</a>
 		</div>
 	</form>
 

@@ -12,7 +12,7 @@
  * @copyright 2013 CyberMint
  */
 
-$pid = $_GET['pid'];
+$lrid = $_GET['lrid'];
 $hmtype = $_GET['hmtype'];
 $scrx = $_GET['scrx'];
 $scry = $_GET['scry'];
@@ -45,7 +45,7 @@ if($hmtype == 'mv') {
 ?>
 </h1>
 </div>
-<iframe id="iframeHeatmap" style="border:1px solid black" src="heatmap.php?pid=<?php echo $pid ?>&hmtype=<?php echo $hmtype?>&scrx=<?php echo $scrx?>&scry=<?php echo $scry?>" seamless width="100%"></iframe>
+<iframe id="iframeHeatmap" style="border:1px solid black" src="heatmap.php?lrid=<?php echo $lrid ?>&hmtype=<?php echo $hmtype?>&scrx=<?php echo $scrx?>&scry=<?php echo $scry?>" seamless width="100%"></iframe>
 
 </body>
 </html>

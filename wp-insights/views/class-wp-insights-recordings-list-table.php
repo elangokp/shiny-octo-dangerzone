@@ -175,7 +175,7 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
     function column_url($item){
 
     	return sprintf('<a href="%1$s" target="_blank">%1$s</a>',
-    			$item['url']
+    			$item['cleansed_url']
    		);
     	 
     }
@@ -435,7 +435,7 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         
         $cacheTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE;
         
-        $total_items = $wpdb->get_var("select count(*) from ".$recordsTable);
+        $total_items = $wpdb->get_var("select count(records.client_id) from ".$recordsTable." AS records GROUP BY records.client_id");
         
         /**
          * Instead of querying a database, we're going to fetch the example data
@@ -450,7 +450,7 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         
         //$where = (!empty($_SESSION['filterquery'])) ? $_SESSION['filterquery'] : "1"; // will group by log id
         
-        $where = $recordsTable.".cache_id != 0";
+        //$where = $recordsTable.".cache_id != 0";
         
         /* $data = $WP_Insights_DB_Utils_Instance->db_select_all(
         		$recordsTable
@@ -465,7 +465,9 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         $sql = "SELECT 
         records.client_id,
         MAX(records.id) as id,
-        records.cache_id,
+        records.file,
+        records.raw_url,
+        records.cleansed_url,
         records.os_id,
         records.browser_id,
         records.browser_ver,
@@ -478,13 +480,10 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
 		SUM( records.focus_time ) as focus_time, 
 		SEC_TO_TIME( SUM( records.focus_time ) ) AS focused_browsing_time,
         browsers.name as browser_name,
-        oses.name as os_name,
-        caches.url as url
+        oses.name as os_name
         FROM $recordsTable as records
         LEFT OUTER JOIN $browsersTable as browsers ON records.browser_id = browsers.id
         LEFT OUTER JOIN $osTable as oses ON records.os_id = oses.id
-        LEFT OUTER JOIN $cacheTable as caches ON records.cache_id = caches.id
-        where records.cache_id != 0
         GROUP BY records.client_id
         ORDER BY records.id desc
         LIMIT ".($current_page-1)*$per_page.",".$per_page;
