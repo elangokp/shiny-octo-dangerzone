@@ -99,8 +99,8 @@ class WP_Insights_Replayer {
 		$recordsTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
 		$cacheTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE;
 		$record = $this->wp_insights_db_utils->db_select(
-				$recordsTable." LEFT JOIN ".$cacheTable." ON ".$recordsTable.".cache_id = ".$cacheTable.".id",
-				$recordsTable.".*, ".$cacheTable.".*",
+				$recordsTable,
+				$recordsTable.".*",
 				$recordsTable.".id = '".$this->recordId."'");
 		
 		$this->record = $record;
@@ -108,7 +108,7 @@ class WP_Insights_Replayer {
 		$clientId       = $record['client_id'];
 		$timestamp      = WP_Insights_Utils::mask_client($clientId).'\n'.date("h:i A", strtotime($record['sess_date']));
 		$htmlFile       = $record['file'];
-		$url            = $record['url'];
+		$url            = $record['raw_url'];
 		$viewportWidth  = (int) $record['vp_width'];
 		$viewportHeight = (int) $record['vp_height'];
 		$fps            = (int) $record['fps'];
@@ -143,7 +143,7 @@ class WP_Insights_Replayer {
 	{
 		$this->trailRecords = $this->wp_insights_db_utils->db_select_all(
 				$this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS,
-				"id,cache_id,sess_date,DATE_FORMAT(sess_date,'%W %D %M %Y (%H:%i:%s)') as udate,sess_time",
+				"id,raw_url,sess_date,DATE_FORMAT(sess_date,'%W %D %M %Y (%H:%i:%s)') as udate,sess_time",
 				"client_id = '".$this->record['client_id']."' ORDER BY id ASC");
 	
 		$count = 0;
@@ -155,16 +155,16 @@ class WP_Insights_Replayer {
 				$count++;
 			}
 			// this $cache query is really needed only on the 'analyze' module
-			$cache = $this->wp_insights_db_utils->db_select(
+			/* $cache = $this->wp_insights_db_utils->db_select(
 					$this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE, 
 					"url", 
-					"id = '".$trailRecord['cache_id']."'");
+					"id = '".$trailRecord['cache_id']."'"); */
 			// to track the REAL clickpath we need both the id AND the trail group of each record
 			$this->visits[] = array(
 					"id"    => $trailRecord['id'],
 					"date"  => $trailRecord['udate'],
 					"time"  => $trailRecord['sess_time'],
-					"url"   => $cache['url'],
+					"url"   => $trailRecord['raw_url'],
 					"trail" => $count
 			);
 			// update
@@ -320,7 +320,7 @@ class WP_Insights_Replayer {
 	protected function insertScriptElements() {
 		// a BASE element is needed to link correctly CSS, scripts, etc.
 		$base = $this->doc->createElement('base');
-		$base->setAttribute('href', WP_Insights_Utils::url_get_base($this->record['url']));
+		$base->setAttribute('href', WP_Insights_Utils::url_get_base($this->record['raw_url']));
 		$ini_comm = $this->doc->createComment(" begin wpi tracking code ");
 		$end_comm = $this->doc->createComment(" end wpi tracking code ");
 		$api_comm = $this->doc->createComment(" load wpi drawing API ");

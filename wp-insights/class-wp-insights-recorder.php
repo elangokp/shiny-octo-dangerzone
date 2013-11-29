@@ -328,16 +328,19 @@ class WP_Insights_Recorder {
 		$day = date("d");
 		$hisdate = date("H-i-s");
 		$ext = ".html";
-		$dirPath = $this->cache_dir.$year."/".$month."/".$day."/";
-		WP_Insights_Utils::createDirectory($dirPath);
+		$relativeDirpath = $year."/".$month."/".$day."/";
+		$absoluteDirPath = $this->cache_dir.$relativeDirpath;
+		
+		WP_Insights_Utils::createDirectory($absoluteDirPath);
 		// "March 10th 2006 @ 15h 16m 08s" should create the log file "20060310-151608.html"
 		$htmlfile  = (!is_file($dirPath.$hisdate.$ext)) ?
 		$hisdate.$ext :
 		$hisdate.'-'.mt_rand().$ext; // random seed to avoid duplicated files
-		$filepath = $dirPath.$htmlfile;
-		file_put_contents(utf8_encode($filepath), $liveDom->saveHTML());
+		$absolutefilepath = $absoluteDirPath.$htmlfile;
+		$relativefilepath = $relativeDirpath.$htmlfile;
+		file_put_contents(utf8_encode($absolutefilepath), $liveDom->saveHTML());
 				
-		$recordsValues  = "file = '".$filepath."',";
+		$recordsValues  = "file = '".$relativefilepath."',";
 		$recordsValues .= "os_id = ".$browserAndOSId['os_id'].",";
 		$recordsValues .= "browser_id = ".$browserAndOSId['browser_id'].",";
 		$recordsValues .= "browser_ver = '".$browserAndOSId['browser_ver']."',";

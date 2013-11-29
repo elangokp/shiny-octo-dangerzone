@@ -126,6 +126,7 @@ class WP_Insights {
 		//add_action('admin_notices', array($this, 'wp_insights_admin_notices'));
 		//add_filter( 'TODO', array( $this, 'filter_method_name' ) );
 		self::$cache_dir = dirname(dirname(plugin_dir_path(__FILE__)))."/wpicache/";
+		self::$cache_dir = str_replace('\\', '/', self::$cache_dir);
 		self::$browscap_cache_dir = self::$cache_dir."browscapcache/";
 
 	}
@@ -485,10 +486,14 @@ class WP_Insights {
 	
 	public function get_mouse_event_data() {
 		error_log("Inside get_mouse_event_data");
-		$lrid = $_GET['lrid'];
-		$hmtype = $_GET['hmtype'];
-		$WP_Insights_Event_Data_Instance = new WP_Insights_Event_Data($lrid,$hmtype);
-		echo $WP_Insights_Event_Data_Instance->getMouseMovementDataByPage();
+		$lrid = isset($_GET['lrid'])?$_GET['lrid']:null;
+		$datatype = isset($_GET['datatype'])?$_GET['datatype']:null;
+		$fromDate = isset($_GET['fromdate'])?$_GET['fromdate']:null;
+		$tillDate = isset($_GET['tilldate'])?$_GET['tilldate']:null;
+		$fromRecordNumber = isset($_GET['frn'])?$_GET['frn']:null;
+		$tillRecordNumber = isset($_GET['trn'])?$_GET['trn']:null;
+		$WP_Insights_Event_Data_Instance = new WP_Insights_Event_Data($lrid,$datatype,$fromDate,$tillDate,$fromRecordNumber,$tillRecordNumber);
+		echo $WP_Insights_Event_Data_Instance->getEventData();
 		die();
 	}
 	

@@ -40,17 +40,48 @@ class WP_Insights_Event_Data {
 		$this->cacheTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE;
 	}
 	
+	public function getEventData() {
+		if($this->dataType == 'mvh') {
+			$this->getMouseMovementDataByPage();
+		} else if($this->dataType == 'clickh') {
+			$this->getClickDataByPage();
+		} else if($this->dataType == 'exith') {
+			$this->getExitDataByPage();
+		} else if($this->dataType == 'mph') {
+			$this->getMouseMovementDataByUserByPage();
+		} else if($this->dataType == 'lfh') {
+			$this->getLostFocusDataByPage();
+		}
+		return $this->eventJsonResponse;
+	}
+	
 	public function getMouseMovementDataByPage(){
-		$records = $this->wp_insights_db_utils->db_select_all(
-				$this->recordsTable." AS R"
-				." RIGHT OUTER JOIN ".$this->recordsTable." AS R1"." ON R.cleansed_url = R1.cleansed_url",
-				"R1.id as id,R1.hovered as mousepositions",
-				"R.id = ".$this->lrid);
-	
-		$this->constructHeatmapString($records);
 		
-		return $eventJsonResponse;
+		$sql = "select
+				R.id as id,
+				R1.hovered as mousepositions
+				from $this->recordsTable as R
+				RIGHT OUTER JOIN $this->recordsTable as R1 
+					ON R.cleansed_url = R1.cleansed_url
+				where R.id = $this->lrid";
+		
+		if($this->fromDate != null & $this->tillDate !=null) {
+			$sql = $sql." AND R1.sess_date >= $this->fromDate
+						AND R1.sess_date >= $this->tillDate";
+		}
+		
+		$sql = $sql." ORDER BY R1.id";
+		
+		if($this->fromRecordNumber != null & $this->tillRecordNumber !=null) {
+			$noOfRequestedRecords = $this->tillRecordNumber - $this->fromRecordNumber;
+			$sql = $sql." LIMIT $this->fromRecordNumber , $noOfRequestedRecords";
+		}
+		
+		error_log($sql);
+		
+		$records = $this->wp_insights_db_utils->db_query($sql);
 	
+		$this->constructHeatmapString($records);	
 	}
 	
 	public function getClickDataByPage(){
@@ -60,10 +91,7 @@ class WP_Insights_Event_Data {
 				"R1.id as id,R1.clicked as mousepositions",
 				"R.id = ".$this->lrid);
 	
-		$this->constructHeatmapString($records);
-		
-		return $eventJsonResponse;
-	
+		$this->constructHeatmapString($records);	
 	}
 	
 	public function getLostFocusDataByPage(){
@@ -73,10 +101,7 @@ class WP_Insights_Event_Data {
 				"R1.id as id,R1.lost_focus as mousepositions",
 				"R.id = ".$this->lrid);
 	
-		$this->constructHeatmapString($records);
-		
-		return $eventJsonResponse;
-	
+		$this->constructHeatmapString($records);	
 	}
 	
 	protected function constructHeatmapString($records) {
