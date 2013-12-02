@@ -53,7 +53,8 @@ class WP_Insights_Heatmap {
 		$this->cacheTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE;
 		$this->heatmapJsPath = plugins_url('js/dev/heatmap.js?v='.$this->version, dirname(__FILE__));
 		$this->loadCacheFile();
-		if($hmtype == 'mv') {
+		$this->createHeatmapScriptElements();
+		/* if($hmtype == 'mv') {
 			$this->getMouseMovementDataByPage();
 			$this->createHeatmapScriptElements();
 		} else if($hmtype == 'click') {
@@ -68,13 +69,13 @@ class WP_Insights_Heatmap {
 		} else if($hmtype == 'lf') {
 			$this->getLostFocusDataByPage();
 			$this->createHeatmapScriptElements();
-		}
+		} */
 		
 	}
 	
 	protected function loadCacheFile() {
-		$cacheRecord = $this->wp_insights_db_utils->db_select($this->cacheTable, "file", "id=".$this->pid);
-		$this->cachedFile = $this->cache_dir.$cacheRecord['file'];
+		$relativeCacheFilePath = $this->wp_insights_db_utils->db_select($this->recordsTable, "file", "id=".$this->lrid);
+		$this->cachedFile = $this->cache_dir.$relativeCacheFilePath['file'];
 		error_log($this->cachedFile);
 		$this->doc = new DOMUtil();
 		if (!is_file($this->cachedFile)) {
@@ -354,35 +355,67 @@ class WP_Insights_Heatmap {
 		error_log($this->hoverClickData);
 		
 		
-		$cdata = 'window.onload = function(){
-			var heatmap = h337.create({"element":document.getElementsByTagName("body")[0], "radius":10, "visible":true});
-			
-			var hoverClickObjects = '.$this->hoverClickData.';
-			jQuery.each(hoverClickObjects, function (index, value) {
-					try {
-						//console.log(value.cp + " " + value.w + " " + value.h);
-						var element = jQuery( document ).find(value.cp);
-						if(typeof element != undefined) {
-							var xdiscrepancy = jQuery(element).width()/value.w;
-							//console.log(jQuery(element).width() + " " + value.w + " " + xdiscrepancy);
-							var ydiscrepancy = jQuery(element).height()/value.h;
-							//console.log(jQuery(element).height() + " " + value.h + " " + ydiscrepancy);
-							//xdiscrepancy = 1;
-							//ydiscrepancy = 1;
-							var x = jQuery(element).offset().left + (value.rX * xdiscrepancy);
-							var y = jQuery(element).offset().top + (value.rY * ydiscrepancy);
-						} else {
-							var x = value.pX;
-							var y = value.pY;
-						}
+		$cdata = 'var heatmapOptions = {
+						dataURI: "http://localhost/wordpress/wp-admin/admin-ajax.php",
+						action: "wpimouseeventdata",
+						lrid: '.$this->lrid.',
+						dt: "'.$this->hmtype.'",
+						fd: "2013-11-30",
+						td: "2013-11-30",
+						recordsPerRequest: 100,
+						};
 						
-						heatmap.store.addDataPoint(Math.round(x), Math.round(y), 1);
-					} catch (err) {
-						console.log(err.message);	
-						//console.log(value.csspath);					
+					var fromRecordNumber = 0;
+					var tillRecordNumber = heatmapOptions.recordsPerRequest-1;	
+					var heatmap = null;					
+					
+					function loadIntoHeatmap(data) {
+						jQuery.each(data, function (index, value) {
+																try {
+																	//console.log(value.cp + " " + value.w + " " + value.h);
+																	var element = jQuery( document ).find(value.cp);
+																	if(typeof element != undefined) {
+																		var xdiscrepancy = jQuery(element).width()/value.w;
+																		//console.log(jQuery(element).width() + " " + value.w + " " + xdiscrepancy);
+																		var ydiscrepancy = jQuery(element).height()/value.h;
+																		//console.log(jQuery(element).height() + " " + value.h + " " + ydiscrepancy);
+																		var x = jQuery(element).offset().left + (value.rX * xdiscrepancy);
+																		var y = jQuery(element).offset().top + (value.rY * ydiscrepancy);
+																	} else {
+																		var x = value.pX;
+																		var y = value.pY;
+																	}
+																	heatmap.store.addDataPoint(Math.round(x), Math.round(y), 1);
+																} catch (err) {
+																	console.log(err.message);	
+																	//console.log(value.csspath);					
+																}
+														});
+														if(data.length > 0) {
+															fromRecordNumber = tillRecordNumber+1;
+															tillRecordNumber = tillRecordNumber + (heatmapOptions.recordsPerRequest-1);
+															getData();
+														}
 					}
-		    });
-		};';
+					
+					function getData() {
+						jQuery.getJSON(heatmapOptions.dataURI, {
+												action: heatmapOptions.action,
+												lrid: heatmapOptions.lrid,
+												dt: heatmapOptions.dt,
+												fd: heatmapOptions.fd,
+												td: heatmapOptions.td,
+												frn: fromRecordNumber,
+												trn: tillRecordNumber
+												}).done(function(data) {
+															loadIntoHeatmap(data);
+													});	
+					}
+					
+					jQuery(document).ready(function(){
+										heatmap = h337.create({"element":document.getElementsByTagName("body")[0], "radius":10, "visible":true});
+										getData();					
+		});';
 		$this->invokeheatmapJsElement = $this->doc->createInlineScript($cdata);
 		$heads = $this->doc->getElementsByTagName("head");
 		foreach($heads as $head) {

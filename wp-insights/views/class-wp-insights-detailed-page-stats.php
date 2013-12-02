@@ -7,7 +7,7 @@ class WP_Insights_Detailed_Page_Stats {
 	
 	protected $url = null;
 	
-	protected $pid = null;
+	protected $lrid = null;
 	
 	protected $pageViews = null;
 	
@@ -37,9 +37,9 @@ class WP_Insights_Detailed_Page_Stats {
 	
 	protected $cacheTable = null;
 	
-	public function __construct($pid) {
+	public function __construct($lrid) {
 		global $wpdb;
-		$this->pid = $pid;
+		$this->lrid = $lrid;
 		$this->wp_insights_db_utils = WP_Insights_DB_Utils::get_instance();
 		$this->wp_insights_db_utils->setWpdb($wpdb);
 		$this->recordsTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
@@ -60,8 +60,8 @@ class WP_Insights_Detailed_Page_Stats {
 				"C1.url,R.sess_time,AVG(R.sess_time) as avg_sess_time,R.coords_x,R.coords_y,R.vp_width,R.vp_height,R.scr_width,R.scr_height",
 				"C2.id = ".$this->pid); */
 		
-		$sql = "SELECT cache.url as url, 
-    			max(cache.id) as cache_id,
+		$sql = "SELECT records.cleansed_url as url, 
+    			max(records.id) as latest_record_id,
     			COUNT(records.id ) AS visits, 
     			ROUND((COUNT(records1.id)/COUNT(records.id)*100),2) AS attention,
 				ROUND((COUNT(records2.id)/COUNT(records.id)*100),2) AS interest,
@@ -76,13 +76,12 @@ class WP_Insights_Detailed_Page_Stats {
 			    SEC_TO_TIME( MIN( records.focus_time ) ) AS min_focus_time, 
 			    SEC_TO_TIME( MAX( records.focus_time ) ) AS max_focus_time
 				FROM $this->recordsTable AS records
-				INNER JOIN $this->cacheTable AS cache ON records.cache_id = cache.id
-				INNER JOIN $this->cacheTable AS cache2 ON cache2.url = cache.url
+				INNER JOIN $this->recordsTable AS records0 ON records0.cleansed_url = records.cleansed_url
 				LEFT OUTER JOIN $this->recordsTable AS records1 ON records.id = records1.id and records1.focus_time>60
 				LEFT OUTER JOIN $this->recordsTable AS records2 ON records.id = records2.id and records2.focus_time>120
 				LEFT OUTER JOIN $this->recordsTable AS records3 ON records.id = records3.id and records3.focus_time>300
 				LEFT OUTER JOIN $this->recordsTable AS records4 ON records.id = records4.id and records4.focus_time>600
-				where cache2.id=$this->pid";
+				where records0.id=$this->lrid";
 				
 		$this->records = $this->wp_insights_db_utils->db_query($sql);
 				

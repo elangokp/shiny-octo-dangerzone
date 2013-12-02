@@ -31,7 +31,7 @@ class WP_Insights {
 	 *
 	 * @const   string
 	 */
-	const VERSION = '0.6.2Beta';
+	const VERSION = '0.7.0Beta';
 
 	/**
 	 * Unique identifier for your plugin.
@@ -487,13 +487,13 @@ class WP_Insights {
 	public function get_mouse_event_data() {
 		error_log("Inside get_mouse_event_data");
 		$lrid = isset($_GET['lrid'])?$_GET['lrid']:null;
-		$datatype = isset($_GET['datatype'])?$_GET['datatype']:null;
-		$fromDate = isset($_GET['fromdate'])?$_GET['fromdate']:null;
-		$tillDate = isset($_GET['tilldate'])?$_GET['tilldate']:null;
+		$datatype = isset($_GET['dt'])?$_GET['dt']:null;
+		$fromDate = isset($_GET['fd'])?$_GET['fd']:null;
+		$tillDate = isset($_GET['td'])?$_GET['td']:null;
 		$fromRecordNumber = isset($_GET['frn'])?$_GET['frn']:null;
 		$tillRecordNumber = isset($_GET['trn'])?$_GET['trn']:null;
 		$WP_Insights_Event_Data_Instance = new WP_Insights_Event_Data($lrid,$datatype,$fromDate,$tillDate,$fromRecordNumber,$tillRecordNumber);
-		echo $WP_Insights_Event_Data_Instance->getEventData();
+		echo $WP_Insights_Event_Data_Instance->getMouseEventData();
 		die();
 	}
 	

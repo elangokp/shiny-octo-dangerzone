@@ -278,7 +278,7 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
     function get_columns(){
         $columns = array(
             //'cb'        => '<input type="checkbox" />', //Render a checkbox instead of text
-            'recording_id'     => 'ID',
+            //'recording_id'     => 'ID',
             'ip'    => 'IP',
         	//'url' => 'url',
         	'browser' => 'Browser',

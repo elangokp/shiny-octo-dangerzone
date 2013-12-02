@@ -63,19 +63,19 @@ if(isset($_GET['lrid'])) {
 			<label><?php echo $WP_Insights_Detailed_Page_Stats_Instance->getPassion();?></label>
 		</div>
 		<div id="movementMap">
-			<a id="mvmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?lrid=<?php echo $lrid;?>&hmtype=mv" class="button" target="_blank" title="Movement Heatmap">Movement Heatmap</a>
+			<a id="mvmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?lrid=<?php echo $lrid;?>&hmtype=mvh" class="button" target="_blank" title="Movement Heatmap">Movement Heatmap</a>
 		</div>
 		<div id="clickmap">
-			<a id="clickmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?lrid=<?php echo $lrid;?>&hmtype=click" class="button" target="_blank" title="Click Heatmap">Click Heatmap</a>
+			<a id="clickmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?lrid=<?php echo $lrid;?>&hmtype=clickh" class="button" target="_blank" title="Click Heatmap">Click Heatmap</a>
 		</div>
 		<div id="exitmap">
-			<a id="exitmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?lrid=<?php echo $lrid;?>&hmtype=exit" class="button" target="_blank" title="Exit Heatmap">Exit Heatmap</a>
+			<a id="exitmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?lrid=<?php echo $lrid;?>&hmtype=exith" class="button" target="_blank" title="Exit Heatmap">Exit Heatmap</a>
 		</div>
 		<div id="mousepaths">
-			<a id="mousepaths" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?lrid=<?php echo $lrid;?>&hmtype=mp" class="button" target="_blank" title="Mouse Paths">Mouse Paths</a>
+			<a id="mousepaths" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?lrid=<?php echo $lrid;?>&hmtype=mph" class="button" target="_blank" title="Mouse Paths">Mouse Paths</a>
 		</div>
 		<div id="lostfocusmap">
-			<a id="lostfocusmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?lrid=<?php echo $lrid;?>&hmtype=lf" class="button" target="_blank" title="Lost Focus Heatmap">Lost Focus Heatmap</a>
+			<a id="lostfocusmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>showheat.php?lrid=<?php echo $lrid;?>&hmtype=lfh" class="button" target="_blank" title="Lost Focus Heatmap">Lost Focus Heatmap</a>
 		</div>
 	</form>
 

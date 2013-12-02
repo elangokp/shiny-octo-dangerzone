@@ -26,20 +26,20 @@ $scry = $_GET['scry'];
 <body>
 <script type="text/javascript">
     jQuery( window ).bind("resize",function(e) {document.getElementById('iframeHeatmap').height = jQuery( window ).height() - 90;});
-    jQuery( window ).load(function(e) {document.getElementById('iframeHeatmap').height = jQuery( window ).height() - 90;});
+    jQuery( window ).ready(function(e) {document.getElementById('iframeHeatmap').height = jQuery( window ).height() - 90;});
 </script>
 <div id="top-frame">
 <h1>
 <?php 
-if($hmtype == 'mv') {
+if($hmtype == 'mvh') {
 	echo "Mouse Movement Heatmap";
-} else if($hmtype == 'click') {
+} else if($hmtype == 'clickh') {
 	echo "Click Heatmap";
-} else if($hmtype == 'exit') {
+} else if($hmtype == 'exith') {
 	echo "Exit Heatmap";
-}else if($hmtype == 'mp') {
+}else if($hmtype == 'mph') {
 	echo "Mouse Paths";
-}else if($hmtype == 'lf') {
+}else if($hmtype == 'lfh') {
 	echo "Lost Focus Heatmap";
 }
 ?>
