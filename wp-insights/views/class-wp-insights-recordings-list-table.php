@@ -257,7 +257,7 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
     function column_actions($item){
     
     	return sprintf('%1$s',
-    	 '<a id="wpi-client-id-'.$item['client_id'].'-recordings-link" href="#" class="button wpi-client-recordings-link"  data-val="'.$item['client_id'].'" data-status="show" title="Show Recordings">Show Recordings</a>'.PHP_EOL
+    	 '<a id="wpi-client-id-'.$item['client_id'].'-recordings-link" href="javascript:void(0)" class="button wpi-client-recordings-link"  data-val="'.$item['client_id'].'" data-status="show" title="Show Recordings">Show Recordings</a>'.PHP_EOL
     	);
     }
     
@@ -435,7 +435,7 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         
         $cacheTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE;
         
-        $total_items = $wpdb->get_var("select count(records.client_id) from ".$recordsTable." AS records GROUP BY records.client_id");
+        $total_items = $wpdb->get_var("select count(distinct records.client_id) from ".$recordsTable." AS records");
         
         /**
          * Instead of querying a database, we're going to fetch the example data
