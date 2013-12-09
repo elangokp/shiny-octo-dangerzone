@@ -471,7 +471,7 @@ class WP_Insights_Utils {
 			}
 			
 			if (! is_dir($dirPath)) {
-				mkdir($dirPath,null,true);
+				mkdir($dirPath);
 			}
 	}
 	
