@@ -457,7 +457,8 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
          * looking at. We'll need this later, so you should always include it in
          * your own package classes.
          */
-        $current_page = $this->get_pagenum();
+        //$current_page = $this->get_pagenum();
+        $current_page = 1;
         
         /**
          * REQUIRED for pagination. Let's check how many items are in our data array.
