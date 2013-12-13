@@ -53,7 +53,12 @@ class WP_Insights_Heatmap {
 		$this->cacheTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE;
 		$this->heatmapJsPath = plugins_url('js/dev/heatmap.js?v='.$this->version, dirname(__FILE__));
 		$this->loadCacheFile();
-		$this->createHeatmapScriptElements();
+		
+		if($hmtype == 'mph') {
+			$this->createMousePathScriptElements();
+		} else {
+			$this->createHeatmapScriptElements();
+		}
 		/* if($hmtype == 'mv') {
 			$this->getMouseMovementDataByPage();
 			$this->createHeatmapScriptElements();
@@ -352,17 +357,15 @@ class WP_Insights_Heatmap {
 			xx.store.setDataSet('.$this->heatMapDataString.');	
 		};';*/
 		
-		error_log($this->hoverClickData);
-		
+		//error_log($this->hoverClickData);
+		$wp_admin_url = admin_url( 'admin-ajax.php' );
 		
 		$cdata = 'var heatmapOptions = {
-						dataURI: "http://localhost/wordpress/wp-admin/admin-ajax.php",
+						dataURI: "'.$wp_admin_url.'",
 						action: "wpimouseeventdata",
 						lrid: '.$this->lrid.',
 						dt: "'.$this->hmtype.'",
-						fd: "2013-11-30",
-						td: "2013-11-30",
-						recordsPerRequest: 100,
+						recordsPerRequest: 100
 						};
 						
 					var fromRecordNumber = 0;
@@ -436,63 +439,97 @@ class WP_Insights_Heatmap {
 		$containerDiv->setAttribute("id", "kineticContainer");
 		$style = "width:100%; height:100%;z-index:10000;top:0;left:0;position:absolute;";
 		$containerDiv->setAttribute("style", $style);
-		/*$cdata = 'window.onload = function(){
-		 var xx = h337.create({"element":document.getElementsByTagName("body")[0], "radius":10, "visible":true});
-		xx.store.setDataSet('.$this->heatMapDataString.');
-		};';*/
+
+		$wp_admin_url = admin_url( 'admin-ajax.php' );
 	
 	
-		$cdata = 'window.onload = function(){
-			
-			var stage = new Kinetic.Stage({
-					        container: "kineticContainer",
-					        width: jQuery( document ).width(),
-					        height: jQuery( document ).height(),
-							opacity: 0.5,
-				visible: true
-					      });
-			var layer = new Kinetic.Layer();
-			var hoverClickObjects = '.$this->hoverClickData.';
-			jQuery.each(hoverClickObjects, function (recordIndex, singleRecordHoverClickObjects) {
-					try {
-						var singleRecordMousepathPoints = new Array();
-						jQuery.each(singleRecordHoverClickObjects, function (index, value) {
-							try {
-								//console.log(value.cp + " " + value.w + " " + value.h);
-								var element = jQuery( document ).find(value.cp);
-								var xdiscrepancy = jQuery(element).width()/value.w;
-								//console.log(jQuery(element).width() + " " + value.w + " " + xdiscrepancy);
-								var ydiscrepancy = jQuery(element).height()/value.h;
-								//console.log(jQuery(element).height() + " " + value.h + " " + ydiscrepancy);
-								//xdiscrepancy = 1;
-								//ydiscrepancy = 1;
-								var x = jQuery(element).offset().left + (value.rX * xdiscrepancy);
-								var y = jQuery(element).offset().top + (value.rY * ydiscrepancy);
-								singleRecordMousepathPoints.push(Math.round(x));
-								singleRecordMousepathPoints.push(Math.round(y));
-								var mousePathLine = new Kinetic.Line({
-										        points: singleRecordMousepathPoints,
-										        strokeWidth: 2,
-												lineJoin: "round",
-												lineCap: "round"
-										      });
-								//var randColorR = Math.random() * 255;
-								mousePathLine.setStrokeRGB({
-											r: Math.random() * 255,
-											g: Math.random() * 255,
-											b: Math.random() * 255
-											});
-								layer.add(mousePathLine);
-							} catch(err1) {
-								console.log(err1.message);
-							}
-						});
-					} catch (err2) {
-						console.log(err2.message);
+		$cdata = 'var heatmapOptions = {
+						dataURI: "'.$wp_admin_url.'",
+						action: "wpimouseeventdata",
+						lrid: '.$this->lrid.',
+						dt: "'.$this->hmtype.'",
+						recordsPerRequest: 100
+						};
+						
+					
+					
+					var fromRecordNumber = 0;
+					var tillRecordNumber = heatmapOptions.recordsPerRequest-1;	
+					var stage = null;		
+					var layer = null;
+					
+					function loadIntoHeatmap(data) {
+						jQuery.each(data, function (recordIndex, singleRecordHoverClickObjects) {
+															try {
+																var singleRecordMousepathPoints = new Array();
+																jQuery.each(singleRecordHoverClickObjects, function (index, value) {
+																		try {
+																			//console.log(value.cp + " " + value.w + " " + value.h);
+																			var element = jQuery( document ).find(value.cp);
+																			var xdiscrepancy = jQuery(element).width()/value.w;
+																			//console.log(jQuery(element).width() + " " + value.w + " " + xdiscrepancy);
+																			var ydiscrepancy = jQuery(element).height()/value.h;
+																			//console.log(jQuery(element).height() + " " + value.h + " " + ydiscrepancy);
+																			//xdiscrepancy = 1;
+																			//ydiscrepancy = 1;
+																			var x = jQuery(element).offset().left + (value.rX * xdiscrepancy);
+																			var y = jQuery(element).offset().top + (value.rY * ydiscrepancy);
+																			singleRecordMousepathPoints.push(Math.round(x));
+																			singleRecordMousepathPoints.push(Math.round(y));
+																			var mousePathLine = new Kinetic.Line({
+																							points: singleRecordMousepathPoints,
+																							strokeWidth: 2,
+																							lineJoin: "round",
+																							lineCap: "round"
+																						  });
+																			//var randColorR = Math.random() * 255;
+																			mousePathLine.setStrokeRGB({
+																						r: Math.random() * 255,
+																						g: Math.random() * 255,
+																						b: Math.random() * 255
+																						});
+																			layer.add(mousePathLine);
+																		} catch(err1) {
+																			console.log(err1.message);
+																		}
+																	});
+																} catch (err2) {
+																	console.log(err2.message);
+																}
+														});
+														stage.add(layer);
+														if(data.length > 0) {
+															fromRecordNumber = tillRecordNumber+1;
+															tillRecordNumber = tillRecordNumber + (heatmapOptions.recordsPerRequest-1);
+															getData();
+														}
 					}
-		    });
-			stage.add(layer);
-		};';
+					
+					function getData() {
+						jQuery.getJSON(heatmapOptions.dataURI, {
+												action: heatmapOptions.action,
+												lrid: heatmapOptions.lrid,
+												dt: heatmapOptions.dt,
+												fd: heatmapOptions.fd,
+												td: heatmapOptions.td,
+												frn: fromRecordNumber,
+												trn: tillRecordNumber
+												}).done(function(data) {
+															loadIntoHeatmap(data);
+													});	
+					}
+					
+					jQuery(document).ready(function(){
+										stage = new Kinetic.Stage({
+												container: "kineticContainer",
+												width: jQuery( document ).width(),
+												height: jQuery( document ).height(),
+												opacity: 0.5,
+												visible: true
+											  });
+										layer = new Kinetic.Layer();
+										getData();					
+		});';
 		$drawMousePathsJsElement = $this->doc->createInlineScript($cdata);
 		$heads = $this->doc->getElementsByTagName("head");
 		foreach($heads as $head) {
