@@ -511,54 +511,57 @@ class WP_Insights {
 		<!-- Powered by WP Insights version <?php echo self::VERSION?>-->
 	  <script id='wpi-trigger-script' type="text/javascript">
 				//<![CDATA[
-	  			var jQuery_1_10_2_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
+				var addressBarURL = top.location.href;
+				if(addressBarURL.toLowerCase().indexOf("wpi-replay.php") < 0) {
+		  			var jQuery_1_10_2_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
 
-	  			jQuery.getScript( "<?php echo $json3_js_url?>");
+		  			jQuery.getScript( "<?php echo $json3_js_url?>");
 
-	  			jQuery.getScript(jQuery_1_10_2_url, function() { 
-	  				jQuery_1_10_2 = $.noConflict(true);
-					jQuery_1_10_2.fn.getcssPath = function () {
-					    if (this.length != 1) throw 'Requires one element.';
+		  			jQuery.getScript(jQuery_1_10_2_url, function() { 
+		  				jQuery_1_10_2 = $.noConflict(true);
+						jQuery_1_10_2.fn.getcssPath = function () {
+						    if (this.length != 1) throw 'Requires one element.';
 
-					    var path, node = this;
-					    while (node.length) {
-					        var realNode = node[0], name = realNode.localName || realNode.nodeName;
-					        if (!name) break;
+						    var path, node = this;
+						    while (node.length) {
+						        var realNode = node[0], name = realNode.localName || realNode.nodeName;
+						        if (!name) break;
 
-					        name = name.toLowerCase();
-					        if (realNode.id) {
-					            // As soon as an id is found, there's no need to specify more.
-					            return name + '#' + realNode.id + (path ? '>' + path : '');
-					        } else if (realNode.className) {
-					            name += '.' + realNode.className.split(/\s+/).join('.');
-					        }
+						        name = name.toLowerCase();
+						        if (realNode.id) {
+						            // As soon as an id is found, there's no need to specify more.
+						            return name + '#' + realNode.id + (path ? '>' + path : '');
+						        } else if (realNode.className) {
+						            name += '.' + realNode.className.split(/\s+/).join('.');
+						        }
 
-					        var parent = node.parent(), siblings = parent.children(name);
-					        if (siblings.length > 1) name += ':eq(' + siblings.index(node) + ')';
-					        path = name + (path ? '>' + path : '');
+						        var parent = node.parent(), siblings = parent.children(name);
+						        if (siblings.length > 1) name += ':eq(' + siblings.index(node) + ')';
+						        path = name + (path ? '>' + path : '');
 
-					        node = parent;
-					    }
+						        node = parent;
+						    }
 
-					    return path;
-					};
-		  			jQuery.getScript( "<?php echo $smt_aux_js_url.'?v='.self::VERSION?>", function() 
-		  			  {
-		  				jQuery.getScript( "<?php echo $smt_record_js_url.'?v='.self::VERSION?>", function() 
-		  		  			  {
-			  					smt2.record({
-								      recTime: 300,
-								      trackingUrl: "<?php echo $smt_tracking_url?>",
-								      postInterval: 10
-								    });
+						    return path;
+						};
+			  			jQuery.getScript( "<?php echo $smt_aux_js_url.'?v='.self::VERSION?>", function() 
+			  			  {
+			  				jQuery.getScript( "<?php echo $smt_record_js_url.'?v='.self::VERSION?>", function() 
+			  		  			  {
+				  					smt2.record({
+									      recTime: 300,
+									      trackingUrl: "<?php echo $smt_tracking_url?>",
+									      postInterval: 10
+									    });
 
-		  			  			}
-		  		  			);
+			  			  			}
+			  		  			);
 
-			  			}
-		  			);
-	  			});
-	  			
+				  			}
+			  			);
+		  			});
+
+				}	  			
 				//]]>
 		</script>
 	  
