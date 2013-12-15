@@ -125,6 +125,9 @@ class WP_Insights {
 		add_action('plugins_loaded', array($this, 'setRecorderStatus'));
 		//add_action('admin_notices', array($this, 'wp_insights_admin_notices'));
 		//add_filter( 'TODO', array( $this, 'filter_method_name' ) );
+		
+		add_shortcode( 'wpi_page_section', array($this, 'add_page_section') );
+		
 		self::$cache_dir = dirname(dirname(plugin_dir_path(__FILE__)))."/wpicache/";
 		self::$cache_dir = str_replace('\\', '/', self::$cache_dir);
 		self::$browscap_cache_dir = self::$cache_dir."browscapcache/";
@@ -447,6 +450,11 @@ class WP_Insights {
 	 */
 	public function filter_method_name() {
 		// TODO: Define your filter hook callback here
+	}
+	
+	public function add_page_section() {
+		// TODO: use this http://www.benknowscode.com/2013/07/detect-dom-element-scrolled-with-jquery.html
+		return '<img id="wpipagesection" width=1px height=1px src="'.plugins_url("/assets/spacer.gif").'"/>';
 	}
 	
 	public function store_user_data() {
