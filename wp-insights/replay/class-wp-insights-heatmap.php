@@ -79,8 +79,13 @@ class WP_Insights_Heatmap {
 	}
 	
 	protected function loadCacheFile() {
-		$relativeCacheFilePath = $this->wp_insights_db_utils->db_select($this->recordsTable, "file", "id=".$this->lrid);
-		$this->cachedFile = $this->cache_dir.$relativeCacheFilePath['file'];
+		$sql = "SELECT r2.file FROM $this->recordsTable r1
+				inner join $this->recordsTable r2 on r1.cleansed_url = r2.cleansed_url and r2.file != '0'
+				where r1.id=$this->lrid
+				order by r2.id desc
+				LIMIT 0,1";
+		$relativeCacheFilePath = $this->wp_insights_db_utils->db_query($sql);
+		$this->cachedFile = $this->cache_dir.$relativeCacheFilePath[0]['file'];
 		error_log($this->cachedFile);
 		$this->doc = new DOMUtil();
 		if (!is_file($this->cachedFile)) {
@@ -365,7 +370,8 @@ class WP_Insights_Heatmap {
 						action: "wpimouseeventdata",
 						lrid: '.$this->lrid.',
 						dt: "'.$this->hmtype.'",
-						recordsPerRequest: 100
+						recordsPerRequest: 100,
+						heatmapCompleted: false
 						};
 						
 					var fromRecordNumber = 0;
@@ -391,13 +397,15 @@ class WP_Insights_Heatmap {
 																	heatmap.store.addDataPoint(Math.round(x), Math.round(y), 1);
 																} catch (err) {
 																	console.log(err.message);	
-																	//console.log(value.csspath);					
+																	console.log(value.cp);					
 																}
 														});
 														if(data.length > 0) {
 															fromRecordNumber = tillRecordNumber+1;
 															tillRecordNumber = tillRecordNumber + (heatmapOptions.recordsPerRequest-1);
 															getData();
+														} else {
+															heatmapOptions.heatmapCompleted = true;	
 														}
 					}
 					

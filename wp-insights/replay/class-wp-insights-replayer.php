@@ -118,9 +118,9 @@ class WP_Insights_Replayer {
 		$hovered        = $record['hovered'];
 		$clicked        = $record['clicked'];
 		
-		$clicks = ltrim($clicks, ',');
-		$coordsX = ltrim($coordsX, ',');
-		$coordsY = ltrim($coordsY, ',');
+		$clicks = trim($clicks, ',');
+		$coordsX = trim($coordsX, ',');
+		$coordsY = trim($coordsY, ',');
 		
 		// build JavaScript object
 		$this->JSON[] = '{"xcoords": ['.$coordsX.'], "ycoords": ['.$coordsY.'], "clicks": ['.$clicks.'], "timestamp": "'.$timestamp.'", "wprev": '.$record['vp_width'].', "hprev": '.$record['vp_height'].'}';

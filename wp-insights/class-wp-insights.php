@@ -512,7 +512,8 @@ class WP_Insights {
 	  <script id='wpi-trigger-script' type="text/javascript">
 				//<![CDATA[
 				var addressBarURL = top.location.href;
-				if(addressBarURL.toLowerCase().indexOf("wpi-replay.php") < 0) {
+				if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay.php") < 0 
+					&& addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-heat.php") < 0) {
 		  			var jQuery_1_10_2_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
 
 		  			jQuery.getScript( "<?php echo $json3_js_url?>");
@@ -533,6 +534,7 @@ class WP_Insights {
 						            return name + '#' + realNode.id + (path ? '>' + path : '');
 						        } else if (realNode.className) {
 						            name += '.' + realNode.className.split(/\s+/).join('.');
+						            name = name.replace(/\.+$/,"");
 						        }
 
 						        var parent = node.parent(), siblings = parent.children(name);

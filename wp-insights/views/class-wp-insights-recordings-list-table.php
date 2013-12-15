@@ -139,8 +139,21 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
             $item['ID'],
             $this->row_actions($actions)
         );
-    }
-     */
+    }*/
+    
+    /**
+	 * Extra controls to be displayed between bulk actions and pagination
+	 *
+	 * @since 3.1.0
+	 * @access protected
+	 */
+	function extra_tablenav( $which ) {
+		if ( $which == "top" ){
+			//The code that goes before the table is here
+			echo"Hello, I'm before the table";
+		}
+	}
+
     /** ************************************************************************
      * REQUIRED if displaying checkboxes or using bulk actions! The 'cb' column
      * is given special treatment when columns are processed. It ALWAYS needs to
@@ -465,9 +478,6 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         $sql = "SELECT 
         records.client_id,
         MAX(records.id) as id,
-        records.file,
-        records.raw_url,
-        records.cleansed_url,
         records.os_id,
         records.browser_id,
         records.browser_ver,
@@ -485,7 +495,7 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         LEFT OUTER JOIN $browsersTable as browsers ON records.browser_id = browsers.id
         LEFT OUTER JOIN $osTable as oses ON records.os_id = oses.id
         GROUP BY records.client_id
-        ORDER BY records.id desc
+        ORDER BY id desc
         LIMIT ".($current_page-1)*$per_page.",".$per_page;
                 
         

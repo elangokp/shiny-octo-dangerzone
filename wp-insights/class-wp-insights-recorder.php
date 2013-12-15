@@ -164,8 +164,17 @@ class WP_Insights_Recorder {
 		/* client browser stats ----------------------------------------------------- */
 		
 		//$browser = new Browser();
-		$bc = new Browscap($this->cache_dir."browscapcache/",plugin_dir_path(__FILE__)."utils/full_php_browscap.ini");
-		$current_browser = $bc->getBrowser();
+		try {
+			//$bc = new Browscap($this->cache_dir."browscapcache/",plugin_dir_path(__FILE__)."utils/full_php_browscap.ini");
+			$bc = new Browscap($this->cache_dir."browscapcache/");
+			$current_browser = $bc->getBrowser();
+		} catch (Exception $e) {
+			$current_browser = array(
+					"Parent" => "unknown",
+					"Platform_Description" => "unknown"
+			);
+		}
+		
 		
 		// save browser id
 		$bname = $this->wp_insights_db_utils->db_select($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_BROWSERS, "id", "name='".$current_browser->Parent."'");
