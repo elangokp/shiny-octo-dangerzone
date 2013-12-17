@@ -54,7 +54,7 @@ class WP_Insights_Event_Data {
 			$this->constructHeatmapString();
 		} else {
 			$this->eventJsonResponse = 0;
-		}		
+		}				
 		return $this->eventJsonResponse;
 	}
 	
@@ -159,6 +159,10 @@ class WP_Insights_Event_Data {
 			}
 			$this->eventJsonResponse = rtrim($this->eventJsonResponse, ",");
 			$this->eventJsonResponse = $this->eventJsonResponse."]";
+		}
+		
+		if(strlen($this->eventJsonResponse)<3) {
+			$this->eventJsonResponse = "[]";
 		}
 		
 	}
