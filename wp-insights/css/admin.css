@@ -35,3 +35,8 @@
 #wp-insights-icon32-eye32 {
 	margin: 7px 0px 0 0;
 }
+
+.wpi-form-field {
+	margin: 10px 0px 10px 0;
+	vertical-align: middle;
+}

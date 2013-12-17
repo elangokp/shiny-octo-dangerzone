@@ -34,32 +34,32 @@ if(isset($_GET['lrid'])) {
 		Pages List</a>
 	
 	<form id="wpi-detailed-page-stats" method="get" style="margin-top: 10px">
-		<div id="pageViews" >
-			<label>Page Views: </label>
+		<div id="pageViews" class="wpi-form-field">
+			<label><b>Page Views: </b></label>
 			<label><?php echo $WP_Insights_Detailed_Page_Stats_Instance->getPageViews();?></label>
 		</div>
-		<div id="timeOnPage" >
-			<label>Avg. Time on Page: </label>
+		<div id="timeOnPage" class="wpi-form-field">
+			<label><b>Avg. Time on Page: </b></label>
 			<label><?php echo $WP_Insights_Detailed_Page_Stats_Instance->getAvgBrowsingTime();?></label>
 		</div>
-		<div id="focusedTimeOnPage" >
-			<label>Avg. Focused Time on Page: </label>
+		<div id="focusedTimeOnPage" class="wpi-form-field">
+			<label><b>Avg. Focused Time on Page: </b></label>
 			<label><?php echo $WP_Insights_Detailed_Page_Stats_Instance->getAvgFocusTime();?></label>
 		</div>
-		<div id="attention" >
-			<label>Attention %: </label>
+		<div id="attention" class="wpi-form-field">
+			<label><b>Attention %: </b></label>
 			<label><?php echo $WP_Insights_Detailed_Page_Stats_Instance->getAttention();?></label>
 		</div>
-		<div id="interest" >
-			<label>Interest %: </label>
+		<div id="interest" class="wpi-form-field">
+			<label><b>Interest %: </b></label>
 			<label><?php echo $WP_Insights_Detailed_Page_Stats_Instance->getInterest();?></label>
 		</div>
-		<div id="desire" >
-			<label>Desire %: </label>
+		<div id="desire" class="wpi-form-field">
+			<label><b>Desire %: </b></label>
 			<label><?php echo $WP_Insights_Detailed_Page_Stats_Instance->getDesire();?></label>
 		</div>
-		<div id="passion" >
-			<label>Passion %: </label>
+		<div id="passion" class="wpi-form-field">
+			<label><b>Passion %: </b></label>
 			<label><?php echo $WP_Insights_Detailed_Page_Stats_Instance->getPassion();?></label>
 		</div>
 		<div id="movementMap">
