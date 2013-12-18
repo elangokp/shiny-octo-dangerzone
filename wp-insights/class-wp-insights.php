@@ -454,7 +454,7 @@ class WP_Insights {
 	
 	public function add_page_section() {
 		// TODO: use this http://www.benknowscode.com/2013/07/detect-dom-element-scrolled-with-jquery.html
-		return '<img id="wpipagesection" width=1px height=1px src="'.plugins_url("/assets/spacer.gif").'"/>';
+		return '<img id="wpipagesection" width=1px height=1px src="'.plugins_url("/assets/spacer.gif",  __FILE__).'"/>';
 	}
 	
 	public function store_user_data() {
@@ -511,6 +511,7 @@ class WP_Insights {
 		$smt_aux_js_url = plugins_url('js/dev/smt-aux.js', __FILE__);
 		$smt_record_js_url = plugins_url('js/dev/smt-record.js', __FILE__);
 		$smt_tracking_url = admin_url( 'admin-ajax.php' );
+		$jquery_ui_scrollable_js = plugins_url('js/dev/jquery-ui-scrollable.js', __FILE__);
 		//wp_register_script('smt-aux', $smt_aux_js_url);
 		//wp_register_script('smt-record', $smt_record_js_url);
 		//wp_enqueue_script('smt-aux');
@@ -523,6 +524,7 @@ class WP_Insights {
 				if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay.php") < 0 
 					&& addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-heat.php") < 0) {
 		  			var jQuery_1_10_2_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
+		  			var jQuery_UI_1_10_3_url = "//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js";
 
 		  			jQuery.getScript( "<?php echo $json3_js_url?>");
 
@@ -554,6 +556,33 @@ class WP_Insights {
 
 						    return path;
 						};
+
+						jQuery.getScript( jQuery_UI_1_10_3_url, function() 
+					  			  {
+					  				jQuery.getScript( "<?php echo $jquery_ui_scrollable_js.'?v='.self::VERSION?>", function() 
+					  		  			  {
+
+					  					jQuery(function () {
+		
+					  						jQuery('img#wpipagesection').on('scrollin', function ( e, ui) {
+		
+							  					            alert("Scrolled into wpipagesection");
+		
+							  					         })
+							  					      .on('scrollout', function ( e, ui) {
+		
+							  					    		alert("Scrolled out of wpipagesection");
+		
+							  					         })
+							  					      .scrollable();
+		
+							  					});
+					  			  			}
+					  		  			);
+
+						  			}
+					  			);
+			  			
 			  			jQuery.getScript( "<?php echo $smt_aux_js_url.'?v='.self::VERSION?>", function() 
 			  			  {
 			  				jQuery.getScript( "<?php echo $smt_record_js_url.'?v='.self::VERSION?>", function() 
