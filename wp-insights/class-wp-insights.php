@@ -127,6 +127,8 @@ class WP_Insights {
 		//add_filter( 'TODO', array( $this, 'filter_method_name' ) );
 		
 		add_shortcode( 'wpi_page_section', array($this, 'add_page_section') );
+		add_action( 'add_meta_boxes', array( $this, 'add_wpi_meta_box' ) );
+		add_action( 'save_post', array( $this, 'save_wpi_meta' ) );
 		
 		self::$cache_dir = dirname(dirname(plugin_dir_path(__FILE__)))."/wpicache/";
 		self::$cache_dir = str_replace('\\', '/', self::$cache_dir);
@@ -302,6 +304,94 @@ class WP_Insights {
 	public function enqueue_scripts() {
 		wp_enqueue_script( $this->plugin_slug . '-plugin-script', plugins_url( 'js/public.js', __FILE__ ), array( 'jquery' ), self::VERSION );
 	}
+	
+	/**
+	 * Adds the meta box container.
+	 */
+	public function add_wpi_meta_box( $post_type ) {
+		$post_types = array('post', 'page');     //limit meta box to certain post types
+		if ( in_array( $post_type, $post_types )) {
+			add_meta_box(
+					'wpi_page_section_meta_box'
+					,'WP-Insights Page Sections'
+					,array( $this, 'render_wpi_page_section_meta_box' )
+					,$post_type
+					,'advanced'
+					,'high'
+					);
+		}
+	}
+	
+	/**
+	 * Save the meta when the post is saved.
+	 *
+	 * @param int $post_id The ID of the post being saved.
+	 */
+	public function save_wpi_meta( $post_id ) {
+	
+		/*
+		 * We need to verify this came from the our screen and with proper authorization,
+		* because save_post can be triggered at other times.
+		*/
+	
+		// Check if our nonce is set.
+		if ( ! isset( $_POST['wpi_page_section_meta_box_nonce'] ) )
+			return $post_id;
+	
+		$nonce = $_POST['wpi_page_section_meta_box_nonce'];
+	
+		// Verify that the nonce is valid.
+		if ( ! wp_verify_nonce( $nonce, 'wpi_page_section_meta_box' ) )
+			return $post_id;
+	
+		// If this is an autosave, our form has not been submitted,
+		//     so we don't want to do anything.
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
+			return $post_id;
+	
+		// Check the user's permissions.
+		if ( 'page' == $_POST['post_type'] ) {
+	
+			if ( ! current_user_can( 'edit_page', $post_id ) )
+				return $post_id;
+	
+		} else {
+	
+			if ( ! current_user_can( 'edit_post', $post_id ) )
+				return $post_id;
+		}
+	
+		/* OK, its safe for us to save the data now. */
+	
+		// Sanitize the user input.
+		$mydata = sanitize_text_field( $_POST['myplugin_new_field'] );
+	
+		// Update the meta field.
+		update_post_meta( $post_id, '_my_meta_value_key', $mydata );
+	}
+	
+	
+	/**
+	 * Render Meta Box content.
+	 *
+	 * @param WP_Post $post The post object.
+	 */
+	public function render_wpi_meta_box_content( $post ) {
+	
+		// Add an nonce field so we can check for it later.
+		wp_nonce_field( 'wpi_page_section_meta_box', 'wpi_page_section_meta_box_nonce' );
+	
+		// Use get_post_meta to retrieve an existing value from the database.
+		$value = get_post_meta( $post->ID, '_my_meta_value_key', true );
+	
+		// Display the form, using the current value.
+		echo '<label for="myplugin_new_field">';
+		_e( 'Description for this field', 'myplugin_textdomain' );
+		echo '</label> ';
+		echo '<input type="text" id="myplugin_new_field" name="myplugin_new_field"';
+		echo ' value="' . esc_attr( $value ) . '" size="25" />';
+	}
+	
 
 	/**
 	 * Register the administration menu for this plugin into the WordPress Dashboard menu.
@@ -452,9 +542,12 @@ class WP_Insights {
 		// TODO: Define your filter hook callback here
 	}
 	
-	public function add_page_section() {
+	public function add_page_section($atts) {
 		// TODO: use this http://www.benknowscode.com/2013/07/detect-dom-element-scrolled-with-jquery.html
-		return '<img id="wpipagesection" width=1px height=1px src="'.plugins_url("/assets/spacer.gif",  __FILE__).'"/>';
+		extract( shortcode_atts( array(
+		'name' => 'unnamed-section'
+		), $atts ) );
+		return '<img id="wpipagesection-'.$name.'" width=1px height=1px src="'.plugins_url("/assets/spacer.gif",  __FILE__).'"/>';
 	}
 	
 	public function store_user_data() {
@@ -564,14 +657,23 @@ class WP_Insights {
 
 					  					jQuery(function () {
 		
-					  						jQuery('img#wpipagesection').on('scrollin', function ( e, ui) {
-		
-							  					            alert("Scrolled into wpipagesection");
+					  						jQuery("img[id|='wpipagesection'").on('scrollin', function ( e, ui) {
+						  									var pageSection = jQuery(this).attr("id").replace('wpipagesection-','');	
+						  									if(pageSection != '') {
+						  										alert("Scrolled into wpipagesection : " + pageSection);
+						  									} else {
+						  										alert("Scrolled into unnamed wpipagesection");
+						  									}						  					            
 		
 							  					         })
 							  					      .on('scrollout', function ( e, ui) {
 		
-							  					    		alert("Scrolled out of wpipagesection");
+								  					    	var pageSection = jQuery(this).attr("id").replace('wpipagesection-','');	
+						  									if(pageSection != '') {
+						  										alert("Scrolled out of wpipagesection : " + pageSection);
+						  									} else {
+						  										alert("Scrolled out of unnamed wpipagesection");
+						  									}
 		
 							  					         })
 							  					      .scrollable();
