@@ -364,10 +364,20 @@ class WP_Insights {
 		/* OK, its safe for us to save the data now. */
 	
 		// Sanitize the user input.
-		$mydata = sanitize_text_field( $_POST['myplugin_new_field'] );
+		//$pageSection0 = sanitize_text_field( $_POST['wpi_page_section_0'] );
 	
 		// Update the meta field.
-		update_post_meta( $post_id, '_my_meta_value_key', $mydata );
+		update_post_meta( $post_id, 'wpi_page_section_00', sanitize_text_field( $_POST['wpi_page_section_00'] ) );
+		update_post_meta( $post_id, 'wpi_page_section_01', sanitize_text_field( $_POST['wpi_page_section_01'] ) );
+		update_post_meta( $post_id, 'wpi_page_section_02', sanitize_text_field( $_POST['wpi_page_section_02'] ) );
+		update_post_meta( $post_id, 'wpi_page_section_03', sanitize_text_field( $_POST['wpi_page_section_03'] ) );
+		update_post_meta( $post_id, 'wpi_page_section_04', sanitize_text_field( $_POST['wpi_page_section_04'] ) );
+		update_post_meta( $post_id, 'wpi_page_section_05', sanitize_text_field( $_POST['wpi_page_section_05'] ) );
+		update_post_meta( $post_id, 'wpi_page_section_06', sanitize_text_field( $_POST['wpi_page_section_06'] ) );
+		update_post_meta( $post_id, 'wpi_page_section_07', sanitize_text_field( $_POST['wpi_page_section_07'] ) );
+		update_post_meta( $post_id, 'wpi_page_section_08', sanitize_text_field( $_POST['wpi_page_section_08'] ) );
+		update_post_meta( $post_id, 'wpi_page_section_09', sanitize_text_field( $_POST['wpi_page_section_09'] ) );
+		update_post_meta( $post_id, 'wpi_page_section_10', sanitize_text_field( $_POST['wpi_page_section_10'] ) );
 	}
 	
 	
@@ -376,20 +386,79 @@ class WP_Insights {
 	 *
 	 * @param WP_Post $post The post object.
 	 */
-	public function render_wpi_meta_box_content( $post ) {
+	public function render_wpi_page_section_meta_box( $post ) {
 	
 		// Add an nonce field so we can check for it later.
 		wp_nonce_field( 'wpi_page_section_meta_box', 'wpi_page_section_meta_box_nonce' );
 	
 		// Use get_post_meta to retrieve an existing value from the database.
-		$value = get_post_meta( $post->ID, '_my_meta_value_key', true );
+		$wpi_page_section_00_value = get_post_meta( $post->ID, 'wpi_page_section_00', true );
+		$wpi_page_section_01_value = get_post_meta( $post->ID, 'wpi_page_section_01', true );
+		$wpi_page_section_02_value = get_post_meta( $post->ID, 'wpi_page_section_02', true );
+		$wpi_page_section_03_value = get_post_meta( $post->ID, 'wpi_page_section_03', true );
+		$wpi_page_section_04_value = get_post_meta( $post->ID, 'wpi_page_section_04', true );
+		$wpi_page_section_05_value = get_post_meta( $post->ID, 'wpi_page_section_05', true );
+		$wpi_page_section_06_value = get_post_meta( $post->ID, 'wpi_page_section_06', true );
+		$wpi_page_section_07_value = get_post_meta( $post->ID, 'wpi_page_section_07', true );
+		$wpi_page_section_08_value = get_post_meta( $post->ID, 'wpi_page_section_08', true );
+		$wpi_page_section_09_value = get_post_meta( $post->ID, 'wpi_page_section_09', true );
+		$wpi_page_section_10_value = get_post_meta( $post->ID, 'wpi_page_section_10', true );
 	
 		// Display the form, using the current value.
-		echo '<label for="myplugin_new_field">';
-		_e( 'Description for this field', 'myplugin_textdomain' );
-		echo '</label> ';
-		echo '<input type="text" id="myplugin_new_field" name="myplugin_new_field"';
-		echo ' value="' . esc_attr( $value ) . '" size="25" />';
+		echo '<div>';
+		echo '<label for="wpi_page_section_00">Page Section 00:</label>';
+		echo '<input type="text" id="wpi_page_section_00" name="wpi_page_section_00" value="Page Start" size="25" readonly/>';
+		echo '</div>';
+		
+		echo '<div>';
+		echo '<label for="wpi_page_section_01">Page Section 01:</label>';
+		echo '<input type="text" id="wpi_page_section_01" name="wpi_page_section_01" value="'.$wpi_page_section_01_value.'" size="25" />';
+		echo '</div>';
+		
+		echo '<div>';
+		echo '<label for="wpi_page_section_02">Page Section 02:</label>';
+		echo '<input type="text" id="wpi_page_section_02" name="wpi_page_section_02" value="'.$wpi_page_section_02_value.'" size="25" />';
+		echo '</div>';
+		
+		echo '<div>';
+		echo '<label for="wpi_page_section_03">Page Section 03:</label>';
+		echo '<input type="text" id="wpi_page_section_03" name="wpi_page_section_03" value="'.$wpi_page_section_03_value.'" size="25" />';
+		echo '</div>';
+		
+		echo '<div>';
+		echo '<label for="wpi_page_section_04">Page Section 04:</label>';
+		echo '<input type="text" id="wpi_page_section_04" name="wpi_page_section_04" value="'.$wpi_page_section_04_value.'" size="25" />';
+		echo '</div>';
+		
+		echo '<div>';
+		echo '<label for="wpi_page_section_05">Page Section 05:</label>';
+		echo '<input type="text" id="wpi_page_section_05" name="wpi_page_section_05" value="'.$wpi_page_section_05_value.'" size="25" />';
+		echo '</div>';
+		
+		echo '<div>';
+		echo '<label for="wpi_page_section_06">Page Section 06:</label>';
+		echo '<input type="text" id="wpi_page_section_06" name="wpi_page_section_06" value="'.$wpi_page_section_06_value.'" size="25" />';
+		echo '</div>';
+		
+		echo '<div>';
+		echo '<label for="wpi_page_section_07">Page Section 07:</label>';
+		echo '<input type="text" id="wpi_page_section_07" name="wpi_page_section_07" value="'.$wpi_page_section_07_value.'" size="25" />';
+		echo '</div>';
+		
+		echo '<div>';
+		echo '<label for="wpi_page_section_08">Page Section 08:</label>';
+		echo '<input type="text" id="wpi_page_section_08" name="wpi_page_section_08" value="'.$wpi_page_section_08_value.'" size="25" />';
+		echo '</div>';
+		
+		echo '<div>';
+		echo '<label for="wpi_page_section_09">Page Section 09:</label>';
+		echo '<input type="text" id="wpi_page_section_09" name="wpi_page_section_09" value="'.$wpi_page_section_09_value.'" size="25" />';
+		echo '</div>';
+		
+		echo '<div>';
+		echo '<label for="wpi_page_section_10">Page Section 10:</label>';
+		echo '<input type="text" id="wpi_page_section_10" name="wpi_page_section_10" value="'.$wpi_page_section_10_value.'" size="25" />';
+		echo '</div>';
 	}
 	
 
