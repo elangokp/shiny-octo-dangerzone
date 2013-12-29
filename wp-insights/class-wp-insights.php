@@ -120,6 +120,7 @@ class WP_Insights {
 		add_action('wp_ajax_wpiappend', array( $this, 'append_user_data' ) );
 		add_action('wp_ajax_wpiexit', array( $this, 'exit_user_data' ) );
 		add_action('wp_ajax_wpimouseeventdata', array( $this, 'get_mouse_event_data' ) );
+		add_action('wp_ajax_wpipagesections', array( $this, 'get_wpi_page_sections' ) );
 		
 		add_action('wp_head', array($this, 'add_IE9_Compatibility_Meta_Tag'));
 		add_action('plugins_loaded', array($this, 'setRecorderStatus'));
@@ -130,11 +131,63 @@ class WP_Insights {
 		add_action( 'add_meta_boxes', array( $this, 'add_wpi_meta_box' ) );
 		add_action( 'save_post', array( $this, 'save_wpi_meta' ) );
 		
+		//add_action( 'init', array( $this, 'add_wpi_tiny_mce_plugin' ) );
+		add_action( 'media_buttons', array( $this, 'add_wpi_shortcode_button' ) );
+		
 		self::$cache_dir = dirname(dirname(plugin_dir_path(__FILE__)))."/wpicache/";
 		self::$cache_dir = str_replace('\\', '/', self::$cache_dir);
 		self::$browscap_cache_dir = self::$cache_dir."browscapcache/";
 
 	}
+	
+	public function add_wpi_shortcode_button() {
+		
+		if (!is_admin()) 
+			return;
+		global $pagenow;
+		$is_post_edit_page = in_array($pagenow, array('post.php', 'page.php', 'page-new.php', 'post-new.php'));
+        
+        if(!$is_post_edit_page)
+            return;
+
+        // do a version check for the new 3.5 UI
+        $version    = get_bloginfo('version');
+
+        if ($version < 3.5) {
+            // show button for v 3.4 and below
+            $image_btn = plugins_url('assets/eye-20.png', __FILE__);
+            echo '<a id="insert_wpi_page_section_shortcode" href="javascript:void(0)" title="Insert Page Section"><img src="'.$image_btn.'" alt="Insert WP Insights Page Sections Start" /></a>';
+        } else {
+            // display button matching new UI
+            echo '<style>.wpi_media_icon{
+                    background:url(' . plugins_url('assets/eye-20.png', __FILE__) . ') no-repeat top left;
+                    display: inline-block;
+                    height: 20px;
+                    margin: 0 2px 0 0;
+                    vertical-align: text-top;
+                    width: 20px;
+                    }
+                    .wp-core-ui a.wpi_media_link{
+                     padding-left: 0.4em;
+                    }
+                 </style>
+                  <a id="insert_wpi_page_section_shortcode" href="javascript:void(0)" class="button wpi_media_link" title="Insert Page Section"><span class="wpi_media_icon "></span> Insert Page Section</a>';
+        }
+	}
+	
+	/*public function add_wpi_tiny_mce_plugin() {
+		add_filter( "mce_external_plugins", array( $this, 'add_wpi_tiny_mce_buttons' ) );
+		add_filter( 'mce_buttons', array( $this, 'register_wpi_tiny_mce_buttons' ) );
+	}
+	public function add_wpi_tiny_mce_buttons( $plugin_array ) {
+		$plugin_array['WpInsights'] = plugins_url('js/dev/wpi-tiny-mce-plugin.js', __FILE__);;
+		return $plugin_array;
+	}
+	public function register_wpi_tiny_mce_buttons( $buttons ) {
+		array_push( $buttons, 'addWPIPageSection' ); // dropcap', 'recentposts
+		return $buttons;
+	}*/
+	
 
 	/**
 	 * Return an instance of this class.
@@ -405,6 +458,7 @@ class WP_Insights {
 		$wpi_page_section_10_value = get_post_meta( $post->ID, 'wpi_page_section_10', true );
 	
 		// Display the form, using the current value.
+		echo '<input type="hidden" id="wpipostid" value="'.$post->ID.'"/>';
 		echo '<div>';
 		echo '<label for="wpi_page_section_00">Page Section 00:</label>';
 		echo '<input type="text" id="wpi_page_section_00" name="wpi_page_section_00" value="Page Start" size="25" readonly/>';
@@ -667,6 +721,45 @@ class WP_Insights {
 		die();
 	}
 	
+	public function get_wpi_page_sections() {
+		?>
+		<html>
+			<head>
+			    <script type="text/javascript">
+			        jQuery("input[id^='tb_button_wpi_page_section']").click(function(){
+			                    tinyMCE.activeEditor.execCommand('mceInsertContent', 0, '[wpi_page_section name="'+jQuery(this).data('ps')+'" /]');
+			                    tb_remove();
+			        })
+			    </script>			
+			</head>
+			<body>
+				<?php 
+					$postId = $_GET['postid'];
+					$pageSections = get_post_meta($postId);
+					foreach($pageSections as $meta_key => $meta_value)
+					{
+						error_log(print_r($meta_key, true));
+						error_log(print_r($meta_value, true));
+						if(stripos($meta_key, "wpi_page_section") !== FALSE 
+								&& $meta_value !== null && !empty($meta_value) 
+								&& $meta_value[0] !== null && $meta_value[0] !== ""
+								&& $meta_value[0] !== "Page Start") {
+							?>
+							<div>
+								<label for="<?php echo "tb_".$meta_key?>">Page Section <?php echo trim($meta_key,'wpi_page_section_');?>:</label>
+								<input type="text" id="<?php echo "tb_text_".$meta_key?>" name="<?php echo "tb_".$meta_key?>" value="<?php echo $meta_value[0]?>" size="25" readonly/>
+								<input type="button" id="<?php echo "tb_button_".$meta_key?>" data-ps="<?php echo $meta_key?>" value="Insert"/>
+							</div>
+						<?php }
+					}
+				?>
+			</body>
+		</html>
+
+		    <?php
+		    die();
+	}
+	
 	public function add_wpinsights_scripts() {
 		//error_log("Inside add_wpinsights_scripts");
 		$json3_js_url = plugins_url('js/dev/json3.min.js', __FILE__);
@@ -726,7 +819,7 @@ class WP_Insights {
 
 					  					jQuery(function () {
 		
-					  						jQuery("img[id|='wpipagesection'").on('scrollin', function ( e, ui) {
+					  						jQuery("img[id|='wpipagesection']").on('scrollin', function ( e, ui) {
 						  									var pageSection = jQuery(this).attr("id").replace('wpipagesection-','');	
 						  									if(pageSection != '') {
 						  										alert("Scrolled into wpipagesection : " + pageSection);

@@ -1,6 +1,11 @@
 (function ($) {
 	"use strict";
 	$(function () {
+		
+		$("#insert_wpi_page_section_shortcode").click(function() {
+			tb_show('Insert WP Insights Page Section', 'admin-ajax.php?action=wpipagesections&postid='+document.getElementById("wpipostid").getAttribute("value"));
+		})
+		
 		$(".wpi-client-recordings-link").click(function() {
 			//alert($(this).data('val'));
 			//$("div.wpi-cache-stats-details").show();
