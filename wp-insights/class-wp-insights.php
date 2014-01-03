@@ -670,7 +670,7 @@ class WP_Insights {
 		extract( shortcode_atts( array(
 		'name' => 'unnamed-section'
 		), $atts ) );
-		return '<img id="wpipagesection-'.$name.'" width=1px height=1px src="'.plugins_url("/assets/spacer.gif",  __FILE__).'"/>';
+		return '<img id="wpipagesection-'.$name.'" class="wpipagesection" width=1px height=1px src="'.plugins_url("/assets/spacer.gif",  __FILE__).'"/>';
 	}
 	
 	public function store_user_data() {
@@ -829,13 +829,16 @@ class WP_Insights {
 		
 							  					         })
 							  					      .on('scrollout', function ( e, ui) {
-		
-								  					    	var pageSection = jQuery(this).attr("id").replace('wpipagesection-','');	
-						  									if(pageSection != '') {
-						  										alert("Scrolled out of wpipagesection : " + pageSection);
+								  					      	console.log(jQuery(this));
+							  					    		console.log(jQuery(this).prev());
+								  					      	//var pageSectionPrev = jQuery(this).prev("img.wpipagesection").first().attr("id").replace('wpipagesection-','');
+								  					      	//console.log(pageSectionPrev);
+								  					    	//var pageSection = jQuery(element).attr("id").replace('wpipagesection-','');	
+						  									/*if(pageSection != '') {
+						  										alert("Scrolled out of wpipagesection : " + pageSectionPrev);
 						  									} else {
 						  										alert("Scrolled out of unnamed wpipagesection");
-						  									}
+						  									}*/
 		
 							  					         })
 							  					      .scrollable();
