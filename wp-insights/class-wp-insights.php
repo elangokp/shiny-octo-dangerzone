@@ -668,9 +668,10 @@ class WP_Insights {
 	public function add_page_section($atts) {
 		// TODO: use this http://www.benknowscode.com/2013/07/detect-dom-element-scrolled-with-jquery.html
 		extract( shortcode_atts( array(
+		'id' => 'no-id',
 		'name' => 'unnamed-section'
 		), $atts ) );
-		return '<img id="wpipagesection-'.$name.'" class="wpipagesection" width=1px height=1px src="'.plugins_url("/assets/spacer.gif",  __FILE__).'"/>';
+		return '<img id="wpipagesection-'.$id.'" data-psid="'.$id.'" data-psname="'.$name.'" class="wpipagesection" width=1px height=1px src="'.plugins_url("/assets/spacer.gif",  __FILE__).'"/>';
 	}
 	
 	public function store_user_data() {
@@ -727,7 +728,7 @@ class WP_Insights {
 			<head>
 			    <script type="text/javascript">
 			        jQuery("input[id^='tb_button_wpi_page_section']").click(function(){
-			                    tinyMCE.activeEditor.execCommand('mceInsertContent', 0, '[wpi_page_section name="'+jQuery(this).data('ps')+'" /]');
+			                    tinyMCE.activeEditor.execCommand('mceInsertContent', 0, '[wpi_page_section id="'+jQuery(this).data('psid')+'" name="'+jQuery(this).data('psname')+'"/]');
 			                    tb_remove();
 			        })
 			    </script>			
@@ -748,7 +749,7 @@ class WP_Insights {
 							<div>
 								<label for="<?php echo "tb_".$meta_key?>">Page Section <?php echo trim($meta_key,'wpi_page_section_');?>:</label>
 								<input type="text" id="<?php echo "tb_text_".$meta_key?>" name="<?php echo "tb_".$meta_key?>" value="<?php echo $meta_value[0]?>" size="25" readonly/>
-								<input type="button" id="<?php echo "tb_button_".$meta_key?>" data-ps="<?php echo $meta_key?>" value="Insert"/>
+								<input type="button" id="<?php echo "tb_button_".$meta_key?>" data-psid="<?php echo $meta_key?>" data-psname="<?php echo $meta_value[0]?>" value="Insert"/>
 							</div>
 						<?php }
 					}
@@ -776,6 +777,13 @@ class WP_Insights {
 	  <script id='wpi-trigger-script' type="text/javascript">
 				//<![CDATA[
 				var addressBarURL = top.location.href;
+				var pageSectionSeparators = [];
+				var pageSections = [];
+				var currentPageSection = null;
+				var lastPageSection = null;
+				var lastScrollTop = 0;
+				var scrollDirection;
+				
 				if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay.php") < 0 
 					&& addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-heat.php") < 0) {
 		  			var jQuery_1_10_2_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
@@ -812,38 +820,101 @@ class WP_Insights {
 						    return path;
 						};
 
+						jQuery(window).scroll(function(event){
+							   var st = jQuery(this).scrollTop();
+							   if (st > lastScrollTop){
+								   scrollDirection = "down";
+							   } else {
+								   scrollDirection = "up";
+							   }
+							   lastScrollTop = st;
+							   console.log("From Direction Detection : " + scrollDirection);
+							});
+
 						jQuery.getScript( jQuery_UI_1_10_3_url, function() 
 					  			  {
 					  				jQuery.getScript( "<?php echo $jquery_ui_scrollable_js.'?v='.self::VERSION?>", function() 
 					  		  			  {
 
-					  					jQuery(function () {
-		
-					  						jQuery("img[id|='wpipagesection']").on('scrollin', function ( e, ui) {
-						  									var pageSection = jQuery(this).attr("id").replace('wpipagesection-','');	
-						  									if(pageSection != '') {
-						  										alert("Scrolled into wpipagesection : " + pageSection);
-						  									} else {
-						  										alert("Scrolled into unnamed wpipagesection");
-						  									}						  					            
-		
-							  					         })
-							  					      .on('scrollout', function ( e, ui) {
-								  					      	console.log(jQuery(this));
-							  					    		console.log(jQuery(this).prev());
-								  					      	//var pageSectionPrev = jQuery(this).prev("img.wpipagesection").first().attr("id").replace('wpipagesection-','');
-								  					      	//console.log(pageSectionPrev);
-								  					    	//var pageSection = jQuery(element).attr("id").replace('wpipagesection-','');	
-						  									/*if(pageSection != '') {
-						  										alert("Scrolled out of wpipagesection : " + pageSectionPrev);
-						  									} else {
-						  										alert("Scrolled out of unnamed wpipagesection");
-						  									}*/
-		
-							  					         })
-							  					      .scrollable();
-		
-							  					});
+					  						pageSectionSeparators = jQuery("img.wpipagesection");
+
+					  						pageSectionSeparators.each(function(index) {
+					  							var prev = "";
+					  							var next = "";
+
+					  							if(index>0) {
+					  								prev = {
+							  							sectionId : jQuery(pageSectionSeparators.get(index - 1)).data("psid"),
+							  							sectionName : jQuery(pageSectionSeparators.get(index - 1)).data("psname")
+					  								};
+						  						} else {
+						  							prev = {
+								  							sectionId : "wpi_page_section_00",
+								  							sectionName : "pageStart"
+						  								};
+						  						}
+						  						
+				  								if (index < pageSectionSeparators.size() - 1) {
+				  									next = {
+								  							sectionId : jQuery(pageSectionSeparators.get(index + 1)).data("psid"),
+								  							sectionName : jQuery(pageSectionSeparators.get(index + 1)).data("psname")
+						  								};
+				  							 	} else {
+													next = {
+								  							sectionId : "wpi_page_section_999",
+								  							sectionName : "pageEnd"
+						  								};
+				  							 	}
+
+				  							 	var pageSection = {
+				  							 			sectionId : jQuery(pageSectionSeparators.get(index)).data("psid"),
+							  							sectionName : jQuery(pageSectionSeparators.get(index)).data("psname"),
+							  							top : jQuery(pageSectionSeparators.get(index)).offset().top,
+							  							bottom : ,
+							  							prev: prev,
+							  							next: next,
+				  							 	}
+				  								jQuery(pageSectionSeparators.get(index)).data("prev", prev);
+				  								jQuery(pageSectionSeparators.get(index)).data("next", next);
+				  								
+					  				                
+					  						});
+					  						
+						  					jQuery(function () {
+			
+						  						jQuery("img[id|='wpipagesection']").on('scrollin', function ( e, ui) {
+							  									var pageSection = jQuery(this).data("psname");
+							  									console.log("From Scroll In Event : " + scrollDirection);
+							  									if(scrollDirection == "up") {
+							  										console.log("Inside Scroll In up : " + scrollDirection);
+							  										var pageSectionIn = jQuery(this).data("prev").sectionName;
+							  										console.log(pageSectionIn);
+							  										var pageSectionOut = pageSection;
+							  										console.log(pageSectionOut);
+							  										alert("Scrolled into wpipagesection : " + pageSectionIn + " and scrolled out of wpipagesection : " + pageSectionOut);
+							  									} else if(scrollDirection == "down") {
+							  										console.log("Inside Scroll In down : " + scrollDirection);
+								  									var pageSectionIn = pageSection;
+								  									console.log(pageSectionIn);
+							  										var pageSectionOut = jQuery(this).data("prev").sectionName;
+							  										console.log(pageSectionOut);
+							  										alert("Scrolled into wpipagesection : " + pageSectionIn + " and scrolled out of wpipagesection : " + pageSectionOut);
+							  									}						  					            
+			
+								  					         })
+								  					      .on('scrollout', function ( e, ui) {
+									  					    	/*var pageSectionOut = jQuery(this).attr("id").replace('wpipagesection-','');
+									  					    	var pageSectionIn = jQuery(this).data("next");	
+							  									if(pageSectionOut != '') {
+							  										alert("Scrolled into wpipagesection : " + pageSectionIn + " and scrolled out of wpipagesection : " + pageSectionOut);
+							  									} else {
+							  										alert("Scrolled into unnamed wpipagesection");
+							  									}*/
+			
+								  					         })
+								  					      .scrollable({offset : {x:'0%', y:'80%'}, direction: 'vertical'});
+			
+								  				});
 					  			  			}
 					  		  			);
 

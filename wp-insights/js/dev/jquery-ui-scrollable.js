@@ -489,7 +489,7 @@ window.Scrollable = monitor;
    };
 
    $.osb.scrollable.CONFIG = {
-      throttler: 300
+      throttler: 100
    }
 
 })(jQuery);
