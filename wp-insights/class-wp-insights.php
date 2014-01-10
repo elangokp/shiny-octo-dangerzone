@@ -820,6 +820,17 @@ class WP_Insights {
 						    return path;
 						};
 
+						jQuery_1_10_2.fn.scrollStopped = function(delay,callback) {           
+					        $(this).scroll(function(){
+					            var self = this, $this = $(self);
+					            if ($this.data('scrollTimeout')) {
+					              clearTimeout($this.data('scrollTimeout'));
+					            }
+					            $this.data('scrollTimeout', setTimeout(callback,delay,self));
+					        });
+					    };
+					    
+
 						jQuery(window).scroll(function(event){
 							   var st = jQuery(this).scrollTop();
 							   if (st > lastScrollTop){
@@ -837,47 +848,59 @@ class WP_Insights {
 					  		  			  {
 
 					  						pageSectionSeparators = jQuery("img.wpipagesection");
+					  						var pageSections = {};
+				  							var pageSection = {
+			  							 			sectionId : "wpi_page_section_00",
+						  							sectionName : "pageStart",
+						  							top : 0,
+						  							bottom : jQuery(pageSectionSeparators.get(0)).offset().top,
+						  							prevSectionId: "",
+						  							prevSectionName: "",
+						  							nextSectionId: jQuery(pageSectionSeparators.get(0)).data("psid"),
+						  							nextSectionName: jQuery(pageSectionSeparators.get(0)).data("psname"),
+			  							 	};
+
+				  							pageSections.push(pageSection);
 
 					  						pageSectionSeparators.each(function(index) {
 					  							var prev = "";
-					  							var next = "";
+					  							var next = "";	
 
-					  							if(index>0) {
-					  								prev = {
-							  							sectionId : jQuery(pageSectionSeparators.get(index - 1)).data("psid"),
-							  							sectionName : jQuery(pageSectionSeparators.get(index - 1)).data("psname")
-					  								};
-						  						} else {
-						  							prev = {
-								  							sectionId : "wpi_page_section_00",
-								  							sectionName : "pageStart"
-						  								};
-						  						}
-						  						
-				  								if (index < pageSectionSeparators.size() - 1) {
-				  									next = {
-								  							sectionId : jQuery(pageSectionSeparators.get(index + 1)).data("psid"),
-								  							sectionName : jQuery(pageSectionSeparators.get(index + 1)).data("psname")
-						  								};
-				  							 	} else {
-													next = {
-								  							sectionId : "wpi_page_section_999",
-								  							sectionName : "pageEnd"
-						  								};
-				  							 	}
-
-				  							 	var pageSection = {
+					  							pageSection = {
 				  							 			sectionId : jQuery(pageSectionSeparators.get(index)).data("psid"),
 							  							sectionName : jQuery(pageSectionSeparators.get(index)).data("psname"),
 							  							top : jQuery(pageSectionSeparators.get(index)).offset().top,
-							  							bottom : ,
-							  							prev: prev,
-							  							next: next,
+							  							bottom : "",
+							  							prevSectionId: "",
+							  							prevSectionName: "",
+							  							nextSectionId: "",
+							  							nextSectionName: "",
+				  							 	};				  							
+
+					  							if(index>0) {
+					  								pageSection.prevSectionId = jQuery(pageSectionSeparators.get(index - 1)).data("psid");
+					  								pageSection.prevSectionName = jQuery(pageSectionSeparators.get(index - 1)).data("psname");
+						  						} else {
+						  							pageSection.prevSectionId = "wpi_page_section_00";
+					  								pageSection.prevSectionName = "pageStart";
+						  						}
+						  						
+				  								if (index < pageSectionSeparators.size() - 1) {
+					  								pageSection.bottom = jQuery(pageSectionSeparators.get(index+1)).offset().top;
+				  									pageSection.nextSectionId = jQuery(pageSectionSeparators.get(index + 1)).data("psid");
+					  								pageSection.nextSectionName = jQuery(pageSectionSeparators.get(index + 1)).data("psname");
+				  							 	} else {
+				  							 		pageSection.bottom = (jQuery_1_10_2(document).height() < jQuery_1_10_2(window).height()) ? jQuery_1_10_2(window).height() : jQuery_1_10_2(document).height();
+				  							 		pageSection.nextSectionId = "wpi_page_section_999";
+					  								pageSection.nextSectionName = "pageEnd";
 				  							 	}
-				  								jQuery(pageSectionSeparators.get(index)).data("prev", prev);
-				  								jQuery(pageSectionSeparators.get(index)).data("next", next);
-				  								
+
+				  								pageSections.push(pageSection);			  								
 					  				                
+					  						});
+					  						
+					  						$(window).scrollStopped(250,function(){
+					  						    alert('scroll stopped');
 					  						});
 					  						
 						  					jQuery(function () {
