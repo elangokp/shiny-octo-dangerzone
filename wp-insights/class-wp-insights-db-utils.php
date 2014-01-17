@@ -12,6 +12,9 @@ class WP_Insights_DB_Utils {
 	/** Table for storing wp insights records. */
 	const TBL_RECORDS = 'records';
 	
+	/** Table for storing wp insights page section data. */
+	const TBL_PAGE_SECTIONS = 'pagesections';
+	
 	/** Table for caching HTML logs. */
 	const TBL_CACHE = 'cache';
 	
@@ -273,6 +276,7 @@ class WP_Insights_DB_Utils {
         sess_time    FLOAT(7,2)    unsigned  NOT NULL,
         focus_time   FLOAT(7,2)    unsigned  NULL,
         lost_focus_count  TINYINT  unsigned  NULL,
+        exit_page_section VARCHAR(255)       NULL,
         fps          TINYINT       unsigned  NOT NULL,
         coords_x     MEDIUMTEXT              NOT NULL,
         coords_y     MEDIUMTEXT              NOT NULL,
@@ -283,23 +287,46 @@ class WP_Insights_DB_Utils {
         PRIMARY KEY  (id) ) DEFAULT CHARSET utf8";
               
 		dbDelta( $records_table_sql );
+		
+		$pagesections_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_PAGE_SECTIONS;
+		
+		$pagesections_table_sql="CREATE TABLE $pagesections_table (
+		id           BIGINT        unsigned  NOT NULL auto_increment,
+		record_id    BIGINT        unsigned  NOT NULL,
+		section_order TINYINT       unsigned  NOT NULL,
+		section_id   VARCHAR(50)             NOT NULL,
+		section_name VARCHAR(50)             NOT NULL,
+		sess_time    FLOAT(7,2)    unsigned  NOT NULL,
+        focus_time   FLOAT(7,2)    unsigned  NOT NULL,
+        lost_focus_count  TINYINT  unsigned  NOT NULL,
+		entryTimes   VARCHAR(255)  NOT NULL,
+		exitTimes   VARCHAR(255)  NOT NULL,
+		focusedEntryTimes   VARCHAR(255)  NOT NULL,
+		focusedExitTimes   VARCHAR(255)  NOT NULL,
+		PRIMARY KEY  (id) ) DEFAULT CHARSET utf8";
+		
+		dbDelta( $pagesections_table_sql );
+		
+		$cache_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_CACHE;
 	
-		$sql  = 'CREATE TABLE IF NOT EXISTS '.$this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_CACHE.' (';
-		$sql .= 'id           BIGINT        unsigned  NOT NULL auto_increment, ';     // cache log id
-		$sql .= 'file         VARCHAR(255)            NOT NULL, ';                    // cache log file name
-		$sql .= 'url          TEXT                    NOT NULL, ';                    // tracked page url (http://www.boutell.com/newfaq/misc/urllength.html)
-		$sql .= 'title        VARCHAR(255)            NOT NULL, ';                    // tracked page title
-		$sql .= 'saved        DATETIME                NOT NULL, ';                    // tracked page title
-		$sql .= 'PRIMARY KEY  (id) ) DEFAULT CHARSET utf8';
+		$cache_table_sql  = "CREATE TABLE $cache_table (
+		id           BIGINT        unsigned  NOT NULL auto_increment,
+		file         VARCHAR(255)            NOT NULL,
+		url          TEXT                    NOT NULL,
+		title        VARCHAR(255)            NOT NULL,
+		saved        DATETIME                NOT NULL,
+		PRIMARY KEY  (id) ) DEFAULT CHARSET utf8";
 	
-		dbDelta( $sql );
+		dbDelta( $cache_table_sql );
+		
+		$os_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_OS;
 	
-		$sql  = 'CREATE TABLE IF NOT EXISTS '.$this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_OS.' (';
-		$sql .= 'id           TINYINT        unsigned  NOT NULL auto_increment, ';    // OS id
-		$sql .= 'name         VARCHAR(20)              NOT NULL, ';                   // OS name
-		$sql .= 'PRIMARY KEY  (id) ) DEFAULT CHARSET utf8';
+		$os_table_sql  = "CREATE TABLE $os_table (
+		id           TINYINT        unsigned  NOT NULL auto_increment,
+		name         VARCHAR(20)              NOT NULL,
+		PRIMARY KEY  (id) ) DEFAULT CHARSET utf8";
 	
-		dbDelta( $sql );
+		dbDelta( $os_table_sql );
 		
 		$browsers_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_BROWSERS;
 		
@@ -496,6 +523,7 @@ class WP_Insights_DB_Utils {
 		$this->db_drop($this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_OS);
 		$this->db_drop($this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_BROWSERS);
 		$this->db_drop($this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_OPTIONS);
+		$this->db_drop($this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_PAGE_SECTIONS);
 		error_log("After dropping all tables");
 	}
 	

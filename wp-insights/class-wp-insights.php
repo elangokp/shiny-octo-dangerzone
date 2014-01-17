@@ -761,6 +761,7 @@ class WP_Insights {
 		    die();
 	}
 	
+	
 	public function add_wpinsights_scripts() {
 		//error_log("Inside add_wpinsights_scripts");
 		$json3_js_url = plugins_url('js/dev/json3.min.js', __FILE__);
@@ -777,12 +778,7 @@ class WP_Insights {
 	  <script id='wpi-trigger-script' type="text/javascript">
 				//<![CDATA[
 				var addressBarURL = top.location.href;
-				var pageSectionSeparators = [];
-				var pageSections = [];
-				var currentPageSection = null;
-				var lastPageSection = null;
-				var lastScrollTop = 0;
-				var scrollDirection;
+				var isFullyLoaded = false;
 				
 				if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay.php") < 0 
 					&& addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-heat.php") < 0) {
@@ -821,8 +817,8 @@ class WP_Insights {
 						};
 
 						jQuery_1_10_2.fn.scrollStopped = function(delay,callback) {           
-					        $(this).scroll(function(){
-					            var self = this, $this = $(self);
+							jQuery_1_10_2(this).scroll(function(){
+					            var self = this, $this = jQuery_1_10_2(self);
 					            if ($this.data('scrollTimeout')) {
 					              clearTimeout($this.data('scrollTimeout'));
 					            }
@@ -831,7 +827,7 @@ class WP_Insights {
 					    };
 					    
 
-						jQuery(window).scroll(function(event){
+					    /*jQuery_1_10_2(window).scroll(function(event){
 							   var st = jQuery(this).scrollTop();
 							   if (st > lastScrollTop){
 								   scrollDirection = "down";
@@ -840,109 +836,7 @@ class WP_Insights {
 							   }
 							   lastScrollTop = st;
 							   console.log("From Direction Detection : " + scrollDirection);
-							});
-
-						jQuery.getScript( jQuery_UI_1_10_3_url, function() 
-					  			  {
-					  				jQuery.getScript( "<?php echo $jquery_ui_scrollable_js.'?v='.self::VERSION?>", function() 
-					  		  			  {
-
-					  						pageSectionSeparators = jQuery("img.wpipagesection");
-					  						var pageSections = {};
-				  							var pageSection = {
-			  							 			sectionId : "wpi_page_section_00",
-						  							sectionName : "pageStart",
-						  							top : 0,
-						  							bottom : jQuery(pageSectionSeparators.get(0)).offset().top,
-						  							prevSectionId: "",
-						  							prevSectionName: "",
-						  							nextSectionId: jQuery(pageSectionSeparators.get(0)).data("psid"),
-						  							nextSectionName: jQuery(pageSectionSeparators.get(0)).data("psname"),
-			  							 	};
-
-				  							pageSections.push(pageSection);
-
-					  						pageSectionSeparators.each(function(index) {
-					  							var prev = "";
-					  							var next = "";	
-
-					  							pageSection = {
-				  							 			sectionId : jQuery(pageSectionSeparators.get(index)).data("psid"),
-							  							sectionName : jQuery(pageSectionSeparators.get(index)).data("psname"),
-							  							top : jQuery(pageSectionSeparators.get(index)).offset().top,
-							  							bottom : "",
-							  							prevSectionId: "",
-							  							prevSectionName: "",
-							  							nextSectionId: "",
-							  							nextSectionName: "",
-				  							 	};				  							
-
-					  							if(index>0) {
-					  								pageSection.prevSectionId = jQuery(pageSectionSeparators.get(index - 1)).data("psid");
-					  								pageSection.prevSectionName = jQuery(pageSectionSeparators.get(index - 1)).data("psname");
-						  						} else {
-						  							pageSection.prevSectionId = "wpi_page_section_00";
-					  								pageSection.prevSectionName = "pageStart";
-						  						}
-						  						
-				  								if (index < pageSectionSeparators.size() - 1) {
-					  								pageSection.bottom = jQuery(pageSectionSeparators.get(index+1)).offset().top;
-				  									pageSection.nextSectionId = jQuery(pageSectionSeparators.get(index + 1)).data("psid");
-					  								pageSection.nextSectionName = jQuery(pageSectionSeparators.get(index + 1)).data("psname");
-				  							 	} else {
-				  							 		pageSection.bottom = (jQuery_1_10_2(document).height() < jQuery_1_10_2(window).height()) ? jQuery_1_10_2(window).height() : jQuery_1_10_2(document).height();
-				  							 		pageSection.nextSectionId = "wpi_page_section_999";
-					  								pageSection.nextSectionName = "pageEnd";
-				  							 	}
-
-				  								pageSections.push(pageSection);			  								
-					  				                
-					  						});
-					  						
-					  						$(window).scrollStopped(250,function(){
-					  						    alert('scroll stopped');
-					  						});
-					  						
-						  					jQuery(function () {
-			
-						  						jQuery("img[id|='wpipagesection']").on('scrollin', function ( e, ui) {
-							  									var pageSection = jQuery(this).data("psname");
-							  									console.log("From Scroll In Event : " + scrollDirection);
-							  									if(scrollDirection == "up") {
-							  										console.log("Inside Scroll In up : " + scrollDirection);
-							  										var pageSectionIn = jQuery(this).data("prev").sectionName;
-							  										console.log(pageSectionIn);
-							  										var pageSectionOut = pageSection;
-							  										console.log(pageSectionOut);
-							  										alert("Scrolled into wpipagesection : " + pageSectionIn + " and scrolled out of wpipagesection : " + pageSectionOut);
-							  									} else if(scrollDirection == "down") {
-							  										console.log("Inside Scroll In down : " + scrollDirection);
-								  									var pageSectionIn = pageSection;
-								  									console.log(pageSectionIn);
-							  										var pageSectionOut = jQuery(this).data("prev").sectionName;
-							  										console.log(pageSectionOut);
-							  										alert("Scrolled into wpipagesection : " + pageSectionIn + " and scrolled out of wpipagesection : " + pageSectionOut);
-							  									}						  					            
-			
-								  					         })
-								  					      .on('scrollout', function ( e, ui) {
-									  					    	/*var pageSectionOut = jQuery(this).attr("id").replace('wpipagesection-','');
-									  					    	var pageSectionIn = jQuery(this).data("next");	
-							  									if(pageSectionOut != '') {
-							  										alert("Scrolled into wpipagesection : " + pageSectionIn + " and scrolled out of wpipagesection : " + pageSectionOut);
-							  									} else {
-							  										alert("Scrolled into unnamed wpipagesection");
-							  									}*/
-			
-								  					         })
-								  					      .scrollable({offset : {x:'0%', y:'80%'}, direction: 'vertical'});
-			
-								  				});
-					  			  			}
-					  		  			);
-
-						  			}
-					  			);
+							});*/
 			  			
 			  			jQuery.getScript( "<?php echo $smt_aux_js_url.'?v='.self::VERSION?>", function() 
 			  			  {

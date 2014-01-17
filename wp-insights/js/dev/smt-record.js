@@ -128,6 +128,61 @@
     blurTime:      0,                      // Blur time on the page
     lastBlurTimeStamp: null,               // Timestamp when the window lost focus last time
     lastFocusTimeStamp: null,              // Timestamp when the window gained focus last time
+    pageSections: [],                      // Array of page sections with data
+    currentPageSection: "",                // Page section in view port now. Initialised to page start default page section.
+    lastPageSection: "",                   // Page section that was in viewport before the current page section.
+    
+    find_in_array: function(arr, name, value) {
+        for (var i = 0, len = arr.length; i<len; i++) {
+            if (name in arr[i] && arr[i][name] == value) return i;
+        };
+        return false;
+    },
+    
+    updatePageSections: function()
+    {
+    	var scrollTop = jQuery_1_10_2(window).scrollTop();
+		var center = scrollTop + ((jQuery_1_10_2(window).height())/2);
+		console.log("updatePageSections");
+		jQuery_1_10_2.each(smtRec.pageSections, function(index){
+			var sectionTop = smtRec.pageSections[index].top;
+			var sectionBottom = smtRec.pageSections[index].bottom;
+			if(sectionTop<center && sectionBottom>center) {
+				var pageSectionDetected = smtRec.pageSections[index].sectionName;
+				if(pageSectionDetected != smtRec.currentPageSection) {
+					smtRec.lastPageSection = smtRec.currentPageSection;
+					smtRec.currentPageSection = pageSectionDetected;
+					smtRec.pageSections[index].viewed = "true";
+					smtRec.pageSections[index].entryTimes.push(smtRec.getTime());
+					smtRec.pageSections[index].focusedEntryTimes.push(smtRec.getFocusTime());
+					if(smtRec.lastPageSection !== "") {
+						var lastPageSectionIndex = smtRec.find_in_array(smtRec.pageSections,"sectionName",smtRec.lastPageSection);
+						
+						smtRec.pageSections[lastPageSectionIndex].exitTimes.push(smtRec.getTime());
+						smtRec.pageSections[lastPageSectionIndex].focusedExitTimes.push(smtRec.getFocusTime());
+						var LPSEntryTimesLastIndex = smtRec.pageSections[lastPageSectionIndex].entryTimes.length - 1;
+						var LPSExitTimesLastIndex = smtRec.pageSections[lastPageSectionIndex].exitTimes.length - 1;
+						
+						var LPSLastEntryTime = smtRec.pageSections[lastPageSectionIndex].entryTimes[LPSEntryTimesLastIndex];
+						var LPSLastExitTime = smtRec.pageSections[lastPageSectionIndex].exitTimes[LPSExitTimesLastIndex];
+						
+						smtRec.pageSections[lastPageSectionIndex].totalTime = smtRec.pageSections[lastPageSectionIndex].totalTime + (LPSLastExitTime - LPSLastEntryTime);
+						
+						var LPSFocusedEntryTimesLastIndex = smtRec.pageSections[lastPageSectionIndex].focusedEntryTimes.length - 1;
+						var LPSFocusedExitTimesLastIndex = smtRec.pageSections[lastPageSectionIndex].focusedExitTimes.length - 1;
+						
+						var LPSLastFocusedEntryTime = smtRec.pageSections[lastPageSectionIndex].entryTimes[LPSFocusedEntryTimesLastIndex];
+						var LPSLastFocusedExitTime = smtRec.pageSections[lastPageSectionIndex].exitTimes[LPSFocusedExitTimesLastIndex];
+						
+						smtRec.pageSections[lastPageSectionIndex].totalFocusedTime = smtRec.pageSections[lastPageSectionIndex].totalFocusedTime + (LPSLastFocusedExitTime - LPSLastFocusedEntryTime);
+					}
+					
+				}
+				return false;
+			}
+		});
+		//alert("currentPageSection is " +smtRec.currentPageSection+ " lastPageSection is " + smtRec.lastPageSection);
+    },
     
     /** 
      * Pauses recording. 
@@ -437,6 +492,8 @@
 	      requestData += "&lostFocusCount=" + smtRec.lostFocusCount;
 	      requestData += "&focusedTime=" + smtRec.getFocusTime();
 	      requestData += "&scrollPercentage=" + smtRec.scrollPercentage;
+	      requestData += "&pageSections=" + encodeURIComponent(JSON.stringify(smtRec.pageSections));
+	      requestData += "&currentPageSection=" + smtRec.currentPageSection;
           requestData += "&action="    + "wpiappend";
           requestData += "&remote="    + smtOpt.storageServer;
           
@@ -493,6 +550,8 @@
 	      requestData += "&lostFocusCount=" + smtRec.lostFocusCount;
 	      requestData += "&focusedTime=" + smtRec.getFocusTime();
 	      requestData += "&scrollPercentage=" + smtRec.scrollPercentage;
+	      requestData += "&pageSections=" + encodeURIComponent(JSON.stringify(smtRec.pageSections));
+	      requestData += "&currentPageSection=" + smtRec.currentPageSection;
 	      requestData += "&action="    + "wpiexit";
 	      requestData += "&remote="    + smtOpt.storageServer;
 	      
@@ -631,6 +690,100 @@
      */
     keyHandler: function(e) {
     },
+    
+    adjustPageSections: function()
+    {
+    	jQuery_1_10_2.each(smtRec.pageSections, function(index){
+    		var sectionId = smtRec.pageSections[index].sectionId;
+    		var nextSectionId = smtRec.pageSections[index].nextSectionId;
+    		if("wpi_page_section_00" == sectionId){
+        		var nextSelector = "img#wpipagesection-"+nextSectionId;
+        		smtRec.pageSections[index].top = 0;
+        		smtRec.pageSections[index].bottom = Math.round(jQuery_1_10_2(nextSelector).offset().top);
+    		}else if("wpi_page_section_999" == nextSectionId) {
+    			var selector = "img#wpipagesection-"+sectionId;
+        		smtRec.pageSections[index].top = Math.round(jQuery_1_10_2(selector).offset().top);
+        		smtRec.pageSections[index].bottom = (jQuery_1_10_2(document).height() < jQuery_1_10_2(window).height()) ? Math.round(jQuery_1_10_2(window).height()) : Math.round(jQuery_1_10_2(document).height());
+    		}else {
+    			var selector = "img#wpipagesection-"+sectionId;
+        		var nextSelector = "img#wpipagesection-"+nextSectionId;
+        		smtRec.pageSections[index].top = Math.round(jQuery_1_10_2(selector).offset().top);
+        		smtRec.pageSections[index].bottom = Math.round(jQuery_1_10_2(nextSelector).offset().top);
+    		}
+    		
+    	});
+    },
+    
+    initPageSections: function()
+    {
+    	var pageSectionSeparators = jQuery_1_10_2("img.wpipagesection");
+		var pageSection = {
+	 			sectionId : "wpi_page_section_00",
+				sectionName : "pageStart",
+				order : 0,
+				top : 0,
+				bottom : Math.round(jQuery_1_10_2(pageSectionSeparators.get(0)).offset().top),
+				prevSectionId: "",
+				prevSectionName: "",
+				nextSectionId: jQuery_1_10_2(pageSectionSeparators.get(0)).data("psid"),
+				nextSectionName: jQuery_1_10_2(pageSectionSeparators.get(0)).data("psname"),
+				viewed: false,
+				entryTimes: [],
+				exitTimes: [],
+				focusedEntryTimes: [],
+				focusedExitTimes: [],
+				totalTime: 0,
+				totalFocusedTime: 0,
+				lostFocusCount: 0
+	 	};
+
+		smtRec.pageSections.push(pageSection);
+	
+		pageSectionSeparators.each(function(index) {
+			pageSection = {
+			 		sectionId : jQuery_1_10_2(pageSectionSeparators.get(index)).data("psid"),
+					sectionName : jQuery_1_10_2(pageSectionSeparators.get(index)).data("psname"),
+					order : index+1,
+					top : Math.round(jQuery_1_10_2(pageSectionSeparators.get(index)).offset().top),
+					bottom : "",
+					prevSectionId: "",
+					prevSectionName: "",
+					nextSectionId: "",
+					nextSectionName: "",
+					viewed: false,
+					entryTimes: [],
+					exitTimes: [],
+					focusedEntryTimes: [],
+					focusedExitTimes: [],
+					totalTime: 0,
+					totalFocusedTime: 0,
+					lostFocusCount: 0
+			 	};				  							
+	
+			if(index>0) {
+				pageSection.prevSectionId = jQuery_1_10_2(pageSectionSeparators.get(index - 1)).data("psid");
+				pageSection.prevSectionName = jQuery_1_10_2(pageSectionSeparators.get(index - 1)).data("psname");
+			} else {
+				pageSection.prevSectionId = "wpi_page_section_00";
+				pageSection.prevSectionName = "pageStart";
+			}
+			
+			if (index < pageSectionSeparators.size() - 1) {
+				pageSection.bottom = Math.round(jQuery_1_10_2(pageSectionSeparators.get(index+1)).offset().top);
+				pageSection.nextSectionId = jQuery_1_10_2(pageSectionSeparators.get(index + 1)).data("psid");
+				pageSection.nextSectionName = jQuery_1_10_2(pageSectionSeparators.get(index + 1)).data("psname");
+		 	} else {
+		 		pageSection.bottom = (jQuery_1_10_2(document).height() < jQuery_1_10_2(window).height()) ? Math.round(jQuery_1_10_2(window).height()) : Math.round(jQuery_1_10_2(document).height());
+		 		pageSection.nextSectionId = "wpi_page_section_999";
+				pageSection.nextSectionName = "pageEnd";
+		 	}
+	
+			smtRec.pageSections.push(pageSection);			  								
+	            
+		});
+		smt2fn.log(smtRec.pageSections);
+		smtRec.updatePageSections();
+    },
     /** 
      * System initialization.
      * Assigns events and performs other initialization routines.
@@ -638,6 +791,13 @@
     init: function() 
     {
     	//alert("Inside init function");
+    	
+		// this is the best cross-browser method to store tracking data successfully
+	    setTimeout(smtRec.initMouseData, 1000);
+	    // compute log session time by date instead of dividing coords length by frame rate
+	    smtRec.timestamp = (new Date()).getTime();
+	    smtRec.lastBlurTimeStamp = (new Date()).getTime();
+	    smtRec.lastFocusTimeStamp = (new Date()).getTime();
       smtRec.computeAvailableSpace();
       // get this location BEFORE making the AJAX request
       smtRec.url = escape(window.location.href);
@@ -692,6 +852,10 @@
           aux.addEvent(window, "focus", smtRec.resumeRecording);
         }
       }*/
+      smtRec.initPageSections();
+      jQuery_1_10_2(window).load(function() {
+    	  smtRec.adjustPageSections();
+      });
       
       jQuery_1_10_2(window).focus(function() {
     		var thisFocusTimeStamp = new Date();
@@ -710,14 +874,21 @@
     	    smtRec.lastFocusTimeStamp = new Date();
     	});
 
-      jQuery_1_10_2(window).blur(function() {
+      jQuery_1_10_2(window).blur(function() {    		
+    		smtRec.lastBlurTimeStamp = +new Date();
     		smtRec.inFocus = false;
     		smtRec.lostFocusCount += 1;
-    		smtRec.lastBlurTimeStamp = +new Date();
     		smtRec.elem.lostFocus.push(smtRec.elem.hovered[smtRec.elem.hovered.length - 1]);
+    		var currentPageSectionIndex = smtRec.find_in_array(smtRec.pageSections,"sectionName",smtRec.currentPageSection);
+    		smtRec.pageSections[currentPageSectionIndex].lostFocusCount += 1;
     		smt2fn.log("On Blur Timestamp: " + smtRec.lastBlurTimeStamp);
     	});
+      
+      jQuery_1_10_2(window).scrollStopped(500,function(){
+    	  smtRec.updatePageSections();
+		}); 
     	
+      
       /*
       // flush mouse data when tracking ends
       if (typeof window.onbeforeunload == 'function') {
@@ -738,12 +909,7 @@
       //window.onbeforeunload = smtRec.appendExitMouseData;
       //window.onbeforeunload = smtRec.appendMouseData;
       //window.unload = smtRec.appendMouseData;
-      // this is the best cross-browser method to store tracking data successfully
-      setTimeout(smtRec.initMouseData, 1000);
-      // compute log session time by date instead of dividing coords length by frame rate
-      smtRec.timestamp = (new Date()).getTime();
-      smtRec.lastBlurTimeStamp = (new Date()).getTime();
-      smtRec.lastFocusTimeStamp = (new Date()).getTime();
+      
       //alert("After init");
     }
   };
