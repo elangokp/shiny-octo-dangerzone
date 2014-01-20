@@ -254,16 +254,17 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
     	$displayId = 'id='.$item['id'];
     	// wait for very recent visits
     	$timeDiff = time() - (strtotime($item['sess_date']) + $item['sess_time']);
-    	error_log($timeDiff);
+    	//error_log($timeDiff);
     	$receivingData = ($timeDiff > -10 && $timeDiff < 30);
-    	error_log($receivingData);
+    	//error_log($receivingData);
     	$rowActions = "<div>";
     	if (!$receivingData)
     	{
     		if($item['file'] != "0") {
     			$rowActions .= '<a href="'.$this->views_url.'wpi-replay.php?'.$displayId.'&api=js" class="button" target="_blank" title="Play">Realtime Replay</a>'.PHP_EOL;
     			$rowActions .= '<a href="'.$this->views_url.'wpi-replay.php?'.$displayId.'&api=js&realTime=0" class="button" target="_blank" title="Show">Show Mouse Path</a>'.PHP_EOL;
-    			$rowActions .= '<a href="'.$this->views_url.'wpi-replay.php?'.$displayId.'&api=swf" class="button" target="_blank" title="Play (Experimental)">Replay in Flash</a>'.PHP_EOL;
+    			//$rowActions .= '<a href="'.$this->views_url.'wpi-replay.php?'.$displayId.'&api=swf" class="button" target="_blank" title="Play (Experimental)">Replay in Flash</a>'.PHP_EOL;
+    			$rowActions .= '<a id="wpi_ps_rec_stats_button_'.$item['id'].'" href="javascript:void(0)" data-rid="'.$item['id'].'" class="button" target="_blank" title="Page Section Stats">Page Section Stats</a>'.PHP_EOL;
     		} else {
     			$rowActions .= '<em>Couldnt record this session.</em>';
     		}
@@ -520,10 +521,10 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
         records.sess_date,
         UNIX_TIMESTAMP(records.sess_date) as unix_sess_date,
         records.sess_time,
-        SEC_TO_TIME(records.sess_time) as browser_open_time,
+        SEC_TO_TIME(ROUND(records.sess_time)) as browser_open_time,
         records.lost_focus_count,
         records.focus_time,
-        SEC_TO_TIME(records.focus_time) as focused_browsing_time,
+        SEC_TO_TIME(ROUND(records.focus_time)) as focused_browsing_time,
         browsers.name as browser_name,
         oses.name as os_name
         FROM $recordsTable as records

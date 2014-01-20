@@ -486,9 +486,9 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         MAX(records.sess_date) as sess_date,
         UNIX_TIMESTAMP(MAX(records.sess_date)) as unix_sess_date,
         SUM( records.sess_time ) as sess_time, 
-		SEC_TO_TIME( SUM( records.sess_time ) ) AS browser_open_time, 
+		SEC_TO_TIME(ROUND(SUM( records.sess_time ))) AS browser_open_time, 
 		SUM( records.focus_time ) as focus_time, 
-		SEC_TO_TIME( SUM( records.focus_time ) ) AS focused_browsing_time,
+		SEC_TO_TIME(ROUND(SUM( records.focus_time ))) AS focused_browsing_time,
         browsers.name as browser_name,
         oses.name as os_name
         FROM $recordsTable as records

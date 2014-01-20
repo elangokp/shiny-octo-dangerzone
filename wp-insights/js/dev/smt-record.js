@@ -171,8 +171,8 @@
 						var LPSFocusedEntryTimesLastIndex = smtRec.pageSections[lastPageSectionIndex].focusedEntryTimes.length - 1;
 						var LPSFocusedExitTimesLastIndex = smtRec.pageSections[lastPageSectionIndex].focusedExitTimes.length - 1;
 						
-						var LPSLastFocusedEntryTime = smtRec.pageSections[lastPageSectionIndex].entryTimes[LPSFocusedEntryTimesLastIndex];
-						var LPSLastFocusedExitTime = smtRec.pageSections[lastPageSectionIndex].exitTimes[LPSFocusedExitTimesLastIndex];
+						var LPSLastFocusedEntryTime = smtRec.pageSections[lastPageSectionIndex].focusedEntryTimes[LPSFocusedEntryTimesLastIndex];
+						var LPSLastFocusedExitTime = smtRec.pageSections[lastPageSectionIndex].focusedExitTimes[LPSFocusedExitTimesLastIndex];
 						
 						smtRec.pageSections[lastPageSectionIndex].totalFocusedTime = smtRec.pageSections[lastPageSectionIndex].totalFocusedTime + (LPSLastFocusedExitTime - LPSLastFocusedEntryTime);
 					}

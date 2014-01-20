@@ -22,6 +22,7 @@ require_once('class-wp-insights-db-utils.php');
 require_once('class-wp-insights-utils.php');
 require_once('class-wp-insights-recorder.php');
 require_once(plugin_dir_path(__FILE__).'replay/class-wp-insights-event-data.php');
+require_once(plugin_dir_path(__FILE__).'views/class-wp-insights-recording-ps-stats-list-table.php');
 class WP_Insights {
 
 	/**
@@ -31,7 +32,7 @@ class WP_Insights {
 	 *
 	 * @const   string
 	 */
-	const VERSION = '0.7.0Beta';
+	const VERSION = '0.7.1Beta';
 
 	/**
 	 * Unique identifier for your plugin.
@@ -121,6 +122,8 @@ class WP_Insights {
 		add_action('wp_ajax_wpiexit', array( $this, 'exit_user_data' ) );
 		add_action('wp_ajax_wpimouseeventdata', array( $this, 'get_mouse_event_data' ) );
 		add_action('wp_ajax_wpipagesections', array( $this, 'get_wpi_page_sections' ) );
+		add_action('wp_ajax_wpipsrecordingstats', array( $this, 'get_wpi_page_section_recording_stats' ) );
+		
 		
 		add_action('wp_head', array($this, 'add_IE9_Compatibility_Meta_Tag'));
 		add_action('plugins_loaded', array($this, 'setRecorderStatus'));
@@ -315,7 +318,7 @@ class WP_Insights {
 		
 		//if ( stripos($screen_id, 'wp-insights') !== FALSE ) {
 			wp_enqueue_style( $this->plugin_slug .'-admin-styles', plugins_url( 'css/admin.css', __FILE__ ), array(), self::VERSION );
-			
+			wp_enqueue_style('thickbox');
 		//}
 
 	}
@@ -336,6 +339,7 @@ class WP_Insights {
 		$screen = get_current_screen();
 		if ( $screen->id == $this->plugin_screen_hook_suffix ) { */
 			wp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'js/admin.js', __FILE__ ), array( 'jquery' ), self::VERSION );
+			wp_enqueue_script('thickbox');
 		//}
 
 	}
@@ -759,6 +763,23 @@ class WP_Insights {
 
 		    <?php
 		    die();
+	}
+	
+	public function get_wpi_page_section_recording_stats() {
+?>
+		<html>
+			<head/>
+			<body>
+				<?php 
+					$WP_Insights_Recording_PS_Stats_List_Table_Instance = new WP_Insights_Recording_PS_Stats_List_Table($_GET['rid']);
+	    			$WP_Insights_Recording_PS_Stats_List_Table_Instance->prepare_items();
+	    			$WP_Insights_Recording_PS_Stats_List_Table_Instance->display();
+				?>
+			</body>
+		</html>
+
+		    <?php
+		    die();		
 	}
 	
 	

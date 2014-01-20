@@ -67,14 +67,14 @@ class WP_Insights_Detailed_Page_Stats {
 				ROUND((COUNT(records2.id)/COUNT(records.id)*100),2) AS interest,
 				ROUND((COUNT(records3.id)/COUNT(records.id)*100),2) AS desire,
 				ROUND((COUNT(records4.id)/COUNT(records.id)*100),2) AS passion,
-    			SEC_TO_TIME(AVG( records.sess_time )) AS browsing_time,
-    			SEC_TO_TIME( STD( records.sess_time ) ) AS std_browsing_time, 
-			    SEC_TO_TIME( MIN( records.sess_time ) ) AS min_browsing_time, 
-			    SEC_TO_TIME( MAX( records.sess_time ) ) AS max_browsing_time,
-			    SEC_TO_TIME(AVG( records.focus_time )) AS focus_time,
-    			SEC_TO_TIME( STD( records.focus_time ) ) AS std_focus_time, 
-			    SEC_TO_TIME( MIN( records.focus_time ) ) AS min_focus_time, 
-			    SEC_TO_TIME( MAX( records.focus_time ) ) AS max_focus_time
+    			SEC_TO_TIME(ROUND(AVG( records.sess_time ))) AS browsing_time,
+    			SEC_TO_TIME(ROUND(STD( records.sess_time ))) AS std_browsing_time, 
+			    SEC_TO_TIME(ROUND(MIN( records.sess_time ))) AS min_browsing_time, 
+			    SEC_TO_TIME(ROUND(MAX( records.sess_time ))) AS max_browsing_time,
+			    SEC_TO_TIME(ROUND(AVG( records.focus_time ))) AS focus_time,
+    			SEC_TO_TIME(ROUND(STD( records.focus_time ))) AS std_focus_time, 
+			    SEC_TO_TIME(ROUND(MIN( records.focus_time ))) AS min_focus_time, 
+			    SEC_TO_TIME(ROUND(MAX( records.focus_time ))) AS max_focus_time
 				FROM $this->recordsTable AS records
 				INNER JOIN $this->recordsTable AS records0 ON records0.cleansed_url = records.cleansed_url
 				LEFT OUTER JOIN $this->recordsTable AS records1 ON records.id = records1.id and records1.focus_time>60

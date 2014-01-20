@@ -4,7 +4,11 @@
 		
 		$("#insert_wpi_page_section_shortcode").click(function() {
 			tb_show('Insert WP Insights Page Section', 'admin-ajax.php?action=wpipagesections&postid='+document.getElementById("wpipostid").getAttribute("value"));
-		})
+		});
+		
+		$("a[id^='wpi_ps_rec_stats_button']").click(function() {
+			tb_show('WP Insights Page Section Stats', 'admin-ajax.php?action=wpipsrecordingstats&rid='+$(this).data('rid')+'&width=700');
+		});
 		
 		$(".wpi-client-recordings-link").click(function() {
 			//alert($(this).data('val'));
