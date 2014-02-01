@@ -56,6 +56,8 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
     
     protected $assets_url = null;
     protected $view_url = null;
+    protected $from_date = null;
+    protected $till_date = null;
     
     /** ************************************************************************
      * REQUIRED. Set up a constructor that references the parent constructor. We 
@@ -70,6 +72,25 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
             'plural'    => 'Recordings',    //plural name of the listed records
             'ajax'      => false        //does this table support ajax?
         ) );
+        
+        if(!empty($_REQUEST['from-date']) && !empty($_REQUEST['till-date'])) {
+        	error_log("From Date and Till Date is present ");
+        	$this->from_date = $_REQUEST['from-date'];
+        	$this->till_date = $_REQUEST['till-date'];
+        }else if(empty($_REQUEST['from-date']) && !empty($_REQUEST['till-date'])) {
+        	error_log("From Date is empty ");
+        	$this->from_date = $_REQUEST['till-date'];
+        	$this->till_date = $_REQUEST['till-date'];
+        }else if(!empty($_REQUEST['from-date']) && empty($_REQUEST['till-date'])) {
+        	error_log("Till Date is empty ");
+        	$this->from_date = $_REQUEST['from-date'];
+        	$this->till_date = $_REQUEST['from-date'];
+        }else if(empty($_REQUEST['from-date']) && empty($_REQUEST['till-date'])) {
+        	error_log("From Date and Till Date are empty ");
+        	$this->till_date = date("Y-m-d");
+        	$oneMonthBack = mktime(0,0,0,date("m")-1,date("d"), date("Y"));
+        	$this->from_date = date("Y-m-d",$oneMonthBack);
+        }
         
         $this->assets_url = plugins_url('/../assets/', __FILE__);
         $this->views_url = plugins_url('/../views/', __FILE__);
@@ -150,7 +171,13 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
 	function extra_tablenav( $which ) {
 		if ( $which == "top" ){
 			//The code that goes before the table is here
-			echo"Hello, I'm before the table";
+			?>
+			<label for="from-date">From:</label> 
+			<input id="from-date" type="date" name="from-date" value="<?php echo $this->from_date?>" /> 
+			<label for="till-date">Till:</label> 
+			<input id="till-date" type="date" name="till-date" value="<?php echo $this->till_date?>" /> 
+			<?php
+			submit_button( 'Filter', 'button', false, false, array('id' => 'search-submit') );
 		}
 	}
 
@@ -494,10 +521,12 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         FROM $recordsTable as records
         LEFT OUTER JOIN $browsersTable as browsers ON records.browser_id = browsers.id
         LEFT OUTER JOIN $osTable as oses ON records.os_id = oses.id
+        WHERE
+        records.sess_date >= '$this->from_date'
+        AND records.sess_date <= '$this->till_date 23:59:59'
         GROUP BY records.client_id
         ORDER BY id desc
-        LIMIT ".($current_page-1)*$per_page.",".$per_page;
-                
+        LIMIT ".($current_page-1)*$per_page.",".$per_page;                
         
         $data = $WP_Insights_DB_Utils_Instance->db_query($sql);
         /**

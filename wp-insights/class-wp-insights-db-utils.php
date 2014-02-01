@@ -296,6 +296,7 @@ class WP_Insights_DB_Utils {
 		section_order TINYINT       unsigned  NOT NULL,
 		section_id   VARCHAR(50)             NOT NULL,
 		section_name VARCHAR(50)             NOT NULL,
+		current_page_section TINYINT unsigned NOT NULL,
 		sess_time    FLOAT(7,2)    unsigned  NOT NULL,
         focus_time   FLOAT(7,2)    unsigned  NOT NULL,
         lost_focus_count  TINYINT  unsigned  NOT NULL,

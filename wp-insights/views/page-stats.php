@@ -15,6 +15,7 @@ if(isset($_GET['lrid'])) {
 	$lrid = $_GET['lrid'];
 	$views_url = plugins_url('/../views/', __FILE__);
 	require_once(plugin_dir_path(__FILE__).'class-wp-insights-detailed-page-stats.php');
+	require_once(plugin_dir_path(__FILE__).'class-wp-insights-page-ps-stats-list-table.php');
 	$WP_Insights_Detailed_Page_Stats_Instance = new WP_Insights_Detailed_Page_Stats($lrid);
 	//$WP_Insights_Detailed_Page_Stats_Instance->process_stats();
 	?>
@@ -77,6 +78,11 @@ if(isset($_GET['lrid'])) {
 		<div id="lostfocusmap">
 			<a id="lostfocusmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>wpi-heat.php?lrid=<?php echo $lrid;?>&hmtype=lfh" class="button" target="_blank" title="Lost Focus Heatmap">Lost Focus Heatmap</a>
 		</div>
+		<?php 
+					$WP_Insights_Page_PS_Stats_List_Table_Instance = new WP_Insights_Page_PS_Stats_List_Table($lrid);
+	    			$WP_Insights_Page_PS_Stats_List_Table_Instance->prepare_items();
+	    			$WP_Insights_Page_PS_Stats_List_Table_Instance->display();
+		?>
 	</form>
 
 </div>

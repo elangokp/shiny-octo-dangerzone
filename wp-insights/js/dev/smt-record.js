@@ -152,6 +152,7 @@
 				if(pageSectionDetected != smtRec.currentPageSection) {
 					smtRec.lastPageSection = smtRec.currentPageSection;
 					smtRec.currentPageSection = pageSectionDetected;
+					smtRec.pageSections[index].currentPageSection = 1;
 					smtRec.pageSections[index].viewed = "true";
 					smtRec.pageSections[index].entryTimes.push(smtRec.getTime());
 					smtRec.pageSections[index].focusedEntryTimes.push(smtRec.getFocusTime());
@@ -160,6 +161,7 @@
 						
 						smtRec.pageSections[lastPageSectionIndex].exitTimes.push(smtRec.getTime());
 						smtRec.pageSections[lastPageSectionIndex].focusedExitTimes.push(smtRec.getFocusTime());
+						smtRec.pageSections[lastPageSectionIndex].currentPageSection = 0;
 						var LPSEntryTimesLastIndex = smtRec.pageSections[lastPageSectionIndex].entryTimes.length - 1;
 						var LPSExitTimesLastIndex = smtRec.pageSections[lastPageSectionIndex].exitTimes.length - 1;
 						
@@ -381,7 +383,8 @@
     {
       smtRec.userId = parseInt(response);
       if (smtRec.userId > 0) {
-    	  smtRec.cacheUserPage();
+    	  setTimeout(smtRec.cacheUserPage, 10);
+    	  setTimeout(smtRec.appendMouseData, 100);
         // once the session started, append mouse data
         smtRec.append = setInterval(smtRec.appendMouseData, smtOpt.postInterval*1000);
       }      
@@ -719,7 +722,7 @@
     	var pageSectionSeparators = jQuery_1_10_2("img.wpipagesection");
 		var pageSection = {
 	 			sectionId : "wpi_page_section_00",
-				sectionName : "pageStart",
+				sectionName : "Page Start",
 				order : 0,
 				top : 0,
 				bottom : Math.round(jQuery_1_10_2(pageSectionSeparators.get(0)).offset().top),
@@ -734,7 +737,8 @@
 				focusedExitTimes: [],
 				totalTime: 0,
 				totalFocusedTime: 0,
-				lostFocusCount: 0
+				lostFocusCount: 0,
+				currentPageSection: 0
 	 	};
 
 		smtRec.pageSections.push(pageSection);
@@ -757,7 +761,8 @@
 					focusedExitTimes: [],
 					totalTime: 0,
 					totalFocusedTime: 0,
-					lostFocusCount: 0
+					lostFocusCount: 0,
+					currentPageSection: 0
 			 	};				  							
 	
 			if(index>0) {
@@ -765,7 +770,7 @@
 				pageSection.prevSectionName = jQuery_1_10_2(pageSectionSeparators.get(index - 1)).data("psname");
 			} else {
 				pageSection.prevSectionId = "wpi_page_section_00";
-				pageSection.prevSectionName = "pageStart";
+				pageSection.prevSectionName = "Page Start";
 			}
 			
 			if (index < pageSectionSeparators.size() - 1) {
@@ -775,7 +780,7 @@
 		 	} else {
 		 		pageSection.bottom = (jQuery_1_10_2(document).height() < jQuery_1_10_2(window).height()) ? Math.round(jQuery_1_10_2(window).height()) : Math.round(jQuery_1_10_2(document).height());
 		 		pageSection.nextSectionId = "wpi_page_section_999";
-				pageSection.nextSectionName = "pageEnd";
+				pageSection.nextSectionName = "Page End";
 		 	}
 	
 			smtRec.pageSections.push(pageSection);			  								

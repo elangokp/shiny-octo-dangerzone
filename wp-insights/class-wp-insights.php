@@ -32,7 +32,7 @@ class WP_Insights {
 	 *
 	 * @const   string
 	 */
-	const VERSION = '0.7.1Beta';
+	const VERSION = '0.7.3Beta';
 
 	/**
 	 * Unique identifier for your plugin.
@@ -785,6 +785,7 @@ class WP_Insights {
 	
 	public function add_wpinsights_scripts() {
 		//error_log("Inside add_wpinsights_scripts");
+		$wpi_js_url = plugins_url('js/wpi-js.min.js', __FILE__);
 		$json3_js_url = plugins_url('js/dev/json3.min.js', __FILE__);
 		$smt_aux_js_url = plugins_url('js/dev/smt-aux.js', __FILE__);
 		$smt_record_js_url = plugins_url('js/dev/smt-record.js', __FILE__);
@@ -794,93 +795,155 @@ class WP_Insights {
 		//wp_register_script('smt-record', $smt_record_js_url);
 		//wp_enqueue_script('smt-aux');
 		//wp_enqueue_script('smt-record');
-		?>
+		error_log(print_r($_GET,true));
+		if(!empty($_GET['wpidev']) && $_GET['wpidev'] === "true") {?>
+
 		<!-- Powered by WP Insights version <?php echo self::VERSION?>-->
-	  <script id='wpi-trigger-script' type="text/javascript">
-				//<![CDATA[
-				var addressBarURL = top.location.href;
-				var isFullyLoaded = false;
+		  <script id='wpi-trigger-script' type="text/javascript">
+					//<![CDATA[
+					var addressBarURL = top.location.href;
+					var isFullyLoaded = false;
+					
+					if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay.php") < 0 
+						&& addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-heat.php") < 0) {
+			  			var jQuery_1_10_2_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
+			  			var jQuery_UI_1_10_3_url = "//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js";
+	
+			  			jQuery.getScript( "<?php echo $json3_js_url?>");
+	
+			  			jQuery.getScript(jQuery_1_10_2_url, function() { 
+			  				jQuery_1_10_2 = $.noConflict(true);
+							jQuery_1_10_2.fn.getcssPath = function () {
+							    if (this.length != 1) throw 'Requires one element.';
+	
+							    var path, node = this;
+							    while (node.length) {
+							        var realNode = node[0], name = realNode.localName || realNode.nodeName;
+							        if (!name) break;
+	
+							        name = name.toLowerCase();
+							        if (realNode.id) {
+							            // As soon as an id is found, there's no need to specify more.
+							            return name + '#' + realNode.id + (path ? '>' + path : '');
+							        } else if (realNode.className) {
+							            name += '.' + realNode.className.split(/\s+/).join('.');
+							            name = name.replace(/\.+$/,"");
+							        }
+	
+							        var parent = node.parent(), siblings = parent.children(name);
+							        if (siblings.length > 1) name += ':eq(' + siblings.index(node) + ')';
+							        path = name + (path ? '>' + path : '');
+	
+							        node = parent;
+							    }
+	
+							    return path;
+							};
+	
+							jQuery_1_10_2.fn.scrollStopped = function(delay,callback) {           
+								jQuery_1_10_2(this).scroll(function(){
+						            var self = this, $this = jQuery_1_10_2(self);
+						            if ($this.data('scrollTimeout')) {
+						              clearTimeout($this.data('scrollTimeout'));
+						            }
+						            $this.data('scrollTimeout', setTimeout(callback,delay,self));
+						        });
+						    };
+						    
+	
+						    /*jQuery_1_10_2(window).scroll(function(event){
+								   var st = jQuery(this).scrollTop();
+								   if (st > lastScrollTop){
+									   scrollDirection = "down";
+								   } else {
+									   scrollDirection = "up";
+								   }
+								   lastScrollTop = st;
+								   console.log("From Direction Detection : " + scrollDirection);
+								});*/
+				  			
+				  			jQuery.getScript( "<?php echo $smt_aux_js_url.'?v='.self::VERSION?>", function() 
+				  			  {
+				  				jQuery.getScript( "<?php echo $smt_record_js_url.'?v='.self::VERSION?>", function() 
+				  		  			  {
+					  					smt2.record({
+										      recTime: 300,
+										      trackingUrl: "<?php echo $smt_tracking_url?>",
+										      postInterval: 7
+										    });
+	
+				  			  			}
+				  		  			);
+	
+					  			}
+				  			);
+			  			});
+	
+					}	  			
+					//]]>
+			</script>
+		<?php }else { ?>
+		<!-- Powered by WP Insights version <?php echo self::VERSION?>-->
+		  <script id='wpi-trigger-script' type="text/javascript">
+					//<![CDATA[
+					var addressBarURL = top.location.href;
+					var isFullyLoaded = false;
+					
+					if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay.php") < 0 
+						&& addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-heat.php") < 0) {
+	
+				  				jQuery.getScript( "<?php echo $wpi_js_url.'?v='.self::VERSION?>", function() 
+				  		  			  {
+					  					jQuery_1_10_2 = $.noConflict(true);
+										jQuery_1_10_2.fn.getcssPath = function () {
+										    if (this.length != 1) throw 'Requires one element.';
 				
-				if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay.php") < 0 
-					&& addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-heat.php") < 0) {
-		  			var jQuery_1_10_2_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
-		  			var jQuery_UI_1_10_3_url = "//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js";
-
-		  			jQuery.getScript( "<?php echo $json3_js_url?>");
-
-		  			jQuery.getScript(jQuery_1_10_2_url, function() { 
-		  				jQuery_1_10_2 = $.noConflict(true);
-						jQuery_1_10_2.fn.getcssPath = function () {
-						    if (this.length != 1) throw 'Requires one element.';
-
-						    var path, node = this;
-						    while (node.length) {
-						        var realNode = node[0], name = realNode.localName || realNode.nodeName;
-						        if (!name) break;
-
-						        name = name.toLowerCase();
-						        if (realNode.id) {
-						            // As soon as an id is found, there's no need to specify more.
-						            return name + '#' + realNode.id + (path ? '>' + path : '');
-						        } else if (realNode.className) {
-						            name += '.' + realNode.className.split(/\s+/).join('.');
-						            name = name.replace(/\.+$/,"");
-						        }
-
-						        var parent = node.parent(), siblings = parent.children(name);
-						        if (siblings.length > 1) name += ':eq(' + siblings.index(node) + ')';
-						        path = name + (path ? '>' + path : '');
-
-						        node = parent;
-						    }
-
-						    return path;
-						};
-
-						jQuery_1_10_2.fn.scrollStopped = function(delay,callback) {           
-							jQuery_1_10_2(this).scroll(function(){
-					            var self = this, $this = jQuery_1_10_2(self);
-					            if ($this.data('scrollTimeout')) {
-					              clearTimeout($this.data('scrollTimeout'));
-					            }
-					            $this.data('scrollTimeout', setTimeout(callback,delay,self));
-					        });
-					    };
-					    
-
-					    /*jQuery_1_10_2(window).scroll(function(event){
-							   var st = jQuery(this).scrollTop();
-							   if (st > lastScrollTop){
-								   scrollDirection = "down";
-							   } else {
-								   scrollDirection = "up";
-							   }
-							   lastScrollTop = st;
-							   console.log("From Direction Detection : " + scrollDirection);
-							});*/
-			  			
-			  			jQuery.getScript( "<?php echo $smt_aux_js_url.'?v='.self::VERSION?>", function() 
-			  			  {
-			  				jQuery.getScript( "<?php echo $smt_record_js_url.'?v='.self::VERSION?>", function() 
-			  		  			  {
-				  					smt2.record({
-									      recTime: 300,
-									      trackingUrl: "<?php echo $smt_tracking_url?>",
-									      postInterval: 10
-									    });
-
-			  			  			}
-			  		  			);
-
-				  			}
-			  			);
-		  			});
-
-				}	  			
-				//]]>
-		</script>
-	  
-		<?php
+										    var path, node = this;
+										    while (node.length) {
+										        var realNode = node[0], name = realNode.localName || realNode.nodeName;
+										        if (!name) break;
+				
+										        name = name.toLowerCase();
+										        if (realNode.id) {
+										            // As soon as an id is found, there's no need to specify more.
+										            return name + '#' + realNode.id + (path ? '>' + path : '');
+										        } else if (realNode.className) {
+										            name += '.' + realNode.className.split(/\s+/).join('.');
+										            name = name.replace(/\.+$/,"");
+										        }
+				
+										        var parent = node.parent(), siblings = parent.children(name);
+										        if (siblings.length > 1) name += ':eq(' + siblings.index(node) + ')';
+										        path = name + (path ? '>' + path : '');
+				
+										        node = parent;
+										    }
+				
+										    return path;
+										};
+				
+										jQuery_1_10_2.fn.scrollStopped = function(delay,callback) {           
+											jQuery_1_10_2(this).scroll(function(){
+									            var self = this, $this = jQuery_1_10_2(self);
+									            if ($this.data('scrollTimeout')) {
+									              clearTimeout($this.data('scrollTimeout'));
+									            }
+									            $this.data('scrollTimeout', setTimeout(callback,delay,self));
+									        });
+									    };
+					  					smt2.record({
+										      recTime: 300,
+										      trackingUrl: "<?php echo $smt_tracking_url?>",
+										      postInterval: 7
+										    });
+	
+				  			  			}
+				  		  			);
+	
+					}	  			
+					//]]>
+			</script>
+		<?php }
 	}
 	
 	public function add_wpinsights_admin_scripts(){
