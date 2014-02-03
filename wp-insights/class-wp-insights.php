@@ -32,7 +32,7 @@ class WP_Insights {
 	 *
 	 * @const   string
 	 */
-	const VERSION = '0.7.3Beta';
+	const VERSION = '0.7.4Beta';
 
 	/**
 	 * Unique identifier for your plugin.
@@ -91,6 +91,7 @@ class WP_Insights {
 		//error_log("Inside wp-insights class construct");
 		// Load plugin text domain
 		add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
+		add_action( 'init', array( $this, 'register_session' ) );
 
 		// Add the options page and menu item.
 		add_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );
@@ -141,6 +142,12 @@ class WP_Insights {
 		self::$cache_dir = str_replace('\\', '/', self::$cache_dir);
 		self::$browscap_cache_dir = self::$cache_dir."browscapcache/";
 
+	}
+	
+	public function register_session() {
+		if(!session_id()) {
+			session_start();
+		}
 	}
 	
 	public function add_wpi_shortcode_button() {
@@ -319,6 +326,7 @@ class WP_Insights {
 		//if ( stripos($screen_id, 'wp-insights') !== FALSE ) {
 			wp_enqueue_style( $this->plugin_slug .'-admin-styles', plugins_url( 'css/admin.css', __FILE__ ), array(), self::VERSION );
 			wp_enqueue_style('thickbox');
+			wp_enqueue_style('jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css');
 		//}
 
 	}
@@ -340,6 +348,7 @@ class WP_Insights {
 		if ( $screen->id == $this->plugin_screen_hook_suffix ) { */
 			wp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'js/admin.js', __FILE__ ), array( 'jquery' ), self::VERSION );
 			wp_enqueue_script('thickbox');
+			wp_enqueue_script('jquery-ui-datepicker');
 		//}
 
 	}

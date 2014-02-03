@@ -56,17 +56,18 @@ class WP_Insights_Recorder {
 		if (empty($_REQUEST)) {
 			exit;
 		}
-		
+		$browserAndOSId = $this->getBrowserAndOSDetails();
+
 		/* create database entry ---------------------------------------------------- */
 		$recorddetails = array(
 				"client_id" => WP_Insights_Utils::get_client_id(),
 				"file" => "0",
 				"raw_url" => $_REQUEST['url'],
 				"cleansed_url" => $_REQUEST['url'],
-				"os_id" => 0,
-				"browser_id" => 0,
-				"browser_ver" => 0,
-				"user_agent" => 0,
+				"os_id" => $browserAndOSId['os_id'],
+				"browser_id" => $browserAndOSId['browser_id'],
+				"browser_ver" => $browserAndOSId['browser_ver'],
+				"user_agent" => $browserAndOSId['user_agent'],
 				"ftu" => (int) $_REQUEST['ftu'],
 				"ip" => WP_Insights_Utils::get_client_ip() ,
 				"scr_width" => (int) $_REQUEST['screenw'],
@@ -272,6 +273,7 @@ class WP_Insights_Recorder {
 
 		$this->removejscssfile($dom, "smt-record.js", "js");
 		$this->removejscssfile($dom, "smt-aux.js", "js");
+		$this->removejscssfile($dom, "wpi-js.min.js", "js");
 		return $dom;
 	}
 	
@@ -330,7 +332,6 @@ class WP_Insights_Recorder {
 		$html  = rawurldecode(stripslashes($_POST['html']));
 		$liveDom = $this->parseContent($html);
 		
-		$browserAndOSId = $this->getBrowserAndOSDetails();
 		
 		$year = date("Y");
 		$month = date("M");
@@ -349,11 +350,8 @@ class WP_Insights_Recorder {
 		$relativefilepath = $relativeDirpath.$htmlfile;
 		file_put_contents(utf8_encode($absolutefilepath), $liveDom->saveHTML());
 				
-		$recordsValues  = "file = '".$relativefilepath."',";
-		$recordsValues .= "os_id = ".$browserAndOSId['os_id'].",";
-		$recordsValues .= "browser_id = ".$browserAndOSId['browser_id'].",";
-		$recordsValues .= "browser_ver = '".$browserAndOSId['browser_ver']."',";
-		$recordsValues .= "user_agent = '".$browserAndOSId['user_agent']."'";
+		$recordsValues  = "file = '".$relativefilepath."'";
+
 		$this->wp_insights_db_utils->db_update($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS, $recordsValues, "id='".$recordingId."'");
 		
 		// insert new row on TBL_CACHE and look for inserted id

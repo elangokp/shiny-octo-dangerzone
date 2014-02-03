@@ -73,25 +73,36 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
             'ajax'      => false        //does this table support ajax?
         ) );
         
-        if(!empty($_REQUEST['from-date']) && !empty($_REQUEST['till-date'])) {
+        if(!empty($_REQUEST['from-date'])){
+        	$_SESSION['from-date'] = $_REQUEST['from-date'];
+        }
+        
+        if(!empty($_REQUEST['till-date'])){
+        	$_SESSION['till-date'] = $_REQUEST['till-date'];
+        }
+        
+        if(!empty($_SESSION['from-date']) && !empty($_SESSION['till-date'])) {
         	error_log("From Date and Till Date is present ");
-        	$this->from_date = $_REQUEST['from-date'];
-        	$this->till_date = $_REQUEST['till-date'];
-        }else if(empty($_REQUEST['from-date']) && !empty($_REQUEST['till-date'])) {
+        	$this->from_date = $_SESSION['from-date'];
+        	$this->till_date = $_SESSION['till-date'];
+        }else if(empty($_SESSION['from-date']) && !empty($_SESSION['till-date'])) {
         	error_log("From Date is empty ");
-        	$this->from_date = $_REQUEST['till-date'];
-        	$this->till_date = $_REQUEST['till-date'];
-        }else if(!empty($_REQUEST['from-date']) && empty($_REQUEST['till-date'])) {
+        	$this->from_date = $_SESSION['till-date'];
+        	$this->till_date = $_SESSION['till-date'];
+        }else if(!empty($_SESSION['from-date']) && empty($_SESSION['till-date'])) {
         	error_log("Till Date is empty ");
-        	$this->from_date = $_REQUEST['from-date'];
-        	$this->till_date = $_REQUEST['from-date'];
-        }else if(empty($_REQUEST['from-date']) && empty($_REQUEST['till-date'])) {
+        	$this->from_date = $_SESSION['from-date'];
+        	$this->till_date = $_SESSION['from-date'];
+        }else if(empty($_SESSION['from-date']) && empty($_SESSION['till-date'])) {
         	error_log("From Date and Till Date are empty ");
         	$this->till_date = date("Y-m-d");
         	$oneMonthBack = mktime(0,0,0,date("m")-1,date("d"), date("Y"));
         	$this->from_date = date("Y-m-d",$oneMonthBack);
         }
         
+        $_SESSION['from-date'] = $this->from_date;
+        $_SESSION['till-date'] = $this->till_date;
+         
         $this->assets_url = plugins_url('/../assets/', __FILE__);
         $this->views_url = plugins_url('/../views/', __FILE__);
         
@@ -173,9 +184,9 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
 			//The code that goes before the table is here
 			?>
 			<label for="from-date">From:</label> 
-			<input id="from-date" type="date" name="from-date" value="<?php echo $this->from_date?>" /> 
+			<input id="from-date" type="text" name="from-date" value="<?php echo $this->from_date?>" /> 
 			<label for="till-date">Till:</label> 
-			<input id="till-date" type="date" name="till-date" value="<?php echo $this->till_date?>" /> 
+			<input id="till-date" type="text" name="till-date" value="<?php echo $this->till_date?>" /> 
 			<?php
 			submit_button( 'Filter', 'button', false, false, array('id' => 'search-submit') );
 		}

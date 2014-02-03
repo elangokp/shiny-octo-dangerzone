@@ -2,6 +2,15 @@
 	"use strict";
 	$(function () {
 		
+		$(document).ready(function() {
+		    $('#from-date').datepicker({
+		        dateFormat : 'yy-mm-dd'
+		    });
+		    $('#till-date').datepicker({
+		        dateFormat : 'yy-mm-dd'
+		    });
+		});
+		
 		$("#insert_wpi_page_section_shortcode").click(function() {
 			tb_show('Insert WP Insights Page Section', 'admin-ajax.php?action=wpipagesections&postid='+document.getElementById("wpipostid").getAttribute("value"));
 		});
