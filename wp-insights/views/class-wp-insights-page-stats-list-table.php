@@ -34,6 +34,7 @@
     require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 } */
 require_once(plugin_dir_path(__FILE__).'class-wpi-wp-list-table.php');
+require_once(plugin_dir_path(__FILE__).'class-wp-insights-filters.php');
 require_once(plugin_dir_path(__FILE__).'class-wp-insights-page-versions-list-table.php');
 require_once(plugin_dir_path(dirname(__FILE__)).'class-wp-insights-db-utils.php');
 require_once(plugin_dir_path(dirname(__FILE__)).'class-wp-insights-utils.php');
@@ -56,6 +57,7 @@ class WP_Insights_Page_Stats_List_Table extends WPI_WP_List_Table {
     
     protected $assets_url = null;
     protected $view_url = null;
+    protected $WP_Insights_Filters_Instance = null;
     
     /** ************************************************************************
      * REQUIRED. Set up a constructor that references the parent constructor. We 
@@ -70,6 +72,8 @@ class WP_Insights_Page_Stats_List_Table extends WPI_WP_List_Table {
             'plural'    => 'Pages',    //plural name of the listed records
             'ajax'      => false        //does this table support ajax?
         ) );
+        
+        $this->WP_Insights_Filters_Instance = new WP_Insights_Filters();
         
         $this->assets_url = plugins_url('/../assets/', __FILE__);
         $this->views_url = plugins_url('/../views/', __FILE__);
@@ -152,6 +156,20 @@ class WP_Insights_Page_Stats_List_Table extends WPI_WP_List_Table {
         );
     }
      */
+    
+    /**
+     * Extra controls to be displayed between bulk actions and pagination
+     *
+     * @since 3.1.0
+     * @access protected
+     */
+    function extra_tablenav( $which ) {
+    	if ( $which == "top" ){
+    		//The code that goes before the table is here
+    		$this->WP_Insights_Filters_Instance->display();
+    	}
+    }
+    
     /** ************************************************************************
      * REQUIRED if displaying checkboxes or using bulk actions! The 'cb' column
      * is given special treatment when columns are processed. It ALWAYS needs to
@@ -428,7 +446,12 @@ class WP_Insights_Page_Stats_List_Table extends WPI_WP_List_Table {
         
         $cacheTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE;
         
-        $total_items = $wpdb->get_var("select count(DISTINCT url) from ".$cacheTable);
+        $fromDate = $this->WP_Insights_Filters_Instance->fromDate;
+        $tillDate = $this->WP_Insights_Filters_Instance->tillDate;
+        
+        $total_items = $wpdb->get_var("select count(DISTINCT cleansed_url) from ".$recordsTable." AS records  WHERE 
+								        records.sess_date >= '$fromDate'
+								        AND records.sess_date <= '$tillDate 23:59:59'" );
         
         /**
          * Instead of querying a database, we're going to fetch the example data
@@ -469,6 +492,9 @@ class WP_Insights_Page_Stats_List_Table extends WPI_WP_List_Table {
 				LEFT OUTER JOIN $recordsTable AS records2 ON records.id = records2.id and records2.focus_time>120
 				LEFT OUTER JOIN $recordsTable AS records3 ON records.id = records3.id and records3.focus_time>300
 				LEFT OUTER JOIN $recordsTable AS records4 ON records.id = records4.id and records4.focus_time>600
+				WHERE
+		        records.sess_date >= '$fromDate'
+		        AND records.sess_date <= '$tillDate 23:59:59'
 				GROUP BY records.cleansed_url
 				ORDER BY visits desc 
         		LIMIT ".($current_page-1)*$per_page.",".$per_page;

@@ -6,6 +6,9 @@
   <property name="plugin-name" value="wp-insights"/>
   <property name="plugins-folder" location="D:\Setups\Xampp\htdocs\wordpress\wp-content\plugins"/>
   <property name="exports-folder" location="C:\Users\Elango\Desktop\exports-folder"/>
+  
+  <taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask"
+           classpath="../build/taskjars/compiler.jar"/>
 
   <target name="clean" description="clean up" >
     <delete dir="${plugins-folder}\${plugin-name}"/>
@@ -14,6 +17,22 @@
   <target name="clean-exports" description="clean up exports folder" >
     <delete dir="${exports-folder}"/>
     <mkdir dir="${exports-folder}"/>
+  </target>
+  
+  <target name="compile">
+    
+    <jscomp compilationLevel="simple" warning="verbose" 
+            debug="false" output="../js/wpi-js.min.js">
+
+      <sources dir="../js/dev">
+        <file name="jquery-1.11.0.js"/>
+        <file name="json3.min.js"/>
+        <file name="smt-aux.js"/>
+        <file name="smt-record.js"/>
+      </sources>
+
+    </jscomp>
+    
   </target>
   
   <target name="deploy" depends="clean">

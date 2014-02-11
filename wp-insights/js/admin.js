@@ -3,10 +3,10 @@
 	$(function () {
 		
 		$(document).ready(function() {
-		    $('#from-date').datepicker({
+		    $('#fromDate').datepicker({
 		        dateFormat : 'yy-mm-dd'
 		    });
-		    $('#till-date').datepicker({
+		    $('#tillDate').datepicker({
 		        dateFormat : 'yy-mm-dd'
 		    });
 		});

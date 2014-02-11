@@ -34,6 +34,7 @@
     require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 } */
 require_once(plugin_dir_path(__FILE__).'class-wpi-wp-list-table.php');
+require_once(plugin_dir_path(__FILE__).'class-wp-insights-filters.php');
 require_once(plugin_dir_path(__FILE__).'class-wp-insights-client-recording-list-table.php');
 require_once(plugin_dir_path(dirname(__FILE__)).'class-wp-insights-db-utils.php');
 require_once(plugin_dir_path(dirname(__FILE__)).'class-wp-insights-utils.php');
@@ -453,7 +454,12 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         
         $cacheTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE;
         
-        $total_items = $wpdb->get_var("select count(distinct records.client_id) from ".$recordsTable." AS records");
+        $fromDate = $this->WP_Insights_Filters_Instance->fromDate;
+        $tillDate = $this->WP_Insights_Filters_Instance->tillDate;
+        
+        $total_items = $wpdb->get_var("select count(distinct records.client_id) from ".$recordsTable." AS records  WHERE 
+								        records.sess_date >= '$fromDate'
+								        AND records.sess_date <= '$tillDate 23:59:59'");
         
         /**
          * Instead of querying a database, we're going to fetch the example data
@@ -479,7 +485,8 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         		$recordsTable.".*, ".$browsersTable.".name as browser_name, ".$osTable.".name as os_name, ".$cacheTable.".url as url",
         		$where." ORDER BY ".$recordsTable.".id DESC, ".$recordsTable.".client_id LIMIT ".($current_page-1)*$per_page.",".$per_page
         ); */
-        
+
+		      
         $sql = "SELECT 
         records.client_id,
         MAX(records.id) as id,
@@ -500,8 +507,8 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         LEFT OUTER JOIN $browsersTable as browsers ON records.browser_id = browsers.id
         LEFT OUTER JOIN $osTable as oses ON records.os_id = oses.id
         WHERE
-        records.sess_date >= '$this->WP_Insights_Filters_Instance->fromDate'
-        AND records.sess_date <= '$this->WP_Insights_Filters_Instance->tillDate 23:59:59'
+        records.sess_date >= '$fromDate'
+        AND records.sess_date <= '$tillDate 23:59:59'
         GROUP BY records.client_id
         ORDER BY id desc
         LIMIT ".($current_page-1)*$per_page.",".$per_page;                
