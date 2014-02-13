@@ -166,8 +166,8 @@ class WP_Insights_Recorder {
 		
 		//$browser = new Browser();
 		try {
-			//$bc = new Browscap($this->cache_dir."browscapcache/",plugin_dir_path(__FILE__)."utils/full_php_browscap.ini");
-			$bc = new Browscap($this->cache_dir."browscapcache/");
+			$bc = new Browscap($this->cache_dir."browscapcache/",plugin_dir_path(__FILE__)."utils/full_php_browscap.ini");
+			//$bc = new Browscap($this->cache_dir."browscapcache/");
 			$current_browser = $bc->getBrowser();
 		} catch (Exception $e) {
 			$current_browser = array(
@@ -536,87 +536,90 @@ class WP_Insights_Recorder {
 		$currentPageSection = urldecode(stripslashes($_POST['currentPageSection']));
 		$pageSections  = json_decode($pageSections_json, true);
 		
-		$pagesections_table = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_PAGE_SECTIONS;
-		$psInsertCheckQuery = "SELECT count(id) as count from $pagesections_table WHERE record_id = '".$_POST['uid']."'";
-		error_log("psInsertCheckQuery : $psInsertCheckQuery");
-		$psRecordCount = $this->wp_insights_db_utils->db_query($psInsertCheckQuery);
-		error_log("psRecordCount : ".print_r($psRecordCount,true));
-		if(null != $psRecordCount[0]['count'] && $psRecordCount[0]['count']>0) {
-			error_log("Inside update");
-			$pageSectionUpdateQuery = "UPDATE $pagesections_table SET ";
-			$currentPageSectionCaseStmt = "current_page_section = CASE section_id ";
-			$sessTimeCaseStmt = "sess_time = CASE section_id ";
-			$focusTimeCaseStmt = "focus_time = CASE section_id ";
-			$lostFocusCountCaseStmt = "lost_focus_count = CASE section_id ";
-			$entryTimesCaseStmt = "entryTimes = CASE section_id ";
-			$exitTimesCaseStmt = "exitTimes = CASE section_id ";
-			$focusedEntryTimesCaseStmt = "focusedEntryTimes = CASE section_id ";
-			$focusedExitTimesCaseStmt = "focusedExitTimes = CASE section_id ";
-			foreach($pageSections as $pageSection){
-				if($currentPageSection == $pageSection['sectionName']){
-					if(sizeof($pageSection['exitTimes']) < sizeof($pageSection['entryTimes'])){
-						array_push($pageSection['exitTimes'],$_POST['time']);
-						$entryTimesLastIndex = sizeof($pageSection['entryTimes']) - 1;
-						$exitTimesLastIndex = sizeof($pageSection['exitTimes']) - 1;
-						$pageSection['totalTime'] = $pageSection['totalTime'] + ($pageSection['exitTimes'][$exitTimesLastIndex] - $pageSection['entryTimes'][$entryTimesLastIndex]);
+		if(sizeof($pageSections) > 0) {
+			$pagesections_table = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_PAGE_SECTIONS;
+			$psInsertCheckQuery = "SELECT count(id) as count from $pagesections_table WHERE record_id = '".$_POST['uid']."'";
+			error_log("psInsertCheckQuery : $psInsertCheckQuery");
+			$psRecordCount = $this->wp_insights_db_utils->db_query($psInsertCheckQuery);
+			error_log("psRecordCount : ".print_r($psRecordCount,true));
+			if(null != $psRecordCount[0]['count'] && $psRecordCount[0]['count']>0) {
+				error_log("Inside update");
+				$pageSectionUpdateQuery = "UPDATE $pagesections_table SET ";
+				$currentPageSectionCaseStmt = "current_page_section = CASE section_id ";
+				$sessTimeCaseStmt = "sess_time = CASE section_id ";
+				$focusTimeCaseStmt = "focus_time = CASE section_id ";
+				$lostFocusCountCaseStmt = "lost_focus_count = CASE section_id ";
+				$entryTimesCaseStmt = "entryTimes = CASE section_id ";
+				$exitTimesCaseStmt = "exitTimes = CASE section_id ";
+				$focusedEntryTimesCaseStmt = "focusedEntryTimes = CASE section_id ";
+				$focusedExitTimesCaseStmt = "focusedExitTimes = CASE section_id ";
+				foreach($pageSections as $pageSection){
+					if($currentPageSection == $pageSection['sectionName']){
+						if(sizeof($pageSection['exitTimes']) < sizeof($pageSection['entryTimes'])){
+							array_push($pageSection['exitTimes'],$_POST['time']);
+							$entryTimesLastIndex = sizeof($pageSection['entryTimes']) - 1;
+							$exitTimesLastIndex = sizeof($pageSection['exitTimes']) - 1;
+							$pageSection['totalTime'] = $pageSection['totalTime'] + ($pageSection['exitTimes'][$exitTimesLastIndex] - $pageSection['entryTimes'][$entryTimesLastIndex]);
+						}
+						if(sizeof($pageSection['focusedExitTimes']) < sizeof($pageSection['focusedEntryTimes'])){
+							array_push($pageSection['focusedExitTimes'],$_POST['focusedTime']);
+							$focusedEntryTimesLastIndex = sizeof($pageSection['focusedEntryTimes']) - 1;
+							$focusedExitTimesLastIndex = sizeof($pageSection['focusedExitTimes']) - 1;
+							$pageSection['totalFocusedTime'] = $pageSection['totalFocusedTime'] + ($pageSection['focusedExitTimes'][$focusedExitTimesLastIndex] - $pageSection['focusedEntryTimes'][$focusedEntryTimesLastIndex]);
+						}
 					}
-					if(sizeof($pageSection['focusedExitTimes']) < sizeof($pageSection['focusedEntryTimes'])){
-						array_push($pageSection['focusedExitTimes'],$_POST['focusedTime']);
-						$focusedEntryTimesLastIndex = sizeof($pageSection['focusedEntryTimes']) - 1;
-						$focusedExitTimesLastIndex = sizeof($pageSection['focusedExitTimes']) - 1;
-						$pageSection['totalFocusedTime'] = $pageSection['totalFocusedTime'] + ($pageSection['focusedExitTimes'][$focusedExitTimesLastIndex] - $pageSection['focusedEntryTimes'][$focusedEntryTimesLastIndex]);
-					}
+					$currentPageSectionCaseStmt .= "WHEN '" . $pageSection['sectionId'] . "' THEN " . $pageSection['currentPageSection'] . " ";
+					$sessTimeCaseStmt .= "WHEN '" . $pageSection['sectionId'] . "' THEN " . $pageSection['totalTime'] . " ";
+					$focusTimeCaseStmt .= "WHEN '" . $pageSection['sectionId'] . "' THEN " . $pageSection['totalFocusedTime'] . " ";
+					$lostFocusCountCaseStmt .= "WHEN '" . $pageSection['sectionId'] . "' THEN " . $pageSection['lostFocusCount'] . " ";
+					$entryTimesCaseStmt .= "WHEN '" . $pageSection['sectionId'] . "' THEN '" . implode(",", $pageSection['entryTimes']) . "' ";
+					$exitTimesCaseStmt .= "WHEN '" . $pageSection['sectionId'] . "' THEN '" . implode(",", $pageSection['exitTimes']) . "' ";
+					$focusedEntryTimesCaseStmt .= "WHEN '" . $pageSection['sectionId'] . "' THEN '" . implode(",", $pageSection['focusedEntryTimes']) . "' ";
+					$focusedExitTimesCaseStmt .= "WHEN '" . $pageSection['sectionId'] . "' THEN '" . implode(",", $pageSection['focusedExitTimes']) . "' ";
 				}
-				$currentPageSectionCaseStmt .= "WHEN '" . $pageSection['sectionId'] . "' THEN " . $pageSection['currentPageSection'] . " ";
-				$sessTimeCaseStmt .= "WHEN '" . $pageSection['sectionId'] . "' THEN " . $pageSection['totalTime'] . " ";
-				$focusTimeCaseStmt .= "WHEN '" . $pageSection['sectionId'] . "' THEN " . $pageSection['totalFocusedTime'] . " ";
-				$lostFocusCountCaseStmt .= "WHEN '" . $pageSection['sectionId'] . "' THEN " . $pageSection['lostFocusCount'] . " ";
-				$entryTimesCaseStmt .= "WHEN '" . $pageSection['sectionId'] . "' THEN '" . implode(",", $pageSection['entryTimes']) . "' ";
-				$exitTimesCaseStmt .= "WHEN '" . $pageSection['sectionId'] . "' THEN '" . implode(",", $pageSection['exitTimes']) . "' ";
-				$focusedEntryTimesCaseStmt .= "WHEN '" . $pageSection['sectionId'] . "' THEN '" . implode(",", $pageSection['focusedEntryTimes']) . "' ";
-				$focusedExitTimesCaseStmt .= "WHEN '" . $pageSection['sectionId'] . "' THEN '" . implode(",", $pageSection['focusedExitTimes']) . "' ";
-			}
-			$currentPageSectionCaseStmt .= "ELSE current_page_section END, ";
-			$sessTimeCaseStmt .= "ELSE sess_time END, ";
-			$focusTimeCaseStmt .= "ELSE focus_time END, ";
-			$lostFocusCountCaseStmt .= "ELSE lost_focus_count END, ";
-			$entryTimesCaseStmt .= "ELSE entryTimes END, ";
-			$exitTimesCaseStmt .= "ELSE exitTimes END, ";
-			$focusedEntryTimesCaseStmt .= "ELSE focusedEntryTimes END, ";
-			$focusedExitTimesCaseStmt .= "ELSE focusedExitTimes END ";
-			$pageSectionUpdateQuery = $pageSectionUpdateQuery
-			.$currentPageSectionCaseStmt
-			.$sessTimeCaseStmt
-			.$focusTimeCaseStmt
-			.$lostFocusCountCaseStmt
-			.$entryTimesCaseStmt
-			.$exitTimesCaseStmt
-			.$focusedEntryTimesCaseStmt
-			.$focusedExitTimesCaseStmt;
-			$pageSectionUpdateQuery .= "WHERE record_id = ".$_POST['uid'];
-			$this->wp_insights_db_utils->db_query($pageSectionUpdateQuery);
-		} else {
-			error_log("Inside insert");
-			$pageSectionInsertQuery = "INSERT into $pagesections_table (record_id, section_order, section_id, section_name, sess_time, focus_time, current_page_section, lost_focus_count, entryTimes, exitTimes, focusedEntryTimes, focusedExitTimes) VALUES ";
-			$pageSectionValues = " ";
-			foreach($pageSections as $pageSection){
-				$pageSectionValues .= "(".$_POST['uid'].",";
-				$pageSectionValues .= $pageSection['order'].",";
-				$pageSectionValues .= "'".$pageSection['sectionId']."',";
-				$pageSectionValues .= "'".$pageSection['sectionName']."',";
-				$pageSectionValues .= $pageSection['totalTime'].",";
-				$pageSectionValues .= $pageSection['totalFocusedTime'].",";
-				$pageSectionValues .= $pageSection['currentPageSection'].",";
-				$pageSectionValues .= $pageSection['lostFocusCount'].",";
-				$pageSectionValues .= "'".implode(",", $pageSection['entryTimes'])."',";
-				$pageSectionValues .= "'".implode(",", $pageSection['exitTimes'])."',";
-				$pageSectionValues .= "'".implode(",", $pageSection['focusedEntryTimes'])."',";
-				$pageSectionValues .= "'".implode(",", $pageSection['focusedExitTimes'])."'),";
-			}
-			$pageSectionValues = rtrim($pageSectionValues, ",");
-			$pageSectionInsertQuery .= $pageSectionValues;
-			$this->wp_insights_db_utils->db_query($pageSectionInsertQuery);
+				$currentPageSectionCaseStmt .= "ELSE current_page_section END, ";
+				$sessTimeCaseStmt .= "ELSE sess_time END, ";
+				$focusTimeCaseStmt .= "ELSE focus_time END, ";
+				$lostFocusCountCaseStmt .= "ELSE lost_focus_count END, ";
+				$entryTimesCaseStmt .= "ELSE entryTimes END, ";
+				$exitTimesCaseStmt .= "ELSE exitTimes END, ";
+				$focusedEntryTimesCaseStmt .= "ELSE focusedEntryTimes END, ";
+				$focusedExitTimesCaseStmt .= "ELSE focusedExitTimes END ";
+				$pageSectionUpdateQuery = $pageSectionUpdateQuery
+				.$currentPageSectionCaseStmt
+				.$sessTimeCaseStmt
+				.$focusTimeCaseStmt
+				.$lostFocusCountCaseStmt
+				.$entryTimesCaseStmt
+				.$exitTimesCaseStmt
+				.$focusedEntryTimesCaseStmt
+				.$focusedExitTimesCaseStmt;
+				$pageSectionUpdateQuery .= "WHERE record_id = ".$_POST['uid'];
+				$this->wp_insights_db_utils->db_query($pageSectionUpdateQuery);
+			} else {
+				error_log("Inside insert");
+				$pageSectionInsertQuery = "INSERT into $pagesections_table (record_id, section_order, section_id, section_name, sess_time, focus_time, current_page_section, lost_focus_count, entryTimes, exitTimes, focusedEntryTimes, focusedExitTimes) VALUES ";
+				$pageSectionValues = " ";
+				foreach($pageSections as $pageSection){
+					$pageSectionValues .= "(".$_POST['uid'].",";
+					$pageSectionValues .= $pageSection['order'].",";
+					$pageSectionValues .= "'".$pageSection['sectionId']."',";
+					$pageSectionValues .= "'".$pageSection['sectionName']."',";
+					$pageSectionValues .= $pageSection['totalTime'].",";
+					$pageSectionValues .= $pageSection['totalFocusedTime'].",";
+					$pageSectionValues .= $pageSection['currentPageSection'].",";
+					$pageSectionValues .= $pageSection['lostFocusCount'].",";
+					$pageSectionValues .= "'".implode(",", $pageSection['entryTimes'])."',";
+					$pageSectionValues .= "'".implode(",", $pageSection['exitTimes'])."',";
+					$pageSectionValues .= "'".implode(",", $pageSection['focusedEntryTimes'])."',";
+					$pageSectionValues .= "'".implode(",", $pageSection['focusedExitTimes'])."'),";
+				}
+				$pageSectionValues = rtrim($pageSectionValues, ",");
+				$pageSectionInsertQuery .= $pageSectionValues;
+				$this->wp_insights_db_utils->db_query($pageSectionInsertQuery);
+			}			
 		}
+
 		
 		
 		//error_log(print_r($pageSections, true));

@@ -720,74 +720,79 @@
     initPageSections: function()
     {
     	var pageSectionSeparators = jQuery_1_10_2("img.wpipagesection");
-		var pageSection = {
-	 			sectionId : "wpi_page_section_00",
-				sectionName : "Page Start",
-				order : 0,
-				top : 0,
-				bottom : Math.round(jQuery_1_10_2(pageSectionSeparators.get(0)).offset().top),
-				prevSectionId: "",
-				prevSectionName: "",
-				nextSectionId: jQuery_1_10_2(pageSectionSeparators.get(0)).data("psid"),
-				nextSectionName: jQuery_1_10_2(pageSectionSeparators.get(0)).data("psname"),
-				viewed: false,
-				entryTimes: [],
-				exitTimes: [],
-				focusedEntryTimes: [],
-				focusedExitTimes: [],
-				totalTime: 0,
-				totalFocusedTime: 0,
-				lostFocusCount: 0,
-				currentPageSection: 0
-	 	};
+    	if(pageSectionSeparators.length > 0) {
+    		var pageSection = {
+    		   	 			sectionId : "wpi_page_section_00",
+    		   				sectionName : "Page Start",
+    		   				order : 0,
+    		   				top : 0,
+    		   				bottom : Math.round(jQuery_1_10_2(pageSectionSeparators.get(0)).offset().top),
+    		   				prevSectionId: "",
+    		   				prevSectionName: "",
+    		   				nextSectionId: jQuery_1_10_2(pageSectionSeparators.get(0)).data("psid"),
+    		   				nextSectionName: jQuery_1_10_2(pageSectionSeparators.get(0)).data("psname"),
+    		   				viewed: false,
+    		   				entryTimes: [],
+    		   				exitTimes: [],
+    		   				focusedEntryTimes: [],
+    		   				focusedExitTimes: [],
+    		   				totalTime: 0,
+    		   				totalFocusedTime: 0,
+    		   				lostFocusCount: 0,
+    		   				currentPageSection: 0
+    		   	 	};
 
-		smtRec.pageSections.push(pageSection);
-	
-		pageSectionSeparators.each(function(index) {
-			pageSection = {
-			 		sectionId : jQuery_1_10_2(pageSectionSeparators.get(index)).data("psid"),
-					sectionName : jQuery_1_10_2(pageSectionSeparators.get(index)).data("psname"),
-					order : index+1,
-					top : Math.round(jQuery_1_10_2(pageSectionSeparators.get(index)).offset().top),
-					bottom : "",
-					prevSectionId: "",
-					prevSectionName: "",
-					nextSectionId: "",
-					nextSectionName: "",
-					viewed: false,
-					entryTimes: [],
-					exitTimes: [],
-					focusedEntryTimes: [],
-					focusedExitTimes: [],
-					totalTime: 0,
-					totalFocusedTime: 0,
-					lostFocusCount: 0,
-					currentPageSection: 0
-			 	};				  							
-	
-			if(index>0) {
-				pageSection.prevSectionId = jQuery_1_10_2(pageSectionSeparators.get(index - 1)).data("psid");
-				pageSection.prevSectionName = jQuery_1_10_2(pageSectionSeparators.get(index - 1)).data("psname");
-			} else {
-				pageSection.prevSectionId = "wpi_page_section_00";
-				pageSection.prevSectionName = "Page Start";
-			}
-			
-			if (index < pageSectionSeparators.size() - 1) {
-				pageSection.bottom = Math.round(jQuery_1_10_2(pageSectionSeparators.get(index+1)).offset().top);
-				pageSection.nextSectionId = jQuery_1_10_2(pageSectionSeparators.get(index + 1)).data("psid");
-				pageSection.nextSectionName = jQuery_1_10_2(pageSectionSeparators.get(index + 1)).data("psname");
-		 	} else {
-		 		pageSection.bottom = (jQuery_1_10_2(document).height() < jQuery_1_10_2(window).height()) ? Math.round(jQuery_1_10_2(window).height()) : Math.round(jQuery_1_10_2(document).height());
-		 		pageSection.nextSectionId = "wpi_page_section_999";
-				pageSection.nextSectionName = "Page End";
-		 	}
-	
-			smtRec.pageSections.push(pageSection);			  								
-	            
-		});
-		smt2fn.log(smtRec.pageSections);
-		smtRec.updatePageSections();
+    		   		smtRec.pageSections.push(pageSection);
+    		   	
+    		   		pageSectionSeparators.each(function(index) {
+    		   			pageSection = {
+    		   			 		sectionId : jQuery_1_10_2(pageSectionSeparators.get(index)).data("psid"),
+    		   					sectionName : jQuery_1_10_2(pageSectionSeparators.get(index)).data("psname"),
+    		   					order : index+1,
+    		   					top : Math.round(jQuery_1_10_2(pageSectionSeparators.get(index)).offset().top),
+    		   					bottom : "",
+    		   					prevSectionId: "",
+    		   					prevSectionName: "",
+    		   					nextSectionId: "",
+    		   					nextSectionName: "",
+    		   					viewed: false,
+    		   					entryTimes: [],
+    		   					exitTimes: [],
+    		   					focusedEntryTimes: [],
+    		   					focusedExitTimes: [],
+    		   					totalTime: 0,
+    		   					totalFocusedTime: 0,
+    		   					lostFocusCount: 0,
+    		   					currentPageSection: 0
+    		   			 	};				  							
+    		   	
+    		   			if(index>0) {
+    		   				pageSection.prevSectionId = jQuery_1_10_2(pageSectionSeparators.get(index - 1)).data("psid");
+    		   				pageSection.prevSectionName = jQuery_1_10_2(pageSectionSeparators.get(index - 1)).data("psname");
+    		   			} else {
+    		   				pageSection.prevSectionId = "wpi_page_section_00";
+    		   				pageSection.prevSectionName = "Page Start";
+    		   			}
+    		   			
+    		   			if (index < pageSectionSeparators.size() - 1) {
+    		   				pageSection.bottom = Math.round(jQuery_1_10_2(pageSectionSeparators.get(index+1)).offset().top);
+    		   				pageSection.nextSectionId = jQuery_1_10_2(pageSectionSeparators.get(index + 1)).data("psid");
+    		   				pageSection.nextSectionName = jQuery_1_10_2(pageSectionSeparators.get(index + 1)).data("psname");
+    		   		 	} else {
+    		   		 		pageSection.bottom = (jQuery_1_10_2(document).height() < jQuery_1_10_2(window).height()) ? Math.round(jQuery_1_10_2(window).height()) : Math.round(jQuery_1_10_2(document).height());
+    		   		 		pageSection.nextSectionId = "wpi_page_section_999";
+    		   				pageSection.nextSectionName = "Page End";
+    		   		 	}
+    		   	
+    		   			smtRec.pageSections.push(pageSection);			  								
+    		   	            
+    		   		});
+    		   		smt2fn.log(smtRec.pageSections);
+    		   		smtRec.updatePageSections();
+    	
+    	}
+    	
+		
     },
     /** 
      * System initialization.
@@ -885,13 +890,20 @@
     		smtRec.lostFocusCount += 1;
     		smtRec.elem.lostFocus.push(smtRec.elem.hovered[smtRec.elem.hovered.length - 1]);
     		var currentPageSectionIndex = smtRec.find_in_array(smtRec.pageSections,"sectionName",smtRec.currentPageSection);
-    		smtRec.pageSections[currentPageSectionIndex].lostFocusCount += 1;
+    		if(currentPageSectionIndex != false) {
+    			smtRec.pageSections[currentPageSectionIndex].lostFocusCount += 1;
+    		}	
+    		
     		smt2fn.log("On Blur Timestamp: " + smtRec.lastBlurTimeStamp);
     	});
       
-      jQuery_1_10_2(window).scrollStopped(500,function(){
-    	  smtRec.updatePageSections();
-		}); 
+      if(smtRec.pageSections.length>0) {
+    	  jQuery_1_10_2(window).scrollStopped(500,function(){
+        	  smtRec.updatePageSections();
+    		}); 
+      }
+      
+      
     	
       
       /*

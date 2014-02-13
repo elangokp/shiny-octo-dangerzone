@@ -7,8 +7,8 @@
   <property name="plugins-folder" location="D:\Setups\Xampp\htdocs\wordpress\wp-content\plugins"/>
   <property name="exports-folder" location="C:\Users\Elango\Desktop\exports-folder"/>
   
-  <taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask"
-           classpath="../build/taskjars/compiler.jar"/>
+  <!--<taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask"
+           classpath="../build/taskjars/compiler.jar"/>-->
 
   <target name="clean" description="clean up" >
     <delete dir="${plugins-folder}\${plugin-name}"/>
@@ -19,7 +19,7 @@
     <mkdir dir="${exports-folder}"/>
   </target>
   
-  <target name="compile">
+  <!--<target name="compile">
     
     <jscomp compilationLevel="simple" warning="verbose" 
             debug="false" output="../js/wpi-js.min.js">
@@ -33,7 +33,7 @@
 
     </jscomp>
     
-  </target>
+  </target>-->
   
   <target name="deploy" depends="clean">
     <!-- Create the time stamp -->
