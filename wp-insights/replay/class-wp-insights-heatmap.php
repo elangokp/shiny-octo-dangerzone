@@ -4,6 +4,7 @@ require_once(plugin_dir_path(dirname(__FILE__)).'class-wp-insights-db-utils.php'
 require_once(plugin_dir_path(dirname(__FILE__)).'class-wp-insights-utils.php');
 require_once(plugin_dir_path(dirname(__FILE__)).'utils/class-point.php');
 require_once(plugin_dir_path(dirname(__FILE__)).'utils/class-domutil.php');
+require_once(plugin_dir_path(dirname(__FILE__)).'views/class-wp-insights-filters.php');
 
 class WP_Insights_Heatmap {
 	
@@ -39,8 +40,11 @@ class WP_Insights_Heatmap {
 	
 	protected $hoverClickData = "";
 	
+	protected $WP_Insights_Filters_Instance = null;
+	
 	public function __construct($lrid, $hmtype, $scrx, $scry, $version) {
 		global $wpdb;
+		$this->WP_Insights_Filters_Instance = new WP_Insights_Filters();
 		$this->lrid = $lrid;
 		$this->hmtype = $hmtype;
 		$this->scrx = $scrx;
@@ -370,6 +374,8 @@ class WP_Insights_Heatmap {
 						action: "wpimouseeventdata",
 						lrid: '.$this->lrid.',
 						dt: "'.$this->hmtype.'",
+						fd: "'.$this->WP_Insights_Filters_Instance->fromDate.'",
+						td: "'.$this->WP_Insights_Filters_Instance->tillDate.'",
 						recordsPerRequest: 100,
 						heatmapCompleted: false
 						};
@@ -379,9 +385,10 @@ class WP_Insights_Heatmap {
 					var heatmap = null;					
 					
 					function loadIntoHeatmap(data) {
+						console.log("Into loadIntoHeatmap");
 						jQuery.each(data, function (index, value) {
 																try {
-																	//console.log(value.cp + " " + value.w + " " + value.h);
+																	console.log(value.cp + " " + value.w + " " + value.h);
 																	var element = jQuery( document ).find(value.cp);
 																	if(typeof element != undefined) {
 																		var xdiscrepancy = jQuery(element).width()/value.w;
@@ -401,10 +408,12 @@ class WP_Insights_Heatmap {
 																}
 														});
 														if(data.length > 0) {
+															console.log("Into data length greater than 0");
 															fromRecordNumber = tillRecordNumber+1;
 															tillRecordNumber = tillRecordNumber + (heatmapOptions.recordsPerRequest-1);
-															getData();
+															setTimeout(getData(),0);
 														} else {
+															console.log("Into data length less than or equal to 0");
 															heatmapOptions.heatmapCompleted = true;	
 														}
 					}
@@ -419,7 +428,7 @@ class WP_Insights_Heatmap {
 												frn: fromRecordNumber,
 												trn: tillRecordNumber
 												}).done(function(data) {
-															loadIntoHeatmap(data);
+															setTimeout(loadIntoHeatmap(data),0);
 													});	
 					}
 					
@@ -456,7 +465,10 @@ class WP_Insights_Heatmap {
 						action: "wpimouseeventdata",
 						lrid: '.$this->lrid.',
 						dt: "'.$this->hmtype.'",
-						recordsPerRequest: 100
+						fd: "'.$this->WP_Insights_Filters_Instance->fromDate.'",
+						td: "'.$this->WP_Insights_Filters_Instance->tillDate.'",
+						recordsPerRequest: 100,
+						heatmapCompleted: false
 						};
 						
 					
@@ -510,6 +522,8 @@ class WP_Insights_Heatmap {
 															fromRecordNumber = tillRecordNumber+1;
 															tillRecordNumber = tillRecordNumber + (heatmapOptions.recordsPerRequest-1);
 															getData();
+														} else {
+															heatmapOptions.heatmapCompleted = true;	
 														}
 					}
 					

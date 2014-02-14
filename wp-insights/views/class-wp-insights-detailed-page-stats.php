@@ -1,5 +1,6 @@
 <?php
 
+require_once(plugin_dir_path(__FILE__).'class-wp-insights-filters.php');
 require_once(plugin_dir_path(dirname(__FILE__)).'class-wp-insights-db-utils.php');
 require_once(plugin_dir_path(dirname(__FILE__)).'class-wp-insights-utils.php');
 
@@ -37,11 +38,16 @@ class WP_Insights_Detailed_Page_Stats {
 	
 	protected $cacheTable = null;
 	
+	protected $WP_Insights_Filters_Instance = null;
+	
 	public function __construct($lrid) {
 		global $wpdb;
 		$this->lrid = $lrid;
 		$this->wp_insights_db_utils = WP_Insights_DB_Utils::get_instance();
 		$this->wp_insights_db_utils->setWpdb($wpdb);
+		
+		$this->WP_Insights_Filters_Instance = new WP_Insights_Filters();
+		
 		$this->recordsTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
 		
 		$this->browsersTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_BROWSERS;
@@ -59,6 +65,8 @@ class WP_Insights_Detailed_Page_Stats {
 				." INNER JOIN ".$this->cacheTable." AS C2"." ON C2.url = C1.url",
 				"C1.url,R.sess_time,AVG(R.sess_time) as avg_sess_time,R.coords_x,R.coords_y,R.vp_width,R.vp_height,R.scr_width,R.scr_height",
 				"C2.id = ".$this->pid); */
+		$fromDate = $this->WP_Insights_Filters_Instance->fromDate;
+		$tillDate = $this->WP_Insights_Filters_Instance->tillDate;
 		
 		$sql = "SELECT records.cleansed_url as url, 
     			max(records.id) as latest_record_id,
@@ -81,7 +89,9 @@ class WP_Insights_Detailed_Page_Stats {
 				LEFT OUTER JOIN $this->recordsTable AS records2 ON records.id = records2.id and records2.focus_time>120
 				LEFT OUTER JOIN $this->recordsTable AS records3 ON records.id = records3.id and records3.focus_time>300
 				LEFT OUTER JOIN $this->recordsTable AS records4 ON records.id = records4.id and records4.focus_time>600
-				where records0.id=$this->lrid";
+				where records0.id=$this->lrid
+				AND records.sess_date >= '$fromDate'
+        		AND records.sess_date <= '$tillDate 23:59:59'";
 				
 		$this->records = $this->wp_insights_db_utils->db_query($sql);
 				
@@ -161,5 +171,9 @@ class WP_Insights_Detailed_Page_Stats {
 	
 	public function getPassion() {
 		return $this->passion;
+	}
+	
+	public function displayFilters() {
+		return $this->WP_Insights_Filters_Instance->display();
 	}
 }

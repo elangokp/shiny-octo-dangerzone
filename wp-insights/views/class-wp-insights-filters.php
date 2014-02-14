@@ -44,7 +44,7 @@ class WP_Insights_Filters {
 		<input id="fromDate" type="text" name="fromDate" value="<?php echo $this->fromDate?>" /> 
 		<label for="tillDate">Till:</label> 
 		<input id="tillDate" type="text" name="tillDate" value="<?php echo $this->tillDate?>" /> 
+		<input type="submit" name="filterSubmit" id="filterSubmit" class="button" value="Filter">
 		<?php
-		submit_button( 'Filter', 'button', false, false, array('id' => 'searchSubmit') );
 	}
 }

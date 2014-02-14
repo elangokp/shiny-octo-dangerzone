@@ -321,7 +321,7 @@ class WP_Insights {
 	 */
 	public function enqueue_admin_styles() {
 		
-		$screen_id = get_current_screen()->id;
+		//$screen_id = get_current_screen()->id;
 		
 		//if ( stripos($screen_id, 'wp-insights') !== FALSE ) {
 			wp_enqueue_style( $this->plugin_slug .'-admin-styles', plugins_url( 'css/admin.css', __FILE__ ), array(), self::VERSION );
