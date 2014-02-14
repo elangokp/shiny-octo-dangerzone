@@ -25,6 +25,13 @@ if(isset($_GET['lrid'])) {
 		<img
 			src="<?php echo plugin_dir_url(dirname(__FILE__)).'assets/eye-32.png'?>" />
 	</div>
+	<h2>
+		<?php echo esc_html( $WP_Insights_Detailed_Page_Stats_Instance->getUrl()); ?>
+		<a
+			href="<?php echo esc_html( $WP_Insights_Detailed_Page_Stats_Instance->getUrl()); ?>"
+			target="_blank">Open</a>
+	</h2>
+	<a href="admin.php?page=<?php echo $_REQUEST['page']?>">&lt;- Back to Pages List</a>
 	<form id="wpi-detailed-page-stats" method="get" style="margin-top: 10px">
 	<input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
 	<input type="hidden" name="lrid" value="<?php echo $lrid ?>" />
@@ -32,16 +39,7 @@ if(isset($_GET['lrid'])) {
 		<div class="alignright">
 			<?php echo $WP_Insights_Detailed_Page_Stats_Instance->displayFilters();?>
 		</div>
-	</div>
-	<h2>
-		<?php echo esc_html( $WP_Insights_Detailed_Page_Stats_Instance->getUrl()); ?>
-		<a
-			href="<?php echo esc_html( $WP_Insights_Detailed_Page_Stats_Instance->getUrl()); ?>"
-			target="_blank">Open</a>
-	</h2>
-	<a href="admin.php?page=<?php echo $_REQUEST['page']?>">&lt;- Back to
-		Pages List</a>
-	
+	</div>	
 	
 		<div id="pageViews" class="wpi-form-field">
 			<label><b>Page Views: </b></label>

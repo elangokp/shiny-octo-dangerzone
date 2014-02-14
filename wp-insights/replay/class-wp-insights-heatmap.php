@@ -376,12 +376,11 @@ class WP_Insights_Heatmap {
 						dt: "'.$this->hmtype.'",
 						fd: "'.$this->WP_Insights_Filters_Instance->fromDate.'",
 						td: "'.$this->WP_Insights_Filters_Instance->tillDate.'",
-						recordsPerRequest: 100,
+						recordsPerPage: 100,
 						heatmapCompleted: false
 						};
-						
-					var fromRecordNumber = 0;
-					var tillRecordNumber = heatmapOptions.recordsPerRequest-1;	
+							
+					var currentPageNo = 1;
 					var heatmap = null;					
 					
 					function loadIntoHeatmap(data) {
@@ -409,8 +408,7 @@ class WP_Insights_Heatmap {
 														});
 														if(data.length > 0) {
 															console.log("Into data length greater than 0");
-															fromRecordNumber = tillRecordNumber+1;
-															tillRecordNumber = tillRecordNumber + (heatmapOptions.recordsPerRequest-1);
+															currentPageNo = currentPageNo+1;
 															setTimeout(getData(),0);
 														} else {
 															console.log("Into data length less than or equal to 0");
@@ -425,8 +423,8 @@ class WP_Insights_Heatmap {
 												dt: heatmapOptions.dt,
 												fd: heatmapOptions.fd,
 												td: heatmapOptions.td,
-												frn: fromRecordNumber,
-												trn: tillRecordNumber
+												cpn: currentPageNo,
+												rpp: heatmapOptions.recordsPerPage
 												}).done(function(data) {
 															setTimeout(loadIntoHeatmap(data),0);
 													});	
@@ -434,7 +432,7 @@ class WP_Insights_Heatmap {
 					
 					jQuery(document).ready(function(){
 										heatmap = h337.create({"element":document.getElementsByTagName("body")[0], "radius":10, "visible":true});
-										getData();					
+										setTimeout(getData(),0);				
 		});';
 		$this->invokeheatmapJsElement = $this->doc->createInlineScript($cdata);
 		$heads = $this->doc->getElementsByTagName("head");
@@ -473,8 +471,7 @@ class WP_Insights_Heatmap {
 						
 					
 					
-					var fromRecordNumber = 0;
-					var tillRecordNumber = heatmapOptions.recordsPerRequest-1;	
+					var currentPageNo = 1;
 					var stage = null;		
 					var layer = null;
 					
@@ -519,9 +516,8 @@ class WP_Insights_Heatmap {
 														});
 														stage.add(layer);
 														if(data.length > 0) {
-															fromRecordNumber = tillRecordNumber+1;
-															tillRecordNumber = tillRecordNumber + (heatmapOptions.recordsPerRequest-1);
-															getData();
+															currentPageNo = currentPageNo+1;
+															setTimeout(getData(),0);
 														} else {
 															heatmapOptions.heatmapCompleted = true;	
 														}
@@ -534,10 +530,10 @@ class WP_Insights_Heatmap {
 												dt: heatmapOptions.dt,
 												fd: heatmapOptions.fd,
 												td: heatmapOptions.td,
-												frn: fromRecordNumber,
-												trn: tillRecordNumber
+												cpn: currentPageNo,
+												rpp: heatmapOptions.recordsPerPage
 												}).done(function(data) {
-															loadIntoHeatmap(data);
+															setTimeout(loadIntoHeatmap(data),0);
 													});	
 					}
 					
@@ -550,7 +546,7 @@ class WP_Insights_Heatmap {
 												visible: true
 											  });
 										layer = new Kinetic.Layer();
-										getData();					
+										setTimeout(getData(),0);				
 		});';
 		$drawMousePathsJsElement = $this->doc->createInlineScript($cdata);
 		$heads = $this->doc->getElementsByTagName("head");

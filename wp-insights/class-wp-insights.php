@@ -728,9 +728,9 @@ class WP_Insights {
 		$datatype = isset($_GET['dt'])?$_GET['dt']:null;
 		$fromDate = isset($_GET['fd'])?$_GET['fd']:null;
 		$tillDate = isset($_GET['td'])?$_GET['td']:null;
-		$fromRecordNumber = isset($_GET['frn'])?$_GET['frn']:null;
-		$tillRecordNumber = isset($_GET['trn'])?$_GET['trn']:null;
-		$WP_Insights_Event_Data_Instance = new WP_Insights_Event_Data($lrid,$datatype,$fromDate,$tillDate,$fromRecordNumber,$tillRecordNumber);
+		$currentPageNumber = isset($_GET['cpn'])?$_GET['cpn']:null;
+		$recordsPerPage = isset($_GET['rpp'])?$_GET['rpp']:null;
+		$WP_Insights_Event_Data_Instance = new WP_Insights_Event_Data($lrid,$datatype,$fromDate,$tillDate,$currentPageNumber,$recordsPerPage);
 		echo $WP_Insights_Event_Data_Instance->getMouseEventData();
 		die();
 	}

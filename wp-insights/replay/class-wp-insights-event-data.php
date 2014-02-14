@@ -15,7 +15,7 @@ class WP_Insights_Event_Data {
 	
 	protected $fromRecordNumber = null;
 	
-	protected $tillRecordNumber = null;
+	protected $recordsPerPage = null;
 	
 	protected $wp_insights_db_utils = null;
 	
@@ -27,7 +27,7 @@ class WP_Insights_Event_Data {
 	
 	protected $eventJsonResponse = null;
 	
-	public function __construct($lrid, $dataType, $fromDate=null, $tillDate=null, $fromRecordNumber = null, $tillRecordNumber = null) {
+	public function __construct($lrid, $dataType, $fromDate=null, $tillDate=null, $currentPageNumber = 1, $recordsPerPage = 100) {
 		global $wpdb;
 		$this->lrid = $lrid;
 		$this->dataType = $dataType;
@@ -39,8 +39,8 @@ class WP_Insights_Event_Data {
 			$this->tillDate = $tillDate." 23:59:59";
 		}
 
-		$this->fromRecordNumber = $fromRecordNumber;
-		$this->tillRecordNumber = $tillRecordNumber;
+		$this->fromRecordNumber = ($currentPageNumber-1) * $recordsPerPage;
+		$this->recordsPerPage = $recordsPerPage;
 		
 		$this->wp_insights_db_utils = WP_Insights_DB_Utils::get_instance();
 		$this->wp_insights_db_utils->setWpdb($wpdb);
@@ -54,7 +54,8 @@ class WP_Insights_Event_Data {
 			$this->constructHeatmapString();
 		} else {
 			$this->eventJsonResponse = 0;
-		}				
+		}
+		error_log($this->eventJsonResponse);			
 		return $this->eventJsonResponse;
 	}
 	
@@ -79,13 +80,15 @@ class WP_Insights_Event_Data {
 			$sql = $sql." AND R1.sess_date >= '$this->fromDate'
 			AND R1.sess_date <= '$this->tillDate'";
 		}
-		
+		$fromRecordNumber = $this->fromRecordNumber;
+		$recordsPerPage = $this->recordsPerPage;
 		$sql = $sql." ORDER BY R1.id";
+		$sql = $sql." LIMIT $fromRecordNumber , $recordsPerPage";
 		
-		if($this->fromRecordNumber != null & $this->tillRecordNumber !=null) {
+		/*if($this->fromRecordNumber != null & $this->tillRecordNumber !=null) {
 			$noOfRequestedRecords = ($this->tillRecordNumber - $this->fromRecordNumber) + 1;
 			$sql = $sql." LIMIT $this->fromRecordNumber , $noOfRequestedRecords";
-		}
+		}*/
 		
 		error_log($sql);
 		
@@ -117,11 +120,13 @@ class WP_Insights_Event_Data {
 			foreach ($this->records as $i => $record)
 			{
 				if($record['mousepositions'] != ""){
-					$lastJsonArrayString = end(explode("|~|",$record['mousepositions']));
+					$JsonArrayStrings = explode("|~|",$record['mousepositions']);
+					$lastJsonArrayString = end($JsonArrayStrings);
 					//error_log(print_r($lastJsonArrayString, true));
 					if($lastJsonArrayString != "") {					
 						if(strpos($lastJsonArrayString, "},{") !== false){
-							$exitPointJson = end(explode("},{",$lastJsonArrayString));
+							$pointsJson = explode("},{",$lastJsonArrayString);
+							$exitPointJson = end($pointsJson);
 							//error_log(print_r($exitPointJson, true));
 							$exitPointJson = "{".rtrim($exitPointJson, "]");
 							//error_log(print_r($exitPointJson, true));
