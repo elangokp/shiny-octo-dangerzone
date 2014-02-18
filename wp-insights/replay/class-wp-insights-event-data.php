@@ -82,6 +82,8 @@ class WP_Insights_Event_Data {
 		}
 		$fromRecordNumber = $this->fromRecordNumber;
 		$recordsPerPage = $this->recordsPerPage;
+		error_log($fromRecordNumber);
+		error_log($recordsPerPage);
 		$sql = $sql." ORDER BY R1.id";
 		$sql = $sql." LIMIT $fromRecordNumber , $recordsPerPage";
 		

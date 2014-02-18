@@ -11,17 +11,17 @@
  * @link      http://www.cybermint.com
  * @copyright 2013 CyberMint
  */
-$parse_uri = explode( 'wp-content', $_SERVER['SCRIPT_FILENAME'] );
-require_once( $parse_uri[0] . 'wp-load.php' );
+//$parse_uri = explode( 'wp-content', $_SERVER['SCRIPT_FILENAME'] );
+//require_once( $parse_uri[0] . 'wp-load.php' );
 require_once('class-wp-insights-filters.php');
-require_once( plugin_dir_path( dirname(__FILE__) ) . 'class-wp-insights.php' );
+require_once('class-wp-insights.php' );
 $WP_Insights_Filters_Instance = new WP_Insights_Filters();
 $WP_Insights_instance = WP_Insights::get_instance();
 $lrid = $_GET['lrid'];
 $hmtype = $_GET['hmtype'];
 $scrx = $_GET['scrx'];
 $scry = $_GET['scry'];
-plugins_url( 'js/admin.js', __FILE__ )
+//plugins_url( 'js/admin.js', __FILE__ )
 ?>
 <html>
 <head>
@@ -29,7 +29,7 @@ plugins_url( 'js/admin.js', __FILE__ )
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="../js/dev/jquery.blockUI.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
-<script src="<?php echo '../js/admin.js?ver='.$WP_Insights_instance::VERSION?>"></script>
+<script src="<?php echo '../js/admin.js?ver=7.5'?>"></script>
 <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
 </head>
 <body>
