@@ -14,9 +14,9 @@
 //$parse_uri = explode( 'wp-content', $_SERVER['SCRIPT_FILENAME'] );
 //require_once( $parse_uri[0] . 'wp-load.php' );
 require_once('class-wp-insights-filters.php');
-require_once('class-wp-insights.php' );
+//require_once('../class-wp-insights.php' );
 $WP_Insights_Filters_Instance = new WP_Insights_Filters();
-$WP_Insights_instance = WP_Insights::get_instance();
+//$WP_Insights_instance = WP_Insights::get_instance();
 $lrid = $_GET['lrid'];
 $hmtype = $_GET['hmtype'];
 $scrx = $_GET['scrx'];

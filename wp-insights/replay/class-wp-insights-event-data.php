@@ -51,7 +51,8 @@ class WP_Insights_Event_Data {
 	public function getMouseEventData() {
 		$this->loadMouseEventData();
 		if(!empty($this->records)) {
-			$this->constructHeatmapString();
+			//$this->constructHeatmapString();
+			$this->constructOptimizedHeatmapString();
 		} else {
 			$this->eventJsonResponse = 0;
 		}
@@ -95,6 +96,103 @@ class WP_Insights_Event_Data {
 		error_log($sql);
 		
 		$this->records = $this->wp_insights_db_utils->db_query($sql);
+	}
+	
+	protected function constructOptimizedHeatmapString() {
+	
+		if($this->dataType == 'mvh' || $this->dataType == 'clickh' || $this->dataType == 'lfh') {
+			
+			$heatmapPositions = array();
+			foreach ($this->records as $i => $record)
+			{
+				error_log($record['id'] . "=>" . $record['mousepositions']);
+				foreach(explode("|~|",$record['mousepositions']) as $j => $jsonArrayString){
+					error_log("   " . $j . " => " . $jsonArrayString);
+					if($jsonArrayString != "") {
+						/*$jsonArrayString = ltrim($jsonArrayString, "[");
+						$this->eventJsonResponse = rtrim($this->eventJsonResponse, "]");
+						if(strlen($this->eventJsonResponse)>1){
+							$this->eventJsonResponse = $this->eventJsonResponse.",";
+						}
+						$this->eventJsonResponse = $this->eventJsonResponse.$jsonArrayString;*/
+						$mousePositions  = json_decode($jsonArrayString, true);
+						foreach($mousePositions as $mousePosition){
+							if(!isset($heatmapPositions[$mousePosition['cp']])) {
+								$heatmapPositions[$mousePosition['cp']] = array(
+										"w" => array(),
+										"h" => array(),
+										"rX" => array(),
+										"rY" => array()
+								);
+							}
+							$heatmapPositions[$mousePosition['cp']]['w'][] = $mousePosition['w'];
+							$heatmapPositions[$mousePosition['cp']]['h'][] = $mousePosition['h'];
+							$heatmapPositions[$mousePosition['cp']]['rX'][] = $mousePosition['rX'];
+							$heatmapPositions[$mousePosition['cp']]['rY'][] = $mousePosition['rY'];
+						}
+					}
+	
+				}
+			}
+			print_r($heatmapPositions,true);
+			$this->eventJsonResponse = json_encode($heatmapPositions);
+			error_log($this->eventJsonResponse);
+			
+		} else if($this->dataType == 'exith') {
+			$this->eventJsonResponse = "[";
+			foreach ($this->records as $i => $record)
+			{
+				if($record['mousepositions'] != ""){
+					$JsonArrayStrings = explode("|~|",$record['mousepositions']);
+					$lastJsonArrayString = end($JsonArrayStrings);
+					//error_log(print_r($lastJsonArrayString, true));
+					if($lastJsonArrayString != "") {
+						if(strpos($lastJsonArrayString, "},{") !== false){
+							$pointsJson = explode("},{",$lastJsonArrayString);
+							$exitPointJson = end($pointsJson);
+							//error_log(print_r($exitPointJson, true));
+							$exitPointJson = "{".rtrim($exitPointJson, "]");
+							//error_log(print_r($exitPointJson, true));
+							$this->eventJsonResponse = $this->eventJsonResponse.$exitPointJson;
+							$this->eventJsonResponse = $this->eventJsonResponse.",";
+						} else {
+							$exitPointJson = rtrim(ltrim($lastJsonArrayString, "["), "]");
+							//error_log(print_r($exitPointJson, true));
+							$this->eventJsonResponse = $this->eventJsonResponse.$exitPointJson;
+							$this->eventJsonResponse = $this->eventJsonResponse.",";
+						}
+					}
+				}
+	
+			}
+			$this->eventJsonResponse = rtrim($this->eventJsonResponse, ",");
+			$this->eventJsonResponse = $this->eventJsonResponse."]";
+		} else if($this->dataType == 'mph') {
+			$this->eventJsonResponse = "[";
+			foreach ($this->records as $i => $record)
+			{
+				$eachUserhoverClickData = "";
+				foreach(explode("|~|",$record['mousepositions']) as $j => $jsonArrayString){
+					if($eachUserhoverClickData != "" && $jsonArrayString != "") {
+						$jsonArrayString = ltrim($jsonArrayString, "[");
+						$eachUserhoverClickData = rtrim($eachUserhoverClickData, "]");
+						$eachUserhoverClickData = $eachUserhoverClickData.",";
+					}
+					$eachUserhoverClickData = $eachUserhoverClickData.$jsonArrayString;
+				}
+				if($eachUserhoverClickData != "") {
+					$this->eventJsonResponse = $this->eventJsonResponse.$eachUserhoverClickData;
+					$this->eventJsonResponse = $this->eventJsonResponse.",";
+				}
+			}
+			$this->eventJsonResponse = rtrim($this->eventJsonResponse, ",");
+			$this->eventJsonResponse = $this->eventJsonResponse."]";
+		}
+	
+		if(strlen($this->eventJsonResponse)<3) {
+			$this->eventJsonResponse = "[]";
+		}
+	
 	}
 	
 	protected function constructHeatmapString() {
