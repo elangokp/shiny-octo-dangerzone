@@ -387,20 +387,30 @@ class WP_Insights_Heatmap {
 						console.log("Into loadIntoHeatmap");
 						jQuery.each(data, function (index, value) {
 																try {
-																	//console.log(value.cp + " " + value.w + " " + value.h);
-																	var element = jQuery( document ).find(value.cp);
-																	if(typeof element != undefined) {
-																		var xdiscrepancy = jQuery(element).width()/value.w;
-																		//console.log(jQuery(element).width() + " " + value.w + " " + xdiscrepancy);
-																		var ydiscrepancy = jQuery(element).height()/value.h;
-																		//console.log(jQuery(element).height() + " " + value.h + " " + ydiscrepancy);
-																		var x = jQuery(element).offset().left + (value.rX * xdiscrepancy);
-																		var y = jQuery(element).offset().top + (value.rY * ydiscrepancy);
-																	} else {
-																		var x = value.pX;
-																		var y = value.pY;
+																	//index is the css path here
+																	//console.log(index + " " + value);
+																	var element = jQuery( document ).find(index);
+																	//console.log(jQuery(element));
+																	//console.log(element.length > 0);
+																	//console.log(jQuery(element).length > 0);
+																	if(element.length > 0) {
+																		var eX = jQuery(element).first().offset().left;
+																		var eY = jQuery(element).first().offset().top
+																		var eW = jQuery(element).first().width();
+																		var eH = jQuery(element).first().height();
+																		for (var i = 0; i < value.rX.length; i++) {
+																			
+																		    var xdiscrepancy = eW/value.w[i];
+																			//console.log(eW + " " + value.w[i] + " " + xdiscrepancy);
+																			var ydiscrepancy = eH/value.h[i];
+																			//console.log(eH + " " + value.h[i] + " " + ydiscrepancy);
+																			var x = eX + (value.rX[i] * xdiscrepancy);
+																			var y = eY + (value.rY[i] * ydiscrepancy);
+																			heatmap.store.addDataPoint(Math.round(x), Math.round(y), 1);
+																		}
+																		
 																	}
-																	heatmap.store.addDataPoint(Math.round(x), Math.round(y), 1);
+																	
 																} catch (err) {
 																	console.log(err.message);	
 																	//console.log(value.cp);					
@@ -413,6 +423,8 @@ class WP_Insights_Heatmap {
 														} else {
 															console.log("Into data length less than or equal to 0");
 															heatmapOptions.heatmapCompleted = true;	
+															console.log(heatmap.store.exportDataSet());
+															
 														}
 					}
 					
