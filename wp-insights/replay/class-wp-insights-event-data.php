@@ -99,17 +99,24 @@ class WP_Insights_Event_Data {
 	}
 	
 	protected function constructOptimizedHeatmapString() {
+		
+		$heatmapPositions = array();
+		if($this->recordsPerPage > count($this->records)) {
+			$heatmapPositions['containsMoreRecords'] = false;
+		} else {
+			$heatmapPositions['containsMoreRecords'] = true;
+		}
 	
 		if($this->dataType == 'mvh' || $this->dataType == 'clickh' || $this->dataType == 'lfh') {
 			
-			$heatmapPositions = array();
 			foreach ($this->records as $i => $record)
 			{
+				$singleRecordingMousePositionKeys = array();
 				error_log($record['id'] . "=>" . $record['mousepositions']);
 				foreach(explode("|~|",$record['mousepositions']) as $j => $jsonArrayString){
 					error_log("   " . $j . " => " . $jsonArrayString);
 					if($jsonArrayString != "") {
-						/*$jsonArrayString = ltrim($jsonArrayString, "[");
+						/*$jasonArrayString = ltrim($jsonArrayString, "[");
 						$this->eventJsonResponse = rtrim($this->eventJsonResponse, "]");
 						if(strlen($this->eventJsonResponse)>1){
 							$this->eventJsonResponse = $this->eventJsonResponse.",";
@@ -117,29 +124,31 @@ class WP_Insights_Event_Data {
 						$this->eventJsonResponse = $this->eventJsonResponse.$jsonArrayString;*/
 						$mousePositions  = json_decode($jsonArrayString, true);
 						foreach($mousePositions as $mousePosition){
-							if(!isset($heatmapPositions[$mousePosition['cp']])) {
-								$heatmapPositions[$mousePosition['cp']] = array(
-										"w" => array(),
-										"h" => array(),
-										"rX" => array(),
-										"rY" => array()
-								);
+							$mousePositionKey = $mousePosition['cp']."-".$mousePosition['w']."-".$mousePosition['h']."-".$mousePosition['rX']."-".$mousePosition['rY'];
+							if(!isset($singleRecordingMousePositionKeys[$mousePositionKey])) {
+								$singleRecordingMousePositionKeys[$mousePositionKey] = 1;
+								if(!isset($heatmapPositions[$mousePosition['cp']])) {
+									$heatmapPositions[$mousePosition['cp']] = array(
+											"w" => array(),
+											"h" => array(),
+											"rX" => array(),
+											"rY" => array()
+									);
+								}
+								$heatmapPositions[$mousePosition['cp']]['w'][] = $mousePosition['w'];
+								$heatmapPositions[$mousePosition['cp']]['h'][] = $mousePosition['h'];
+								$heatmapPositions[$mousePosition['cp']]['rX'][] = $mousePosition['rX'];
+								$heatmapPositions[$mousePosition['cp']]['rY'][] = $mousePosition['rY'];
 							}
-							$heatmapPositions[$mousePosition['cp']]['w'][] = $mousePosition['w'];
-							$heatmapPositions[$mousePosition['cp']]['h'][] = $mousePosition['h'];
-							$heatmapPositions[$mousePosition['cp']]['rX'][] = $mousePosition['rX'];
-							$heatmapPositions[$mousePosition['cp']]['rY'][] = $mousePosition['rY'];
 						}
 					}
 	
 				}
 			}
-			print_r($heatmapPositions,true);
 			$this->eventJsonResponse = json_encode($heatmapPositions);
 			error_log($this->eventJsonResponse);
 			
 		} else if($this->dataType == 'exith') {
-			$this->eventJsonResponse = "[";
 			foreach ($this->records as $i => $record)
 			{
 				if($record['mousepositions'] != ""){
@@ -147,26 +156,26 @@ class WP_Insights_Event_Data {
 					$lastJsonArrayString = end($JsonArrayStrings);
 					//error_log(print_r($lastJsonArrayString, true));
 					if($lastJsonArrayString != "") {
-						if(strpos($lastJsonArrayString, "},{") !== false){
-							$pointsJson = explode("},{",$lastJsonArrayString);
-							$exitPointJson = end($pointsJson);
-							//error_log(print_r($exitPointJson, true));
-							$exitPointJson = "{".rtrim($exitPointJson, "]");
-							//error_log(print_r($exitPointJson, true));
-							$this->eventJsonResponse = $this->eventJsonResponse.$exitPointJson;
-							$this->eventJsonResponse = $this->eventJsonResponse.",";
-						} else {
-							$exitPointJson = rtrim(ltrim($lastJsonArrayString, "["), "]");
-							//error_log(print_r($exitPointJson, true));
-							$this->eventJsonResponse = $this->eventJsonResponse.$exitPointJson;
-							$this->eventJsonResponse = $this->eventJsonResponse.",";
+						$mousePositions  = json_decode($lastJsonArrayString, true);
+						$exitPoint = end($mousePositions);
+						if(!isset($heatmapPositions[$exitPoint['cp']])) {
+							$heatmapPositions[$exitPoint['cp']] = array(
+									"w" => array(),
+									"h" => array(),
+									"rX" => array(),
+									"rY" => array()
+							);
 						}
+						$heatmapPositions[$exitPoint['cp']]['w'][] = $exitPoint['w'];
+						$heatmapPositions[$exitPoint['cp']]['h'][] = $exitPoint['h'];
+						$heatmapPositions[$exitPoint['cp']]['rX'][] = $exitPoint['rX'];
+						$heatmapPositions[$exitPoint['cp']]['rY'][] = $exitPoint['rY'];
 					}
 				}
 	
 			}
-			$this->eventJsonResponse = rtrim($this->eventJsonResponse, ",");
-			$this->eventJsonResponse = $this->eventJsonResponse."]";
+			$this->eventJsonResponse = json_encode($heatmapPositions);
+			error_log($this->eventJsonResponse);
 		} else if($this->dataType == 'mph') {
 			$this->eventJsonResponse = "[";
 			foreach ($this->records as $i => $record)

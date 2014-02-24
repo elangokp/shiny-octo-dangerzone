@@ -454,8 +454,8 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         
         $cacheTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE;
         
-        $fromDate = $this->WP_Insights_Filters_Instance->fromDate;
-        $tillDate = $this->WP_Insights_Filters_Instance->tillDate;
+        $fromDate = $this->WP_Insights_Filters_Instance->getFromDate();
+        $tillDate = $this->WP_Insights_Filters_Instance->getTillDate();
         
         $total_items = $wpdb->get_var("select count(distinct records.client_id) from ".$recordsTable." AS records  WHERE 
 								        records.sess_date >= '$fromDate'

@@ -374,8 +374,8 @@ class WP_Insights_Heatmap {
 						action: "wpimouseeventdata",
 						lrid: '.$this->lrid.',
 						dt: "'.$this->hmtype.'",
-						fd: "'.$this->WP_Insights_Filters_Instance->fromDate.'",
-						td: "'.$this->WP_Insights_Filters_Instance->tillDate.'",
+						fd: "'.$this->WP_Insights_Filters_Instance->getFromDate().'",
+						td: "'.$this->WP_Insights_Filters_Instance->getTillDate().'",
 						recordsPerPage: 100,
 						heatmapCompleted: false
 						};
@@ -385,11 +385,15 @@ class WP_Insights_Heatmap {
 					
 					function loadIntoHeatmap(data) {
 						console.log("Into loadIntoHeatmap");
+						console.log(data);
+						console.log(data.containsMoreRecords);
+						//console.log("Date length before is " + Object.keys(data).length);
 						jQuery.each(data, function (index, value) {
 																try {
 																	//index is the css path here
 																	//console.log(index + " " + value);
-																	var element = jQuery( document ).find(index);
+																	var elementPath = index;
+																	var element = jQuery( document ).find(elementPath);
 																	//console.log(jQuery(element));
 																	//console.log(element.length > 0);
 																	//console.log(jQuery(element).length > 0);
@@ -406,7 +410,7 @@ class WP_Insights_Heatmap {
 																			//console.log(eH + " " + value.h[i] + " " + ydiscrepancy);
 																			var x = eX + (value.rX[i] * xdiscrepancy);
 																			var y = eY + (value.rY[i] * ydiscrepancy);
-																			heatmap.store.addDataPoint(Math.round(x), Math.round(y), 1);
+																			heatmap.store.addDataPoint(Math.round(x), Math.round(y), elementPath, false);
 																		}
 																		
 																	}
@@ -416,15 +420,17 @@ class WP_Insights_Heatmap {
 																	//console.log(value.cp);					
 																}
 														});
-														if(data.length > 0) {
-															console.log("Into data length greater than 0");
+														//console.log("Date length after is " + data.length);
+														if(data.containsMoreRecords === true) {
+															console.log("Contain More Records");
 															currentPageNo = currentPageNo+1;
 															setTimeout(getData(),0);
 														} else {
-															console.log("Into data length less than or equal to 0");
-															heatmapOptions.heatmapCompleted = true;	
+															console.log("No More Records Available");
+															//heatmapOptions.heatmapCompleted = true;	
+															heatmap.store.drawNow();
+															window.parent.heatmapComplete();
 															console.log(heatmap.store.exportDataSet());
-															
 														}
 					}
 					
@@ -443,7 +449,7 @@ class WP_Insights_Heatmap {
 					}
 					
 					jQuery(document).ready(function(){
-										heatmap = h337.create({"element":document.getElementsByTagName("body")[0], "radius":10, "visible":true});
+										heatmap = h337.create({"element":document.getElementsByTagName("body")[0], "radius":40, "visible":true});
 										setTimeout(getData(),0);				
 		});';
 		$this->invokeheatmapJsElement = $this->doc->createInlineScript($cdata);
@@ -475,8 +481,8 @@ class WP_Insights_Heatmap {
 						action: "wpimouseeventdata",
 						lrid: '.$this->lrid.',
 						dt: "'.$this->hmtype.'",
-						fd: "'.$this->WP_Insights_Filters_Instance->fromDate.'",
-						td: "'.$this->WP_Insights_Filters_Instance->tillDate.'",
+						fd: "'.$this->WP_Insights_Filters_Instance->getFromDate().'",
+						td: "'.$this->WP_Insights_Filters_Instance->getTillDate().'",
 						recordsPerPage: 100,
 						heatmapCompleted: false
 						};

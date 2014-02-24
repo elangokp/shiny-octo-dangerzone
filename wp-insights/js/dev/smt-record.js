@@ -608,7 +608,7 @@
     {
       if (!e) { e = window.event; }
       // bind function to widget tracking object
-      aux.widget.findDOMElement(e, function(name){
+      smtRec.findDOMElement(e, function(name){
         if (e.type == "mousedown" || e.type == "touchstart") {
           smtRec.elem.clicked.push(name);
           //smt2fn.log(JSON.stringify(smtRec.elem.clicked));
@@ -794,6 +794,73 @@
     	
 		
     },
+    
+    /**
+     * Finds the first available element with an ID.
+     * Traversing count starts from current element to node parents.
+     * This function should be registered on mouse move/down events.
+     * @return {object}            DOM node element
+     * @param {object}   e         DOM event
+     * @param {function} callback  response function
+     */
+    findDOMElement: function(e,callback)
+    {
+      if (!e) { e = window.event; }
+      // find the element
+      //var t = e.target || e.srcElement;
+      // defeat Safari bug
+      //if (t.nodeType == 3) { t = t.parentNode; }
+      // if the element has no ID, travese the DOM in reverse (find its parents)
+      /*var check = (t.id) ? this.getID(t) : this.getParents(t);
+      if (check) {
+        callback(check);
+      }*/
+      callback(this.getMousePositionDetails(e));
+    },
+    
+    getMousePositionDetails: function(event) {
+    	var pageX = 0, pageY = 0;
+    	if (event.pageX || event.pageY) {
+    		pageX = event.pageX;
+    		pageY = event.pageY;
+    	}	else if (event.clientX || event.clientY) {
+    		pageX = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+    		pageY = event.clientY + document.body.scrollTop  + document.documentElement.scrollTop;
+    	}
+    	// in certain situations the mouse coordinates could be negative values (e.g. Opera)
+    	if (pageX < 0 || !pageX) pageX = 0;
+    	if (pageY < 0 || !pageY) pageY = 0;
+    	pageX = Math.round(pageX);
+    	//smt2fn.log(pageX);
+    	pageY = Math.round(pageY);
+    	//smt2fn.log(pageY);
+    	var target = event.target || event.srcElement;
+    	if (target.nodeType == 3) { target = target.parentNode; }
+    	//smt2fn.log(target);
+    	var elementX = Math.round(jQuery_1_10_2(target).offset().left);
+    	//smt2fn.log(elementX);
+    	var elementY = Math.round(jQuery_1_10_2(target).offset().top);
+    	//smt2fn.log(elementY);
+        var mousePosition = {
+            cp: jQuery_1_10_2(target).getcssPath(),//csspath
+            t: smtRec.getTime(),
+            ft: smtRec.getFocusTime(),
+            pX: pageX,//pageX
+            pY: pageY,//pageY
+            eX: elementX,//eX
+            eY: elementY,//eY
+            rX: pageX - elementX,//rX
+            rY: pageY - elementY,//rY
+            w: jQuery_1_10_2(target).width(),//w
+            h: jQuery_1_10_2(target).height()//h
+        };
+        
+        //smt2fn.log(jQuery_1_10_2(target).getcssPath());
+        //smt2fn.log(jQuery_1_10_2(target).width());
+        //smt2fn.log(jQuery_1_10_2(target).height());
+        return mousePosition;
+    },
+    
     /** 
      * System initialization.
      * Assigns events and performs other initialization routines.

@@ -35,7 +35,7 @@
 		
 		$("div.wpi-client-recordings").hide();
 		
-		$("a#mvmap").click(function() {
+		$("a#attentionmap").click(function() {
 			var url = $(this).data('url') + "&scrx=" + screen.width + "&scry=" + screen.height;
 			window.open(url,'_blank');
 		});

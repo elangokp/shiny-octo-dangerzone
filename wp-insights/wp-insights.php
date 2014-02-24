@@ -14,7 +14,7 @@
  * Plugin Name: WP Insights
  * Plugin URI:  http://www.cybermint.com/wpinsights
  * Description: Records and playsback all the visitor sessions on the wordpress pages.
- * Version:     0.7.7 Beta
+ * Version:     0.8.2 Beta
  * Author:      Elango
  * Author URI:  http://www.cybermint.com
  * Text Domain: plugin-name-locale

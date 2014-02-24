@@ -25,6 +25,10 @@
         };
         // the max occurrence - the heatmaps radial gradient alpha transition is based on it
         this.max = 1;
+        
+        this.maxPoint = "0,0";
+        
+        this.maxPointElement = "";
 
         this.get = function(key){
             return _[key];
@@ -37,7 +41,7 @@
     store.prototype = {
         // function for adding datapoints to the store
         // datapoints are usually defined by x and y but could also contain a third parameter which represents the occurrence
-        addDataPoint: function(x, y){
+        addDataPoint: function(x, y, elementPath, shouldDraw){
             if(x < 0 || y < 0)
                 return;
 
@@ -52,17 +56,31 @@
                 data[x][y] = 0;
 
             // if count parameter is set increment by count otherwise by 1
-            data[x][y]+=(arguments.length<3)?1:arguments[2];
+            data[x][y]+=(arguments.length<5)?1:arguments[4];
             
             me.set("data", data);
             // do we have a new maximum?
             if(me.max < data[x][y]){
-                // max changed, we need to redraw all existing(lower) datapoints
-                heatmap.get("actx").clearRect(0,0,heatmap.get("width"),heatmap.get("height"));
-                me.setDataSet({ max: data[x][y], data: data }, true);
-                return;
+            	if(shouldDraw) {
+            		// max changed, we need to redraw all existing(lower) datapoints
+                    heatmap.get("actx").clearRect(0,0,heatmap.get("width"),heatmap.get("height"));
+                    me.setDataSet({ max: data[x][y], maxPoint: x+','+y, maxPointElement: elementPath, data: data }, true);
+                    return;
+            	} else {
+            		this.max = data[x][y];
+            		this.maxPoint = x+','+y;
+                    this.maxPointElement = elementPath;
+            	}
+                
             }
-            heatmap.drawAlpha(x, y, data[x][y], true);
+            
+            if(shouldDraw) {
+            	heatmap.drawAlpha(x, y, data[x][y], true);
+            }
+            
+        },
+        drawNow: function() {
+        	this.setDataSet({ max: this.max, maxPoint: this.maxPoint, maxPointElement: this.maxPointElement, data: this.get("data") }, true);
         },
         setDataSet: function(obj, internal){
             var me = this,
@@ -73,6 +91,8 @@
             // clear the heatmap before the data set gets drawn
             heatmap.clear();
             this.max = obj.max;
+            this.maxPoint = obj.maxPoint;
+            this.maxPointElement = obj.maxPointElement;
             // if a legend is set, update it
             heatmap.get("legend") && heatmap.get("legend").update(obj.max);
             
@@ -121,7 +141,7 @@
                 }
             }
 
-            return { max: me.max, data: exportData };
+            return { max: me.max, maxPoint: me.maxPoint, maxPointElement: me.maxPointElement, data: exportData };
         },
         generateRandomDataSet: function(points){
             var heatmap = this.get("heatmap"),

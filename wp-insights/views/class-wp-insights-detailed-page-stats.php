@@ -45,7 +45,7 @@ class WP_Insights_Detailed_Page_Stats {
 		$this->lrid = $lrid;
 		$this->wp_insights_db_utils = WP_Insights_DB_Utils::get_instance();
 		$this->wp_insights_db_utils->setWpdb($wpdb);
-		
+		error_log("Before calling WP_Insights_Filters constructors");
 		$this->WP_Insights_Filters_Instance = new WP_Insights_Filters();
 		
 		$this->recordsTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
@@ -65,8 +65,8 @@ class WP_Insights_Detailed_Page_Stats {
 				." INNER JOIN ".$this->cacheTable." AS C2"." ON C2.url = C1.url",
 				"C1.url,R.sess_time,AVG(R.sess_time) as avg_sess_time,R.coords_x,R.coords_y,R.vp_width,R.vp_height,R.scr_width,R.scr_height",
 				"C2.id = ".$this->pid); */
-		$fromDate = $this->WP_Insights_Filters_Instance->fromDate;
-		$tillDate = $this->WP_Insights_Filters_Instance->tillDate;
+		$fromDate = $this->WP_Insights_Filters_Instance->getFromDate();
+		$tillDate = $this->WP_Insights_Filters_Instance->getTillDate();
 		
 		$sql = "SELECT records.cleansed_url as url, 
     			max(records.id) as latest_record_id,
@@ -171,6 +171,10 @@ class WP_Insights_Detailed_Page_Stats {
 	
 	public function getPassion() {
 		return $this->passion;
+	}
+	
+	public function getFilters() {
+		return $this->WP_Insights_Filters_Instance;
 	}
 	
 	public function displayFilters() {

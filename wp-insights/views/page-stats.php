@@ -17,6 +17,8 @@ if(isset($_GET['lrid'])) {
 	require_once(plugin_dir_path(__FILE__).'class-wp-insights-detailed-page-stats.php');
 	require_once(plugin_dir_path(__FILE__).'class-wp-insights-page-ps-stats-list-table.php');
 	$WP_Insights_Detailed_Page_Stats_Instance = new WP_Insights_Detailed_Page_Stats($lrid);
+	$fromDate = $WP_Insights_Detailed_Page_Stats_Instance->getFilters()->getFromDate();
+	$tillDate = $WP_Insights_Detailed_Page_Stats_Instance->getFilters()->getTillDate();
 	//$WP_Insights_Detailed_Page_Stats_Instance->process_stats();
 	?>
 <div class="wrap">
@@ -69,20 +71,20 @@ if(isset($_GET['lrid'])) {
 			<label><b>Passion %: </b></label>
 			<label><?php echo $WP_Insights_Detailed_Page_Stats_Instance->getPassion();?></label>
 		</div>
-		<div id="movementMap">
-			<a id="mvmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>wpi-heat.php?lrid=<?php echo $lrid;?>&hmtype=mvh" class="button" target="_blank" title="Movement Heatmap">Movement Heatmap</a>
+		<div id="attentionMap">
+			<a id="attentionmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>wpi-heat.php?lrid=<?php echo $lrid;?>&hmtype=mvh&fromDate=<?php echo $fromDate;?>&tillDate=<?php echo $tillDate;?>" class="button" target="_blank" title="Attention Heatmap">Attention Heatmap</a>
 		</div>
 		<div id="clickmap">
-			<a id="clickmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>wpi-heat.php?lrid=<?php echo $lrid;?>&hmtype=clickh" class="button" target="_blank" title="Click Heatmap">Click Heatmap</a>
+			<a id="clickmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>wpi-heat.php?lrid=<?php echo $lrid;?>&hmtype=clickh&fromDate=<?php echo $fromDate;?>&tillDate=<?php echo $tillDate;?>" class="button" target="_blank" title="Click Heatmap">Click Heatmap</a>
 		</div>
 		<div id="exitmap">
-			<a id="exitmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>wpi-heat.php?lrid=<?php echo $lrid;?>&hmtype=exith" class="button" target="_blank" title="Exit Heatmap">Exit Heatmap</a>
+			<a id="exitmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>wpi-heat.php?lrid=<?php echo $lrid;?>&hmtype=exith&fromDate=<?php echo $fromDate;?>&tillDate=<?php echo $tillDate;?>" class="button" target="_blank" title="Exit Heatmap">Exit Heatmap</a>
 		</div>
 		<div id="mousepaths">
-			<a id="mousepaths" href="javascript:void(0)" data-url="<?php echo $views_url;?>wpi-heat.php?lrid=<?php echo $lrid;?>&hmtype=mph" class="button" target="_blank" title="Mouse Paths">Mouse Paths</a>
+			<a id="mousepaths" href="javascript:void(0)" data-url="<?php echo $views_url;?>wpi-heat.php?lrid=<?php echo $lrid;?>&hmtype=mph&fromDate=<?php echo $fromDate;?>&tillDate=<?php echo $tillDate;?>" class="button" target="_blank" title="Mouse Paths">Mouse Paths</a>
 		</div>
 		<div id="lostfocusmap">
-			<a id="lostfocusmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>wpi-heat.php?lrid=<?php echo $lrid;?>&hmtype=lfh" class="button" target="_blank" title="Lost Focus Heatmap">Lost Focus Heatmap</a>
+			<a id="lostfocusmap" href="javascript:void(0)" data-url="<?php echo $views_url;?>wpi-heat.php?lrid=<?php echo $lrid;?>&hmtype=lfh&fromDate=<?php echo $fromDate;?>&tillDate=<?php echo $tillDate;?>" class="button" target="_blank" title="Lost Focus Heatmap">Lost Focus Heatmap</a>
 		</div>
 		<?php 
 					$WP_Insights_Page_PS_Stats_List_Table_Instance = new WP_Insights_Page_PS_Stats_List_Table($lrid);

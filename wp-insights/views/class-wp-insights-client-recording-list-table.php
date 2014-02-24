@@ -263,6 +263,7 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
     		if($item['file'] != "0") {
     			$rowActions .= '<a href="'.$this->views_url.'wpi-replay.php?'.$displayId.'&api=js" class="button" target="_blank" title="Play">Realtime Replay</a>'.PHP_EOL;
     			$rowActions .= '<a href="'.$this->views_url.'wpi-replay.php?'.$displayId.'&api=js&realTime=0" class="button" target="_blank" title="Show">Show Mouse Path</a>'.PHP_EOL;
+    			$rowActions .= '<a href="'.$this->views_url.'wpi-replay-beta.php?'.$displayId.'&api=js&realTime=0" class="button" target="_blank" title="Show">Replay Beta</a>'.PHP_EOL;
     			//$rowActions .= '<a href="'.$this->views_url.'wpi-replay.php?'.$displayId.'&api=swf" class="button" target="_blank" title="Play (Experimental)">Replay in Flash</a>'.PHP_EOL;
     			$rowActions .= '<a id="wpi_ps_rec_stats_button_'.$item['id'].'" href="javascript:void(0)" data-rid="'.$item['id'].'" class="button" target="_blank" title="Page Section Stats">Page Section Stats</a>'.PHP_EOL;
     		} else {

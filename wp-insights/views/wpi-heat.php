@@ -15,7 +15,6 @@
 //require_once( $parse_uri[0] . 'wp-load.php' );
 require_once('class-wp-insights-filters.php');
 //require_once('../class-wp-insights.php' );
-$WP_Insights_Filters_Instance = new WP_Insights_Filters();
 //$WP_Insights_instance = WP_Insights::get_instance();
 $lrid = $_GET['lrid'];
 $hmtype = $_GET['hmtype'];
@@ -44,7 +43,12 @@ $scry = $_GET['scry'];
         document.getElementById('iframeHeatmap').height = jQuery( window ).height() - (jQuery( window ).height()*0.1);
         });
 
-    function watch(obj, prop, handler) { // make this a framework/global function
+    function heatmapComplete() {
+    	window.frames[0].window.heatmapOptions['heatmapCompleted'] === true;
+    	jQuery.unblockUI();
+    }
+
+   /* function watch(obj, prop, handler) { // make this a framework/global function
         var currval = obj[prop];
         function callback() {
             if (obj[prop] != currval) {
@@ -57,21 +61,29 @@ $scry = $_GET['scry'];
     }
 
     var myhandler = function (oldval, newval) {
-        if(newval == true){
+        if(newval === true){
             //jQuery("#heatmap-status").html("Generation of Heatmap is complete");
             jQuery.unblockUI();
-            clearInterval(intervalH);
+            setTimeout(clearInterval(intervalH),0);
         }
     };
+
+    function isHeatmapCompleted() {
+        if(window.frames[0].window.heatmapOptions !== undefined && window.frames[0].window.heatmapOptions['heatmapCompleted'] === true) {
+        	jQuery.unblockUI();
+            setTimeout(clearInterval(intervalH),0);
+        }
+
+    }
 
     var intervalH = null;
 
     jQuery(function(){
-    	jQuery("#iframeHeatmap").load(function() {
+    	jQuery("#iframeHeatmap").ready(function() {
             //console.log("iframeHeatmap loaded");
-        	intervalH = setInterval(watch(window.frames[0].window.heatmapOptions, "heatmapCompleted", myhandler), 3000);
+        	intervalH = setInterval(isHeatmapCompleted(), 3000);
         });    	
-    });
+    });*/
 
     
 </script>
@@ -79,7 +91,7 @@ $scry = $_GET['scry'];
 <h1 style="margin: 0 auto;float:left;width:50%">
 <?php 
 if($hmtype == 'mvh') {
-	echo "Mouse Movement Heatmap";
+	echo "Attention Heatmap";
 } else if($hmtype == 'clickh') {
 	echo "Click Heatmap";
 } else if($hmtype == 'exith') {
@@ -96,7 +108,10 @@ if($hmtype == 'mvh') {
 <input type="hidden" name="hmtype" value="<?php echo $hmtype ?>" />
 <input type="hidden" name="scrx" value="<?php echo $scrx ?>" />
 <input type="hidden" name="scry" value="<?php echo $scry ?>" />
-<?php $WP_Insights_Filters_Instance->display(); ?>
+<?php 
+$WP_Insights_Filters_Instance = new WP_Insights_Filters();
+$WP_Insights_Filters_Instance->display(); 
+?>
 </form>
 <!-- <div id="heatmap-status" style="margin: 0 auto;float:right;width:30%">Please be patient. Heatmap is being generated</div>-->
 </div>

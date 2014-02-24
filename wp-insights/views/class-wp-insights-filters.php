@@ -2,8 +2,8 @@
 
 class WP_Insights_Filters {
 	
-	public $fromDate;
-	public $tillDate;
+	protected $fromDate;
+	protected $tillDate;
 	
 	function __construct() {
 		
@@ -19,6 +19,8 @@ class WP_Insights_Filters {
 			error_log("From Date and Till Date is present ");
 			$this->fromDate = $_SESSION['fromDate'];
 			$this->tillDate = $_SESSION['tillDate'];
+			error_log($this->fromDate);
+			error_log($this->tillDate);
 		}else if(empty($_SESSION['fromDate']) && !empty($_SESSION['tillDate'])) {
 			error_log("From Date is empty ");
 			$this->fromDate = $_SESSION['tillDate'];
@@ -36,9 +38,16 @@ class WP_Insights_Filters {
 		
 		$_SESSION['fromDate'] = $this->fromDate;
 		$_SESSION['tillDate'] = $this->tillDate;
+		
+		error_log("Before Constructor end ");
+		error_log($this->fromDate);
+		error_log($this->tillDate);
 	}
 	
 	function display() {
+		error_log("Beginning of display ");
+		error_log($this->fromDate);
+		error_log($this->tillDate);
 		?>
 		<label for="fromDate">From:</label> 
 		<input id="fromDate" type="text" name="fromDate" value="<?php echo $this->fromDate?>" /> 
@@ -46,5 +55,13 @@ class WP_Insights_Filters {
 		<input id="tillDate" type="text" name="tillDate" value="<?php echo $this->tillDate?>" /> 
 		<input type="submit" name="filterSubmit" id="filterSubmit" class="button" value="Filter">
 		<?php
+	}
+	
+	function getFromDate() {
+		return $this->fromDate;
+	}
+	
+	function getTillDate() {
+		return $this->tillDate;
 	}
 }

@@ -32,7 +32,7 @@ class WP_Insights {
 	 *
 	 * @const   string
 	 */
-	const VERSION = '0.7.7Beta';
+	const VERSION = '0.8.2Beta';
 
 	/**
 	 * Unique identifier for your plugin.
@@ -142,6 +142,10 @@ class WP_Insights {
 		self::$cache_dir = str_replace('\\', '/', self::$cache_dir);
 		self::$browscap_cache_dir = self::$cache_dir."browscapcache/";
 
+	}
+	
+	public function get_cache_dir() {
+		return self::$cache_dir;
 	}
 	
 	public function register_session() {
