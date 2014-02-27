@@ -17,6 +17,8 @@ class WP_Insights_Replayer_Beta {
 	
 	protected $cachedFilePath = null;
 	
+	protected $doc = null;
+	
 	protected $wp_insights_db_utils = null;
 	
 	public function __construct($recording_id) {
@@ -26,8 +28,8 @@ class WP_Insights_Replayer_Beta {
 		$this->cache_dir = $WP_Insights_instance->get_cache_dir();
 		$this->wp_insights_db_utils = WP_Insights_DB_Utils::get_instance();
 		$this->wp_insights_db_utils->setWpdb($wpdb);
-		$this->getDetailsByRecordingId();
-		$this->loadCacheFile();
+		//$this->getDetailsByRecordingId();
+		//$this->loadCacheFile();
 	}
 	
 	protected function getDetailsByRecordingId(){
@@ -67,14 +69,26 @@ class WP_Insights_Replayer_Beta {
 	}
 	
 	public function getReplayPage() {
+		if($this->cachedFilePath == null) {
+			$this->getDetailsByRecordingId();
+		}
+		if($this->doc == null) {
+			$this->loadCacheFile();
+		}		
 		return $this->doc->saveHTML();
 	}
 
 	public function getScreenWidth(){
+		if($this->screenWidth == null) {
+			$this->getDetailsByRecordingId();
+		}
 		return $this->screenWidth;
 	}
 	
 	public function getScreenHeight(){
+		if($this->screenHeight == null) {
+			$this->getDetailsByRecordingId();
+		}
 		return $this->screenHeight;
 	}
 }

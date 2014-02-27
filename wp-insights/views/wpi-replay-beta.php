@@ -50,11 +50,11 @@ $screenHeight = $WP_Insights_Replayer_Instance->getScreenHeight();
 <div id="top-frame">
 <h1 style="margin: 0 auto;float:left;width:50%">Session Player</h1>
 <form id="wpi-heat" method="get" style="margin: 0 auto;float:right;width:50%">
-<input type="hidden" name="lrid" value="<?php echo $lrid ?>" />
+<input type="hidden" name="rid" value="<?php echo $rid ?>" />
 </form>
 <!-- <div id="heatmap-status" style="margin: 0 auto;float:right;width:30%">Please be patient. Heatmap is being generated</div>-->
 </div>
-<iframe id="iframeHeatmap" style="border:1px solid black" seamless width="<?php echo $screenWidth?>px" height="<?php echo $screenHeight?>px" srcdoc="<?php echo $WP_Insights_Replayer_Instance->getReplayPage(); ?>">
+<iframe id="iframeHeatmap" style="border:1px solid black" src="recorded-session.php?rid=<?php echo $rid ?>" seamless width="<?php echo $screenWidth?>px" height="<?php echo $screenHeight?>px" >
 
 </iframe>
 <div id="heatmapLoadingMessage" style="display:none;"> 
