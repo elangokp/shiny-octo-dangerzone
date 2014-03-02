@@ -44,7 +44,7 @@ $scry = $_GET['scry'];
         });
 
     function heatmapComplete() {
-    	window.frames[0].window.heatmapOptions['heatmapCompleted'] === true;
+    	//window.frames[0].window.heatmapOptions['heatmapCompleted'] === true;
     	jQuery.unblockUI();
     }
 

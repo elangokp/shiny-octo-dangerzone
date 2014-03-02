@@ -309,6 +309,12 @@
     initMouseData: function() 
     {
       smtRec.computeAvailableSpace();
+      console.log("Inside init mouse data");
+      smt2fn.log("Window Height : " + jQuery_1_10_2(window).height());
+      smt2fn.log("Window Width : " + jQuery_1_10_2(window).width());
+      smt2fn.log("Doc Height : " + jQuery_1_10_2(document).height());
+      smt2fn.log("Doc Width : " + jQuery_1_10_2(document).width());
+      
       // prepare data
       var requestData  = "url="        + smtRec.url;
       requestData += "&urltitle="  + document.title;
@@ -317,6 +323,8 @@
       requestData += "&screenh="   + screen.height;
       requestData += "&pagew="     + smtRec.page.width;
       requestData += "&pageh="     + smtRec.page.height;
+      requestData += "&vpw="       + jQuery_1_10_2(window).width();
+      requestData += "&vph="       + jQuery_1_10_2(window).height();
       requestData += "&time="      + smtRec.getTime();
       requestData += "&fps="       + smtOpt.fps;
       requestData += "&ftu="       + smtRec.ftu;
@@ -484,8 +492,8 @@
       // prepare data
       var requestData  = "uid="        + smtRec.userId;
 	      requestData += "&time="      + smtRec.getTime();
-	      requestData += "&pagew="     + smtRec.page.width;
-	      requestData += "&pageh="     + smtRec.page.height;
+	      //requestData += "&pagew="     + smtRec.page.width;
+	      //requestData += "&pageh="     + smtRec.page.height;
 	      requestData += "&xcoords="   + smtRec.coords.x;
 	      requestData += "&ycoords="   + smtRec.coords.y;
 	      requestData += "&clicks="    + smtRec.coords.p;
@@ -542,8 +550,8 @@
       // prepare data
       var requestData  = "uid="        + smtRec.userId;
 	      requestData += "&time="      + smtRec.getTime();
-	      requestData += "&pagew="     + smtRec.page.width;
-	      requestData += "&pageh="     + smtRec.page.height;
+	      //requestData += "&pagew="     + smtRec.page.width;
+	      //requestData += "&pageh="     + smtRec.page.height;
 	      requestData += "&xcoords="   + smtRec.coords.x;
 	      requestData += "&ycoords="   + smtRec.coords.y;
 	      requestData += "&clicks="    + smtRec.coords.p;

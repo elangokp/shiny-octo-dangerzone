@@ -511,33 +511,36 @@ class WP_Insights_Heatmap {
 																			var y = jQuery(element).offset().top + (value.rY * ydiscrepancy);
 																			singleRecordMousepathPoints.push(Math.round(x));
 																			singleRecordMousepathPoints.push(Math.round(y));
-																			var mousePathLine = new Kinetic.Line({
+																		} catch(err1) {
+																			console.log(err1.message);
+																		}
+																	});
+																var mousePathLine = new Kinetic.Line({
 																							points: singleRecordMousepathPoints,
 																							strokeWidth: 2,
 																							lineJoin: "round",
 																							lineCap: "round"
 																						  });
-																			//var randColorR = Math.random() * 255;
-																			mousePathLine.setStrokeRGB({
-																						r: Math.random() * 255,
-																						g: Math.random() * 255,
-																						b: Math.random() * 255
-																						});
-																			layer.add(mousePathLine);
-																		} catch(err1) {
-																			console.log(err1.message);
-																		}
-																	});
+																//var randColorR = Math.random() * 255;
+																mousePathLine.setStrokeRGB({
+																			r: Math.random() * 255,
+																			g: Math.random() * 255,
+																			b: Math.random() * 255
+																			});
+																layer.add(mousePathLine);
 																} catch (err2) {
 																	console.log(err2.message);
 																}
 														});
 														stage.add(layer);
-														if(data.length > 0) {
+														if(data.containsMoreRecords === true) {
+															console.log("Contain More Records");
 															currentPageNo = currentPageNo+1;
 															setTimeout(getData(),0);
 														} else {
-															heatmapOptions.heatmapCompleted = true;	
+															console.log("No More Records Available");
+															window.parent.heatmapComplete();
+															console.log(heatmap.store.exportDataSet());
 														}
 					}
 					

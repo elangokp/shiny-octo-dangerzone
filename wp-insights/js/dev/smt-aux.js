@@ -147,7 +147,7 @@ var smt2fn = {
     var currTrailPos = this.array.indexOf(smtData.trails, smtData.currtrail);
     // check
     if (currTrailPos < smtData.trails.length - 1) {
-      var navigateTo = smtData.trailurl+'?id='+smtData.trails[currTrailPos + 1]+'&api='+smtData.api;
+      var navigateTo = smtData.trailurl+'?rid='+smtData.trails[currTrailPos + 1]+'&api='+smtData.api;
       if (smtData.autoload) {
         window.location.href = navigateTo;
       } else if (confirm("This user also browsed more pages.\nDo you want to replay the next log?")) {

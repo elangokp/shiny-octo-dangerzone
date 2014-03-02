@@ -272,6 +272,8 @@ class WP_Insights_DB_Utils {
         scr_height   SMALLINT      unsigned  NOT NULL,
         vp_width     SMALLINT      unsigned  NOT NULL,
         vp_height    SMALLINT      unsigned  NOT NULL,
+        doc_width    SMALLINT      unsigned  NOT NULL,
+        doc_height   SMALLINT      unsigned  NOT NULL,
         sess_date    TIMESTAMP     default   CURRENT_TIMESTAMP,
         sess_time    FLOAT(7,2)    unsigned  NOT NULL,
         focus_time   FLOAT(7,2)    unsigned  NULL,

@@ -123,7 +123,7 @@ class WP_Insights_Replayer {
 		$coordsY = trim($coordsY, ',');
 		
 		// build JavaScript object
-		$this->JSON[] = '{"xcoords": ['.$coordsX.'], "ycoords": ['.$coordsY.'], "clicks": ['.$clicks.'], "timestamp": "'.$timestamp.'", "wprev": '.$record['vp_width'].', "hprev": '.$record['vp_height'].'}';
+		$this->JSON[] = '{"xcoords": ['.$coordsX.'], "ycoords": ['.$coordsY.'], "clicks": ['.$clicks.'], "timestamp": "'.$timestamp.'", "wprev": '.$record['doc_width'].', "hprev": '.$record['doc_height'].'}';
 	}
 	
 	protected function loadCacheFile() {
@@ -192,6 +192,11 @@ class WP_Insights_Replayer {
 			  currtrail: '.$this->recordId.',
 			  trailurl: "'.WP_Insights_Utils::url_get_current().'"
 			};
+			var recordingData = {
+			  	vp_height: '.$this->record['vp_width'].',
+				vp_width:  '.$this->record['vp_height'].'
+				};
+			window.parent.resizeFrame(recordingData.vp_height,recordingData.vp_width);
 			//]]>
 			';
 		// create user data script

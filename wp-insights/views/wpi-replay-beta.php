@@ -13,11 +13,11 @@
  */
 //define( 'SHORTINIT', true );
 
-$parse_uri = explode( 'wp-content', $_SERVER['SCRIPT_FILENAME'] );
-require_once( $parse_uri[0] . 'wp-load.php' );
+//$parse_uri = explode( 'wp-content', $_SERVER['SCRIPT_FILENAME'] );
+//require_once( $parse_uri[0] . 'wp-load.php' );
 //require_once( $_SERVER['DOCUMENT_ROOT'] . '/wordpress/wp-load.php' );
-require_once(plugin_dir_path(dirname(__FILE__)).'class-wp-insights.php');
-require_once(plugin_dir_path(dirname(__FILE__)).'replay/class-wp-insights-replayer-beta.php');
+//require_once(plugin_dir_path(dirname(__FILE__)).'class-wp-insights.php');
+//require_once(plugin_dir_path(dirname(__FILE__)).'replay/class-wp-insights-replayer-beta.php');
 $rid = $_GET['id'];
 $realTime = 1;
 $dirVect = 0;
@@ -31,9 +31,6 @@ header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
 header('Pragma: no-cache'); // HTTP 1.0.
 header('Expires: 0'); // Proxies.
 
-$WP_Insights_Replayer_Instance = new WP_Insights_Replayer_Beta($rid);
-$screenWidth = $WP_Insights_Replayer_Instance->getScreenWidth();
-$screenHeight = $WP_Insights_Replayer_Instance->getScreenHeight();
 ?>
 <html>
 <head>
@@ -45,21 +42,40 @@ $screenHeight = $WP_Insights_Replayer_Instance->getScreenHeight();
 <body>
 <script type="text/javascript">
 
+	var replayer = null;
+	
+    function resizeFrame(frameHeight, frameWidth) {
+    	//var frameHeight = window.frames[0].window.heatmapOptions['heatmapCompleted'];
+    	//var frameWidth = window.frames[0].window.heatmapOptions['heatmapCompleted'];
+    	document.getElementById('iframePlayer').height = frameHeight;
+    	document.getElementById('iframePlayer').width = frameWidth;
+    }
+    
+
+    $(function(){
+    	$("#iframePlayer").load(function() {
+    		replayer = window.frames[0].window;
+        	$("#playButton").removeAttr('disabled');
+        	$("#playButton").click(function() {
+            	replayer.play();
+        	});
+        	//intervalH = setInterval(isHeatmapCompleted(), 3000);
+        });    	
+    });
     
 </script>
-<div id="top-frame">
 <h1 style="margin: 0 auto;float:left;width:50%">Session Player</h1>
-<form id="wpi-heat" method="get" style="margin: 0 auto;float:right;width:50%">
+<div id="controls" style="margin: 0 auto;float:left;width:50%">
+<button id="playButton" disabled>Play</button>
+</div>
+<!--<form id="wpi-heat" method="get" style="margin: 0 auto;float:right;width:50%">
 <input type="hidden" name="rid" value="<?php echo $rid ?>" />
 </form>
-<!-- <div id="heatmap-status" style="margin: 0 auto;float:right;width:30%">Please be patient. Heatmap is being generated</div>-->
-</div>
-<iframe id="iframeHeatmap" style="border:1px solid black" src="recorded-session.php?rid=<?php echo $rid ?>" seamless width="<?php echo $screenWidth?>px" height="<?php echo $screenHeight?>px" >
+ <div id="heatmap-status" style="margin: 0 auto;float:right;width:30%">Please be patient. Heatmap is being generated</div>-->
+<div style="float:left;width:100%">
+<iframe id="iframePlayer" style="border:1px solid black" src="recorded-session.php?rid=<?php echo $rid ?>" seamless >
 
 </iframe>
-<div id="heatmapLoadingMessage" style="display:none;"> 
-    <p>Hey there Smarty... Heatmap is being generated... Please be patient for a moment.</p> 
-    <p><img src="../assets/progressBar.gif"/></p>
-</div> 
+</div>
 </body>
 </html>

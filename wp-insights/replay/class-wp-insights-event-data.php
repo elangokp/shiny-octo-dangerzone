@@ -116,7 +116,7 @@ class WP_Insights_Event_Data {
 				foreach(explode("|~|",$record['mousepositions']) as $j => $jsonArrayString){
 					error_log("   " . $j . " => " . $jsonArrayString);
 					if($jsonArrayString != "") {
-						/*$jasonArrayString = ltrim($jsonArrayString, "[");
+						/*$jsonArrayString = ltrim($jsonArrayString, "[");
 						$this->eventJsonResponse = rtrim($this->eventJsonResponse, "]");
 						if(strlen($this->eventJsonResponse)>1){
 							$this->eventJsonResponse = $this->eventJsonResponse.",";

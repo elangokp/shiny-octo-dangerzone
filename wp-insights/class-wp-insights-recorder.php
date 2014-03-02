@@ -57,6 +57,9 @@ class WP_Insights_Recorder {
 			exit;
 		}
 		$browserAndOSId = $this->getBrowserAndOSDetails();
+		
+		error_log("vpw : ". $_REQUEST['vpw']);
+		error_log("vph : ". $_REQUEST['vph']);
 
 		/* create database entry ---------------------------------------------------- */
 		$recorddetails = array(
@@ -72,8 +75,10 @@ class WP_Insights_Recorder {
 				"ip" => WP_Insights_Utils::get_client_ip() ,
 				"scr_width" => (int) $_REQUEST['screenw'],
 				"scr_height" => (int) $_REQUEST['screenh'],
-				"vp_width" => (int) $_REQUEST['pagew'],
-				"vp_height" => (int) $_REQUEST['pageh'],
+				"vp_width" => (int) $_REQUEST['vpw'],
+				"vp_height" => (int) $_REQUEST['vph'],
+				"doc_width" => (int) $_REQUEST['pagew'],
+				"doc_height" => (int) $_REQUEST['pageh'],
 				//"sess_date" => current_time('mysql'),
 				//"sess_date" => 'NOW()',
 				"sess_time" => (float) $_REQUEST['time'],
@@ -95,6 +100,8 @@ class WP_Insights_Recorder {
 				'%s',
 				'%d',
 				'%s',
+				'%d',
+				'%d',
 				'%d',
 				'%d',
 				'%d',
@@ -484,8 +491,8 @@ class WP_Insights_Recorder {
 			exit;
 		}
 		$values  = "sess_time = '".                         (float) $_POST['time']    ."',";
-		$values .= "vp_width  = '".                         (int)   $_POST['pagew']   ."',";
-		$values .= "vp_height = '".                         (int)   $_POST['pageh']   ."',";
+		//$values .= "vp_width  = '".                         (int)   $_POST['vpw']   ."',";
+		//$values .= "vp_height = '".                         (int)   $_POST['vph']   ."',";
 		$values .= "focus_time = '".                        (float) $_POST['focusedTime']   ."',";
 		$values .= "lost_focus_count = '".                  (int)   $_POST['lostFocusCount']   ."',";
 		$values .= "exit_page_section = '".                         $_POST['currentPageSection']   ."',";
