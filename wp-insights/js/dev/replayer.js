@@ -1,4 +1,5 @@
 var stage = null;
+var cursor = null;
 var cursorTween = null;
 var movementArray = [];
 var pointIndex = 0;
@@ -21,12 +22,12 @@ function initializePlayer() {
 	setTimeout(function() {
 		var crImage = queue.getResult("cursorImage");
 		console.log(crImage);
-		var cursor123 = new createjs.Bitmap(crImage);
-		cursor123.x=0;
-		cursor123.y=0;
-		stage.addChild(cursor123);
+		cursor = new createjs.Bitmap(crImage);
+		cursor.x=0;
+		cursor.y=0;
+		stage.addChild(cursor);
 		new createjs.Ticker.addEventListener("tick", handleTick);		
-		cursorTween = new createjs.Tween.get(cursor123);
+		//cursorTween = new createjs.Tween.get(cursor);
 		animate();
 		/*cursorTween.to({x:50,y:50}, 800)
 		.wait(1000)
@@ -40,6 +41,7 @@ function initializePlayer() {
 }
 
 function constructMovementArray() {
+	console.log(recordingData.hovered);
 	var hoveredData = recordingData.hovered;
 	for (var i=0; i<hoveredData.length; i++) {
 		try {
@@ -70,9 +72,46 @@ function constructMovementArray() {
 }
 
 function animate() {
-	alert("Calling animate : " + pointIndex);
+	console.log("Calling animate : " + pointIndex);
+	console.log(cursorTween);
+	//alert("Calling animate : " + pointIndex);
 	if(pointIndex<movementArray.length) {
-		alert("Inside animate : " + pointIndex);
+		//alert("Inside animate : " + pointIndex);
+		var point = movementArray[pointIndex];
+		var movementTime,waitTime = 0;
+		if(point.d>500) {
+			movementTime = 500 + 100;
+			waitTime = point.d - 500;
+		} else {
+			movementTime = 100;
+			waitTime = point.d;
+		}
+		pointIndex++;
+		createjs.Tween.get(cursor).to({x:point.x,y:point.y}, movementTime).wait(waitTime).call(animate);
+		//cursorTween = new createjs.Tween.get(cursor);
+		//cursorTween.call(animate1);
+	}
+	
+	/*for (var i=0; i<movementArray.length; i++) {
+		var point = movementArray[i];
+		var movementTime,waitTime = 0;
+		if(point.d>500) {
+			movementTime = 500;
+			waitTime = point.d - 500;
+		} else {
+			movementTime = 0;
+			waitTime = point.d;
+		}
+		cursorTween.to({x:point.x,y:point.y}, movementTime).wait(waitTime);
+	}*/
+}
+
+function animate1() {
+	console.log("Calling animate1 : " + pointIndex);
+	console.log(cursorTween);
+	//alert("Calling animate1 : " + pointIndex);
+	if(pointIndex<movementArray.length) {
+		//alert("Inside animate1 : " + pointIndex);
 		var point = movementArray[pointIndex];
 		var movementTime,waitTime = 0;
 		if(point.d>500) {
@@ -83,7 +122,9 @@ function animate() {
 			waitTime = point.d;
 		}
 		pointIndex++;
-		cursorTween.to({x:point.x,y:point.y}, movementTime).wait(waitTime).call(animate);
+		createjs.Tween.get(cursor).to({x:point.x,y:point.y}, movementTime).wait(waitTime).call(animate);
+		//cursorTween = new createjs.Tween.get(cursor);
+		//cursorTween.call(animate);
 	}
 	
 	/*for (var i=0; i<movementArray.length; i++) {
