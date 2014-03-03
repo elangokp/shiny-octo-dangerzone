@@ -70,8 +70,9 @@ function constructMovementArray() {
 }
 
 function animate() {
+	alert("Calling animate : " + pointIndex);
 	if(pointIndex<movementArray.length) {
-		alert(pointIndex);
+		alert("Inside animate : " + pointIndex);
 		var point = movementArray[pointIndex];
 		var movementTime,waitTime = 0;
 		if(point.d>500) {
