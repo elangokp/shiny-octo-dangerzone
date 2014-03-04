@@ -112,6 +112,7 @@
     page:      { width:0, height:0 },      // data normalization
     coords:    { x:[], y:[], p:[] },       // position coords and mouse click state (~ pressure)
     elem:      { hovered:[], clicked:[], lostFocus:[] }, // clicked, hovered and lostfocus elements
+    scrolls:   [],
     url:       null,                       // document URL
     rec:       null,                       // recording identifier
     userId:    null,                       // user identifier
@@ -131,6 +132,9 @@
     pageSections: [],                      // Array of page sections with data
     currentPageSection: "",                // Page section in view port now. Initialised to page start default page section.
     lastPageSection: "",                   // Page section that was in viewport before the current page section.
+    scrollStopped: true,
+    currentScrollTop: 0,
+    currentScrollLeft: 0,
     
     find_in_array: function(arr, name, value) {
         for (var i = 0, len = arr.length; i<len; i++) {
@@ -138,6 +142,47 @@
         };
         return false;
     },
+    
+    recordScrolls: function(eventType,scrollStopDelay)
+    {
+    	var scrollTop = jQuery_1_10_2(window).scrollTop();	
+    	
+    	var scrollLeft = jQuery_1_10_2(window).scrollLeft();
+    	
+    	if(eventType === "scrollStart" && smtRec.scrollStopped){
+    		console.log("scrollStart");
+    		smtRec.scrollStopped = false;
+    		console.log("scrollTop : " + smtRec.currentScrollTop);
+    		console.log("scrollLeft : " + smtRec.currentScrollLeft);
+    		var scroll = {
+ 	                     startTop: smtRec.currentScrollTop,
+ 	                     startLeft: smtRec.currentScrollLeft,
+ 	                     startTime: smtRec.getTime(),
+ 	                     endTop: null,
+ 	                     endLeft: null,
+					     endTime: null,
+ 	                 };
+    		smtRec.scrolls.push(scroll);
+    		console.log(smtRec.scrolls);
+    	} else if(eventType === "scrollStop" && !smtRec.scrollStopped) {
+    		console.log("scrollStop");
+    		scrollStopDelay = (scrollStopDelay === undefined) ? 0 : scrollStopDelay;
+    		smtRec.currentScrollTop = jQuery_1_10_2(window).scrollTop();
+    		smtRec.currentScrollLeft = jQuery_1_10_2(window).scrollLeft();
+    		console.log("scrollTop : " + smtRec.currentScrollTop);
+    		console.log("scrollLeft : " + smtRec.currentScrollLeft);
+    		if(smtRec.scrolls.length > 0){
+    			console.log("scrolls length greater than 0");
+    			smtRec.scrolls[smtRec.scrolls.length-1].endTop = smtRec.currentScrollTop;
+        		smtRec.scrolls[smtRec.scrolls.length-1].endLeft = smtRec.currentScrollLeft;
+        		smtRec.scrolls[smtRec.scrolls.length-1].endTime = smtRec.getTime()-scrollStopDelay;
+    		} 
+    		console.log(smtRec.scrolls);
+    		smtRec.scrollStopped = true;
+    		
+    	}    	
+    },
+    
     
     updatePageSections: function()
     {
@@ -500,6 +545,7 @@
 	      requestData += "&elhovered=" + encodeURIComponent(JSON.stringify(smtRec.elem.hovered));
 	      requestData += "&elclicked=" + encodeURIComponent(JSON.stringify(smtRec.elem.clicked));
 	      requestData += "&ellostfocus=" + encodeURIComponent(JSON.stringify(smtRec.elem.lostFocus));
+	      requestData += "&scrolls=" + encodeURIComponent(JSON.stringify(smtRec.scrolls));
 	      requestData += "&lostFocusCount=" + smtRec.lostFocusCount;
 	      requestData += "&focusedTime=" + smtRec.getFocusTime();
 	      requestData += "&scrollPercentage=" + smtRec.scrollPercentage;
@@ -558,6 +604,7 @@
 	      requestData += "&elhovered=" + encodeURIComponent(JSON.stringify(smtRec.elem.hovered));
 	      requestData += "&elclicked=" + encodeURIComponent(JSON.stringify(smtRec.elem.clicked));
 	      requestData += "&ellostfocus=" + encodeURIComponent(JSON.stringify(smtRec.elem.lostFocus));
+	      requestData += "&scrolls=" + encodeURIComponent(JSON.stringify(smtRec.scrolls));
 	      requestData += "&lostFocusCount=" + smtRec.lostFocusCount;
 	      requestData += "&focusedTime=" + smtRec.getFocusTime();
 	      requestData += "&scrollPercentage=" + smtRec.scrollPercentage;
@@ -938,6 +985,8 @@
         }
       }*/
       smtRec.initPageSections();
+      smtRec.currentScrollTop = jQuery_1_10_2(window).scrollTop();
+	  smtRec.currentScrollLeft = jQuery_1_10_2(window).scrollLeft();
       jQuery_1_10_2(window).load(function() {
     	  smtRec.adjustPageSections();
       });
@@ -972,11 +1021,17 @@
     		smt2fn.log("On Blur Timestamp: " + smtRec.lastBlurTimeStamp);
     	});
       
-      if(smtRec.pageSections.length>0) {
-    	  jQuery_1_10_2(window).scrollStopped(500,function(){
-        	  smtRec.updatePageSections();
-    		}); 
-      }
+      
+	  jQuery_1_10_2(window).scroll(function() {
+		  smtRec.recordScrolls("scrollStart");		
+		});
+	  
+	  jQuery_1_10_2(window).scrollStopped(500,function(){
+		  smtRec.recordScrolls("scrollStop",500/1000);
+		  if(smtRec.pageSections.length>0) {
+			  smtRec.updatePageSections();
+		  } 
+		});
       
       
     	

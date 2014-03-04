@@ -17,6 +17,8 @@ class WP_Insights_Replayer_Beta {
 	
 	protected $lostFocus = null;
 	
+	protected $scrolls = null;
+	
 	protected $cache_dir = null;
 	
 	protected $viewPortWidth = null;
@@ -138,6 +140,8 @@ class WP_Insights_Replayer_Beta {
 		if($this->lostFocus === "[") {
 			$this->lostFocus = "[]";
 		}
+		
+		$this->scrolls = $this->record['scrolls'];
 	}
 	
 	protected function createUserDataScript() {
@@ -151,6 +155,7 @@ class WP_Insights_Replayer_Beta {
 				hovered:  '.$this->hovered.',
 				clicked:  '.$this->clicked.',
 				lost_focus:  '.$this->lostFocus.',
+				scrolls:  '.$this->scrolls.'
 				};
 			  window.parent.resizeFrame(recordingData.vp_height,recordingData.vp_width);
 			//]]>

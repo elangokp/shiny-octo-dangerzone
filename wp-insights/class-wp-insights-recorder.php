@@ -511,6 +511,7 @@ class WP_Insights_Recorder {
 		$hovered_json = urldecode(stripslashes($_POST['elhovered']));
 		$clicked_json = urldecode(stripslashes($_POST['elclicked']));
 		$lostFocus_json = urldecode(stripslashes($_POST['ellostfocus']));
+		$scrolls_json = urldecode(stripslashes($_POST['scrolls']));
 		
 		/* $hovered = json_decode($hovered_json, true);
 		$clicked = json_decode($clicked_json, true);
@@ -535,6 +536,11 @@ class WP_Insights_Recorder {
 		if(!empty($lostFocus_json) && strlen($lostFocus_json)>2) {
 			error_log("Append Inside not empty lost focus");
 			$values .= ",lost_focus   = CONCAT(COALESCE(lost_focus,  ''), '|~|". esc_sql($lostFocus_json) ."')";
+		}
+		
+		if(!empty($lostFocus_json) && strlen($lostFocus_json)>2) {
+			error_log("Append Inside not empty scrolls");
+			$values .= ",scrolls = '".$scrolls_json."'";
 		}
 
 		$this->wp_insights_db_utils->db_update($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS, $values, "id='".$_POST['uid']."'");

@@ -286,6 +286,7 @@ class WP_Insights_DB_Utils {
         hovered      LONGTEXT                NOT NULL,
         clicked      LONGTEXT                NOT NULL,
         lost_focus   LONGTEXT                NULL,
+        scrolls      LONGTEXT                NULL,
         PRIMARY KEY  (id) ) DEFAULT CHARSET utf8";
               
 		dbDelta( $records_table_sql );
