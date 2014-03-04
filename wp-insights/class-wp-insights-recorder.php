@@ -188,35 +188,33 @@ class WP_Insights_Recorder {
 		}
 		
 		if(isset($current_browser->Parent) && !empty($current_browser->Parent)) {
-			$browserName = "unknown";
-		} else {
 			$browserName = $current_browser->Parent;
+		} else {
+			$browserName = "unknown";
 		}
 		
 		if(isset($current_browser->Platform_Description) && !empty($current_browser->Platform_Description)) {
-			$os = "unknown";
-		} else {
 			$os = $current_browser->Platform_Description;
+		} else {
+			$os = "unknown";
 		}
 		
 		if(isset($current_browser->Version) && !empty($current_browser->Version)) {
-			$browserVersion = "unknown";
-		} else {
 			$browserVersion = (float)$current_browser->Version;
+		} else {
+			$browserVersion = (float)"0.0";
 		}
 		
 		if(isset($current_browser->browser_name) && !empty($current_browser->browser_name)) {
-			$userAgent = "unknown";
-		} else {
 			$userAgent = $current_browser->browser_name;
+		} else {
+			$userAgent = "unknown";
 		}
 
-		error_log(print_r($current_browser, true));
+		//error_log(print_r($current_browser, true));
 		// save browser id
 		$bname = $this->wp_insights_db_utils->db_select($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_BROWSERS, "id", "name='".$browserName."'");
 		if (!$bname) {
-			
-			$browserName = $current_browser->Parent;
 			$isBot = 0;
 			if (strpos($browserName, 'GoogleBot') !== FALSE) {
 				$isBot = 1;
@@ -227,7 +225,7 @@ class WP_Insights_Recorder {
 			}
 			
 			$browserdetails = array(
-					"name" => $current_browser->Parent,
+					"name" => $browserName,
 					"isBot" => $isBot
 			);
 			$browserdetailsformat = array(
@@ -241,10 +239,10 @@ class WP_Insights_Recorder {
 		
 		
 		// save OS id
-		$osname = $this->wp_insights_db_utils->db_select($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_OS, "id", "name='".$current_browser->Platform_Description."'");
+		$osname = $this->wp_insights_db_utils->db_select($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_OS, "id", "name='".$os."'");
 		if (!$osname) {
 			$osdetails = array(
-					"name" => $current_browser->Platform_Description
+					"name" => $os
 			);
 			$osdetailsformat = array(
 					'%s'
@@ -257,8 +255,8 @@ class WP_Insights_Recorder {
 		$browserAndOSId = array(
 				'browser_id' => $browserid,
 				'os_id' => $osid,
-				'browser_ver' => (float) $current_browser->Version,
-				'user_agent' => $current_browser->browser_name
+				'browser_ver' => $browserVersion,
+				'user_agent' => $userAgent
 		);
 		
 		return $browserAndOSId;

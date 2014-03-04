@@ -1,6 +1,7 @@
 var stage = null;
 var cursor = null;
 var cursorTween = null;
+var initialMoveWait = 0;
 var movementArray = [];
 var initialScrollWait = 0;
 var scrollArray = [];
@@ -32,7 +33,10 @@ function initializePlayer() {
 		stage.addChild(cursor);
 		new createjs.Ticker.addEventListener("tick", handleTick);		
 		//cursorTween = new createjs.Tween.get(cursor);
-		animate();
+		console.log("Image Loaded : " + new Date().getTime());
+		setTimeout(scrollAnimate,initialScrollWait);
+		setTimeout(cursorAnimate,initialMoveWait);
+		//setTimeout(cursorAnimate(),0);		
 		//setTimeout(animate1(),0);		
 		/*cursorTween.to({x:50,y:50}, 800)
 		.wait(1000)
@@ -48,6 +52,8 @@ function initializePlayer() {
 function constructMovementArray() {
 	console.log(recordingData.hovered);
 	var hoveredData = recordingData.hovered;
+	movementArray = [];
+	initialMoveWait = hoveredData[0].t;
 	for (var i=0; i<hoveredData.length; i++) {
 		try {
 			var element = jQuery( document ).find(hoveredData[i].cp);
@@ -76,33 +82,8 @@ function constructMovementArray() {
 	console.log(movementArray);
 }
 
-function constructScrollArray() {
-	console.log(recordingData.scrolls);
-	var scrollData = recordingData.scrolls;
-	initialScrollWait = scrollData[0].startTime;
-	for (var i=0; i<scrollData.length; i++) {
-		try {
-				var scroll = {
-						top : scrollData[i].endTop,
-						left : scrollData[i].endLeft,
-						duration : scrollData[i].startTime - scrollData[i].endTime
-				};
-				if(i<(scrollData.length-1)) {
-					scroll.wait = scrollData[i].endTime - scrollData[i+1].startTime;
-				} else {
-					scroll.wait = 0;
-				}
-				scrollArray.push(scroll);			
-		} catch (err) {
-			console.log(err.message);	
-			//console.log(value.cp);					
-		}
-	}
-	console.log(scrollArray);
-}
-
 function cursorAnimate() {
-	console.log("Calling animate : " + pointIndex);
+	console.log("Calling cursorAnimate : " + pointIndex + " - " + new Date().getTime());
 	//console.log(cursorTween);
 	//alert("Calling animate : " + pointIndex);
 	if(pointIndex<movementArray.length) {
@@ -116,71 +97,52 @@ function cursorAnimate() {
 			movementTime = 10;
 			waitTime = point.d;
 		}
-		pointIndex++;	
-		//currentScrollTop = currentScrollTop+100;
-		//createjs.Tween.get(window).to({pageYOffset:currentScrollTop}, 500).wait(1000);
-		createjs.Tween.get(cursor).to({x:point.x,y:point.y}, movementTime).wait(waitTime).call(animate);
-		
-		//cursorTween = new createjs.Tween.get(cursor);
-		//cursorTween.call(animate1);
+		pointIndex++;
+		createjs.Tween.get(cursor).to({x:point.x,y:point.y}, movementTime).wait(waitTime).call(cursorAnimate);
+
 	}
-	
-	/*for (var i=0; i<movementArray.length; i++) {
-		var point = movementArray[i];
-		var movementTime,waitTime = 0;
-		if(point.d>500) {
-			movementTime = 500;
-			waitTime = point.d - 500;
-		} else {
-			movementTime = 0;
-			waitTime = point.d;
+}
+
+function constructScrollArray() {
+	console.log(recordingData.scrolls);
+	var scrollData = recordingData.scrolls;
+	scrollArray = [];
+	initialScrollWait = scrollData[0].startTime*1000;
+	for (var i=0; i<scrollData.length; i++) {
+		try {
+				var scroll = {
+						top : scrollData[i].endTop,
+						left : scrollData[i].endLeft,
+						duration : (scrollData[i].endTime - scrollData[i].startTime)*1000
+				};
+				if(i<(scrollData.length-1)) {
+					scroll.wait = (scrollData[i+1].startTime - scrollData[i].endTime)*1000;
+				} else {
+					scroll.wait = 0;
+				}
+				scrollArray.push(scroll);			
+		} catch (err) {
+			console.log(err.message);	
+			//console.log(value.cp);					
 		}
-		cursorTween.to({x:point.x,y:point.y}, movementTime).wait(waitTime);
-	}*/
+	}
+	console.log(scrollArray);
 }
 
 function scrollAnimate() {
-	//console.log("Calling animate1 : " + pointIndex);
-	currentScrollTop = currentScrollTop+100;	
-	jQuery('body').animate({
-		scrollTop: currentScrollTop
-	},600,function() {
-		setTimeout(animate1(),1000);
-	}
-	);
-	
-	if(scrollIndex<movementArray.length) {
+	console.log("Calling scrollAnimate : " + scrollIndex + " - " + new Date().getTime());
+	if(scrollIndex<scrollArray.length) {
 		//alert("Inside animate : " + pointIndex);
-		var point = movementArray[pointIndex];
-		var movementTime,waitTime = 0;
-		if(point.d>500) {
-			movementTime = 500 + 10;
-			waitTime = point.d - 500;
-		} else {
-			movementTime = 10;
-			waitTime = point.d;
-		}
-		pointIndex++;	
-		//currentScrollTop = currentScrollTop+100;
-		//createjs.Tween.get(window).to({pageYOffset:currentScrollTop}, 500).wait(1000);
-		createjs.Tween.get(cursor).to({x:point.x,y:point.y}, movementTime).wait(waitTime).call(animate);
-		
-		//cursorTween = new createjs.Tween.get(cursor);
-		//cursorTween.call(animate1);
+		var scroll = scrollArray[scrollIndex];
+		scrollIndex++;	
+		jQuery('body').animate({
+			scrollTop: scroll.top,
+			scrollLeft: scroll.left
+		},scroll.duration,function() {
+			setTimeout(scrollAnimate,scroll.wait);
+		});
+
 	}
-	
-	/*for (var i=0; i<movementArray.length; i++) {
-		var point = movementArray[i];
-		var movementTime,waitTime = 0;
-		if(point.d>500) {
-			movementTime = 500;
-			waitTime = point.d - 500;
-		} else {
-			movementTime = 0;
-			waitTime = point.d;
-		}
-		cursorTween.to({x:point.x,y:point.y}, movementTime).wait(waitTime);
-	}*/
 }
 
 function handleTick(event) {
@@ -190,6 +152,7 @@ function handleTick(event) {
 
 function play() {
 	constructMovementArray();
+	constructScrollArray();
 	initializePlayer();	
 	//setTimeout(animate(),6000);
 }
