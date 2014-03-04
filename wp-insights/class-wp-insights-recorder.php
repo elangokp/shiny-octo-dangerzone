@@ -172,6 +172,10 @@ class WP_Insights_Recorder {
 		/* client browser stats ----------------------------------------------------- */
 		
 		//$browser = new Browser();
+		$browserName = null;
+		$browserVersion = null;
+		$os = null;
+		$userAgent = null;
 		try {
 			$bc = new Browscap($this->cache_dir."browscapcache/",plugin_dir_path(__FILE__)."utils/full_php_browscap.ini");
 			//$bc = new Browscap($this->cache_dir."browscapcache/");
@@ -183,9 +187,33 @@ class WP_Insights_Recorder {
 			);
 		}
 		
+		if(isset($current_browser->Parent) && !empty($current_browser->Parent)) {
+			$browserName = "unknown";
+		} else {
+			$browserName = $current_browser->Parent;
+		}
 		
+		if(isset($current_browser->Platform_Description) && !empty($current_browser->Platform_Description)) {
+			$os = "unknown";
+		} else {
+			$os = $current_browser->Platform_Description;
+		}
+		
+		if(isset($current_browser->Version) && !empty($current_browser->Version)) {
+			$browserVersion = "unknown";
+		} else {
+			$browserVersion = (float)$current_browser->Version;
+		}
+		
+		if(isset($current_browser->browser_name) && !empty($current_browser->browser_name)) {
+			$userAgent = "unknown";
+		} else {
+			$userAgent = $current_browser->browser_name;
+		}
+
+		error_log(print_r($current_browser, true));
 		// save browser id
-		$bname = $this->wp_insights_db_utils->db_select($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_BROWSERS, "id", "name='".$current_browser->Parent."'");
+		$bname = $this->wp_insights_db_utils->db_select($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_BROWSERS, "id", "name='".$browserName."'");
 		if (!$bname) {
 			
 			$browserName = $current_browser->Parent;
