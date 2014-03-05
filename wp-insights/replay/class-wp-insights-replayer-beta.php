@@ -37,6 +37,8 @@ class WP_Insights_Replayer_Beta {
 	
 	protected $image_cursor_path = null;
 	
+	protected $image_click_path = null;
+	
 	protected $wp_insights_db_utils = null;
 	
 	public function __construct($recording_id) {
@@ -49,6 +51,7 @@ class WP_Insights_Replayer_Beta {
 		$this->js_replayer_path = plugins_url('js/dev/replayer.js?v='.WP_Insights::VERSION, dirname(__FILE__));
 		$this->js_create_path = "http://code.createjs.com/createjs-2013.12.12.min.js";
 		$this->image_cursor_path = plugins_url('assets/cursor.png?v='.WP_Insights::VERSION, dirname(__FILE__));
+		$this->image_click_path = plugins_url('assets/click.png?v='.WP_Insights::VERSION, dirname(__FILE__));
 		//$this->getDetailsByRecordingId();
 		//$this->loadCacheFile();
 	}
@@ -141,7 +144,12 @@ class WP_Insights_Replayer_Beta {
 			$this->lostFocus = "[]";
 		}
 		
-		$this->scrolls = $this->record['scrolls'];
+		if($this->record['scrolls'] == null || $this->record['scrolls'] === "") {
+			$this->scrolls = "[]";
+		} else {
+			$this->scrolls = $this->record['scrolls'];
+		}
+		
 	}
 	
 	protected function createUserDataScript() {
@@ -149,6 +157,7 @@ class WP_Insights_Replayer_Beta {
 		$cdata_user = '
 			//<![CDATA[
 			  var cursorImageUrl = "'.$this->image_cursor_path.'";
+			  var clickImageUrl = "'.$this->image_click_path.'";
 			  var recordingData = {
 			  	vp_height: '.$this->viewPortHeight.',
 				vp_width:  '.$this->viewPortWidth.',
