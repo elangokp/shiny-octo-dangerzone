@@ -18,6 +18,11 @@ var cursorImage = null;
 var clickImage = null;
 var cursor = null;
 
+var drawingCanvas;
+var oldPt;
+var oldMidPt;
+var stroke;
+
 function initializePlayer() {
 	var canvas = document.createElement("canvas");
 	canvas.setAttribute("id","replayerCanvas");
@@ -44,7 +49,12 @@ function initializePlayer() {
 		cursor.x=0;
 		cursor.y=0;
 		stage.addChild(cursor);
-		new createjs.Ticker.addEventListener("tick", handleTick);		
+		new createjs.Ticker.addEventListener("tick", handleTick);	
+		drawingCanvas = new createjs.Shape();
+		stage.addChild(drawingCanvas);
+		stroke = Math.random()*30 + 10 | 0;
+		oldPt = new createjs.Point(0, 0);
+		oldMidPt = oldPt;
 		//cursorTween = new createjs.Tween.get(cursor);
 		console.log("Image Loaded : " + new Date().getTime());
 		//setTimeout(scrollAnimate,initialScrollWait);
@@ -280,7 +290,26 @@ function animate() {
 				movementTime = 10;
 				waitTime = event.d;
 			}
-			createjs.Tween.get(cursor).to({x:event.x,y:event.y}, movementTime).wait(waitTime).call(animate);
+			var x = 0;
+			var y = 0;
+			if(event.x>4) {
+				x = event.x-4;				
+			} else {
+				x = event.x;
+			}
+			if(event.y>8) {
+				y = event.y-4;				
+			} else {
+				y = event.y;
+			}
+			var midPt = new createjs.Point(oldPt.x + x>>1, oldPt.y+y>>1);
+			drawingCanvas.graphics.setStrokeStyle(5, 'round', 'round').beginStroke("#828b20").moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
+			oldPt.x = x;
+			oldPt.y = y;
+			oldMidPt.x = midPt.x;
+			oldMidPt.y = midPt.y;
+			createjs.Tween.get(cursor).to({x:x,y:y}, movementTime).wait(waitTime).call(animate);
+			
 		} else if(event.type === "scroll") {
 			var duration = event.duration;
 			var delay = event.d;
@@ -298,8 +327,8 @@ function animate() {
 			});
 		} else if(event.type === "click") {
 			var click = new createjs.Bitmap(clickImage);
-			click.x=event.x;
-			click.y=event.y;
+			click.x=event.x - 16; //to adjust with click image size
+			click.y=event.y - 10; //to adjust with click image size
 			stage.addChild(click);
 			setTimeout(animate,event.d);
 		}
