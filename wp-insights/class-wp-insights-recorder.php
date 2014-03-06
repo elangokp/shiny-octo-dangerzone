@@ -564,7 +564,7 @@ class WP_Insights_Recorder {
 			$values .= ",lost_focus   = CONCAT(COALESCE(lost_focus,  ''), '|~|". esc_sql($lostFocus_json) ."')";
 		}
 		
-		if(!empty($lostFocus_json) && strlen($lostFocus_json)>2) {
+		if(!empty($scrolls_json) && strlen($scrolls_json)>2) {
 			error_log("Append Inside not empty scrolls");
 			$values .= ",scrolls = '".$scrolls_json."'";
 		}

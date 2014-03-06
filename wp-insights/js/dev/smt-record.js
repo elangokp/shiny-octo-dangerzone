@@ -150,10 +150,10 @@
     	var scrollLeft = jQuery_1_10_2(window).scrollLeft();
     	
     	if(eventType === "scrollStart" && smtRec.scrollStopped){
-    		console.log("scrollStart");
+    		smt2fn.log("scrollStart");
     		smtRec.scrollStopped = false;
-    		console.log("scrollTop : " + smtRec.currentScrollTop);
-    		console.log("scrollLeft : " + smtRec.currentScrollLeft);
+    		smt2fn.log("scrollTop : " + smtRec.currentScrollTop);
+    		smt2fn.log("scrollLeft : " + smtRec.currentScrollLeft);
     		var scroll = {
  	                     startTop: smtRec.currentScrollTop,
  	                     startLeft: smtRec.currentScrollLeft,
@@ -163,21 +163,21 @@
 					     endTime: null,
  	                 };
     		smtRec.scrolls.push(scroll);
-    		console.log(smtRec.scrolls);
+    		smt2fn.log(smtRec.scrolls);
     	} else if(eventType === "scrollStop" && !smtRec.scrollStopped) {
-    		console.log("scrollStop");
+    		smt2fn.log("scrollStop");
     		scrollStopDelay = (scrollStopDelay === undefined) ? 0 : scrollStopDelay;
     		smtRec.currentScrollTop = jQuery_1_10_2(window).scrollTop();
     		smtRec.currentScrollLeft = jQuery_1_10_2(window).scrollLeft();
-    		console.log("scrollTop : " + smtRec.currentScrollTop);
-    		console.log("scrollLeft : " + smtRec.currentScrollLeft);
+    		smt2fn.log("scrollTop : " + smtRec.currentScrollTop);
+    		smt2fn.log("scrollLeft : " + smtRec.currentScrollLeft);
     		if(smtRec.scrolls.length > 0){
-    			console.log("scrolls length greater than 0");
+    			smt2fn.log("scrolls length greater than 0");
     			smtRec.scrolls[smtRec.scrolls.length-1].endTop = smtRec.currentScrollTop;
         		smtRec.scrolls[smtRec.scrolls.length-1].endLeft = smtRec.currentScrollLeft;
         		smtRec.scrolls[smtRec.scrolls.length-1].endTime = smtRec.getTime()-scrollStopDelay;
     		} 
-    		console.log(smtRec.scrolls);
+    		smt2fn.log(smtRec.scrolls);
     		smtRec.scrollStopped = true;
     		
     	}    	
@@ -188,7 +188,7 @@
     {
     	var scrollTop = jQuery_1_10_2(window).scrollTop();
 		var center = scrollTop + ((jQuery_1_10_2(window).height())/2);
-		console.log("updatePageSections");
+		smt2fn.log("updatePageSections");
 		jQuery_1_10_2.each(smtRec.pageSections, function(index){
 			var sectionTop = smtRec.pageSections[index].top;
 			var sectionBottom = smtRec.pageSections[index].bottom;
@@ -354,7 +354,7 @@
     initMouseData: function() 
     {
       smtRec.computeAvailableSpace();
-      console.log("Inside init mouse data");
+      smt2fn.log("Inside init mouse data");
       smt2fn.log("Window Height : " + jQuery_1_10_2(window).height());
       smt2fn.log("Window Width : " + jQuery_1_10_2(window).width());
       smt2fn.log("Doc Height : " + jQuery_1_10_2(document).height());
@@ -457,7 +457,7 @@
 	    // send request
 	    var gatewayUrl = smtOpt.trackingUrl;
 	    
-	    /*if ('XDomainRequest' in window && window.XDomainRequest !== null) {
+	    if ('XDomainRequest' in window && window.XDomainRequest !== null) {
     	    // Use Microsoft XDR
     	    var xdr = new XDomainRequest();
     	    xdr.open("post", gatewayUrl+"?action=wpicachepage&isXDR=true");
@@ -474,12 +474,7 @@
       		  url:  gatewayUrl,
       		  data: requestData
     		});
-    	}*/
-	    jQuery_1_10_2.ajax({
-    		  type: "POST",
-    		  url:  gatewayUrl,
-    		  data: requestData
-  		});
+    	}
 	},
 	
 	getDocumentHtml: function() {
@@ -554,11 +549,12 @@
           requestData += "&action="    + "wpiappend";
           requestData += "&remote="    + smtOpt.storageServer;
           
-      //alert("Inside append mouse data");
+      smt2fn.log("Inside append mouse data");
       // send request
       var gatewayUrl = smtOpt.trackingUrl;
-      /*if ('XDomainRequest' in window && window.XDomainRequest !== null) {
+      if ('XDomainRequest' in window && window.XDomainRequest !== null) {
   	    // Use Microsoft XDR
+    	smt2fn.log('XDomainRequest');
   	    var xdr = new XDomainRequest();
   	    xdr.open("post", gatewayUrl+"?action=wpiappend&isXDR=true");
   	    xdr.onload = function () {};
@@ -574,13 +570,13 @@
 			  url:  gatewayUrl,
 			  data: requestData
 		});
-	}*/
-      
+	}
+      /*
       jQuery_1_10_2.ajax({
 		  type: "POST",
 		  url:  gatewayUrl,
 		  data: requestData
-	});
+	});*/
       // clean
       smtRec.clearMouseData();
     },
@@ -616,7 +612,7 @@
       //alert("Inside append mouse data");
       // send request
       var gatewayUrl = smtOpt.trackingUrl;
-      /*if ('XDomainRequest' in window && window.XDomainRequest !== null) {
+      if ('XDomainRequest' in window && window.XDomainRequest !== null) {
   	    // Use Microsoft XDR
   	    var xdr = new XDomainRequest();
   	    xdr.open("post", gatewayUrl+"?action=wpiexit&isXDR=true");
@@ -633,13 +629,13 @@
 			  url:  gatewayUrl,
 			  data: requestData
 		});
-	}*/
-      
+	}
+      /*
       jQuery_1_10_2.ajax({
 		  type: "POST",
 		  url:  gatewayUrl,
 		  data: requestData
-	});
+	});*/
       // clean
       smtRec.clearMouseData();
     },

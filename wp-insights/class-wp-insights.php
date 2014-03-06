@@ -32,7 +32,7 @@ class WP_Insights {
 	 *
 	 * @const   string
 	 */
-	const VERSION = '0.8.3Beta';
+	const VERSION = '0.8.5Beta';
 
 	/**
 	 * Unique identifier for your plugin.
@@ -817,7 +817,7 @@ class WP_Insights {
 					var addressBarURL = top.location.href;
 					var isFullyLoaded = false;
 					
-					if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay.php") < 0 
+					if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay") < 0 
 						&& addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-heat.php") < 0) {
 			  			var jQuery_1_10_2_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
 			  			var jQuery_UI_1_10_3_url = "//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js";
@@ -880,7 +880,7 @@ class WP_Insights {
 				  				jQuery.getScript( "<?php echo $smt_record_js_url.'?v='.self::VERSION?>", function() 
 				  		  			  {
 					  					smt2.record({
-										      recTime: 300,
+										      recTime: 3000,
 										      trackingUrl: "<?php echo $smt_tracking_url?>",
 										      postInterval: 7
 										    });
@@ -902,7 +902,7 @@ class WP_Insights {
 					var addressBarURL = top.location.href;
 					var isFullyLoaded = false;
 					
-					if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay.php") < 0 
+					if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay") < 0 
 						&& addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-heat.php") < 0) {
 	
 				  				jQuery.getScript( "<?php echo $wpi_js_url.'?v='.self::VERSION?>", function() 
@@ -945,7 +945,7 @@ class WP_Insights {
 									        });
 									    };
 					  					smt2.record({
-										      recTime: 300,
+										      recTime: 3000,
 										      trackingUrl: "<?php echo $smt_tracking_url?>",
 										      postInterval: 7
 										    });
