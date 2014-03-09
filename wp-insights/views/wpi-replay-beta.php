@@ -50,14 +50,37 @@ header('Expires: 0'); // Proxies.
     	document.getElementById('iframePlayer').height = frameHeight;
     	document.getElementById('iframePlayer').width = frameWidth;
     }
+
+    function playerLoaded() {
+    	$("#playButton").removeAttr('disabled');
+    	//$("#pauseButton").removeAttr('disabled');
+    	//$("#stopButton").removeAttr('disabled');
+    }
     
 
     $(function(){
     	$("#iframePlayer").load(function() {
     		replayer = window.frames[0].window;
-        	$("#playButton").removeAttr('disabled');
+        	replayer.initializePlayer();
         	$("#playButton").click(function() {
+        		$("#playButton").attr('disabled',true);
+        		$("#pauseButton").removeAttr('disabled');
+            	$("#stopButton").removeAttr('disabled');
             	replayer.play();
+        	});
+
+        	$("#pauseButton").click(function() {
+        		$("#pauseButton").attr('disabled',true);
+        		$("#playButton").removeAttr('disabled');
+        		$("#stopButton").removeAttr('disabled');
+            	replayer.pause();
+        	});
+
+        	$("#stopButton").click(function() {
+        		$("#stopButton").attr('disabled',true);
+        		$("#pauseButton").attr('disabled',true);
+        		$("#playButton").removeAttr('disabled');
+            	replayer.stop();
         	});
         	//intervalH = setInterval(isHeatmapCompleted(), 3000);
         });    	
@@ -67,6 +90,8 @@ header('Expires: 0'); // Proxies.
 <h1 style="margin: 0 auto;float:left;width:50%">Session Player</h1>
 <div id="controls" style="margin: 0 auto;float:left;width:50%">
 <button id="playButton" disabled>Play</button>
+<button id="pauseButton" disabled>Pause</button>
+<button id="stopButton" disabled>Stop</button>
 </div>
 <!--<form id="wpi-heat" method="get" style="margin: 0 auto;float:right;width:50%">
 <input type="hidden" name="rid" value="<?php echo $rid ?>" />

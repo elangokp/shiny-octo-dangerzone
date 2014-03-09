@@ -58,8 +58,7 @@ class WP_Insights_Recorder {
 		}
 		$browserAndOSId = $this->getBrowserAndOSDetails();
 		
-		error_log("vpw : ". $_REQUEST['vpw']);
-		error_log("vph : ". $_REQUEST['vph']);
+		$viewPorts_json = urldecode(stripslashes($_REQUEST['vp']));
 
 		/* create database entry ---------------------------------------------------- */
 		$recorddetails = array(
@@ -75,8 +74,7 @@ class WP_Insights_Recorder {
 				"ip" => WP_Insights_Utils::get_client_ip() ,
 				"scr_width" => (int) $_REQUEST['screenw'],
 				"scr_height" => (int) $_REQUEST['screenh'],
-				"vp_width" => (int) $_REQUEST['vpw'],
-				"vp_height" => (int) $_REQUEST['vph'],
+				"viewports" => $viewPorts_json,
 				"doc_width" => (int) $_REQUEST['pagew'],
 				"doc_height" => (int) $_REQUEST['pageh'],
 				//"sess_date" => current_time('mysql'),
@@ -102,8 +100,7 @@ class WP_Insights_Recorder {
 				'%s',
 				'%d',
 				'%d',
-				'%d',
-				'%d',
+				'%s',
 				'%d',
 				'%d',
 				'%f',
@@ -538,6 +535,7 @@ class WP_Insights_Recorder {
 		$clicked_json = urldecode(stripslashes($_POST['elclicked']));
 		$lostFocus_json = urldecode(stripslashes($_POST['ellostfocus']));
 		$scrolls_json = urldecode(stripslashes($_POST['scrolls']));
+		$viewPorts_json = urldecode(stripslashes($_POST['vp']));
 		
 		/* $hovered = json_decode($hovered_json, true);
 		$clicked = json_decode($clicked_json, true);
@@ -567,6 +565,11 @@ class WP_Insights_Recorder {
 		if(!empty($scrolls_json) && strlen($scrolls_json)>2) {
 			error_log("Append Inside not empty scrolls");
 			$values .= ",scrolls = '".$scrolls_json."'";
+		}
+		
+		if(!empty($viewPorts_json) && strlen($viewPorts_json)>2) {
+			error_log("Append Inside not empty view ports");
+			$values .= ",viewports = '".$viewPorts_json."'";
 		}
 
 		$this->wp_insights_db_utils->db_update($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS, $values, "id='".$_POST['uid']."'");

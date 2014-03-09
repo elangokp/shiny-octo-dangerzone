@@ -6,10 +6,12 @@ var movementArray = [];
 var initialScrollWait = 0;
 var scrollArray = [];
 var clickArray = [];
+var viewportArray = [];
 var initialClickWait = 0;
 var pointIndex = 0;
 var scrollIndex = 0;
 var clickIndex = 0;
+var viewportIndex = 0;
 var allEventsArray = [];
 var allEventsIndex = 0;
 var initialWait = 0;
@@ -22,6 +24,8 @@ var drawingCanvas;
 var oldPt;
 var oldMidPt;
 var stroke;
+
+var paused = false;
 
 function initializePlayer() {
 	var canvas = document.createElement("canvas");
@@ -55,21 +59,14 @@ function initializePlayer() {
 		stroke = Math.random()*30 + 10 | 0;
 		oldPt = new createjs.Point(0, 0);
 		oldMidPt = oldPt;
-		//cursorTween = new createjs.Tween.get(cursor);
 		console.log("Image Loaded : " + new Date().getTime());
-		//setTimeout(scrollAnimate,initialScrollWait);
-		//setTimeout(cursorAnimate,initialMoveWait);
-		setTimeout(animate,initialWait);
-		//setTimeout(cursorAnimate(),0);		
-		//setTimeout(animate1(),0);		
-		/*cursorTween.to({x:50,y:50}, 800)
-		.wait(1000)
-		.to({x:100,y:100}, 1000)
-		.to({x:50,y:150}, 1200)
-		.to({x:100,y:200}, 400)
-		.to({x:50,y:250}, 1500);
-		stage.update();*/
+		window.parent.playerLoaded();
 	}, 5000);
+	constructMovementArray();
+	constructScrollArray();
+	constructClickArray();
+	constructViewportsArray();
+	normalizeEvents();
 	 
 }
 
@@ -83,7 +80,7 @@ function constructMovementArray() {
 	}		
 	for (var i=0; i<hoveredData.length; i++) {
 		try {
-			var element = jQuery( document ).find(hoveredData[i].cp);
+			/*var element = jQuery( document ).find(hoveredData[i].cp);
 			var x = hoveredData[i].pX;
 			var y = hoveredData[i].pY;
 			if(element.length > 0) {
@@ -100,12 +97,17 @@ function constructMovementArray() {
 
 				x = jQuery(element).first().offset().left + (hoveredData[i].rX * xdiscrepancy);
 				y = jQuery(element).first().offset().top + (hoveredData[i].rY * ydiscrepancy);	
-			}			
+			}*/			
 			var point = {
 							type : "movement",
-							x : x,
-							y : y,
-							startTime : hoveredData[i].t*1000
+							pX : hoveredData[i].pX,
+							pY : hoveredData[i].pY,
+							w : hoveredData[i].w,
+							h : hoveredData[i].h,
+							rX : hoveredData[i].rX,
+							rY : hoveredData[i].rY,
+							startTime : hoveredData[i].t*1000,
+							cp : hoveredData[i].cp
 					};
 			if(i<(hoveredData.length-1)) {
 				point.d = (hoveredData[i+1].t - hoveredData[i].t)*1000;
@@ -206,8 +208,7 @@ function constructClickArray() {
 	}	
 	for (var i=0; i<clickedData.length; i++) {
 		try {
-			console.log(clickedData[i].cp);
-			var element = jQuery( document ).find(clickedData[i].cp);
+			/*var element = jQuery( document ).find(clickedData[i].cp);
 			var x = clickedData[i].pX;
 			var y = clickedData[i].pY;
 			if(element.length > 0) {
@@ -223,20 +224,19 @@ function constructClickArray() {
 					ydiscrepancy = jQuery(element).height()/clickedData[i].h;
 				}
 
-				console.log("width : " + jQuery(element).width());
-				console.log("height : " + jQuery(element).height());
-				console.log("xdiscrepancy : " + xdiscrepancy);
-				console.log("ydiscrepancy : " + ydiscrepancy);
-				console.log("rX : " + clickedData[i].rX);
-				console.log("rY : " + clickedData[i].rY);
 				x = jQuery(element).first().offset().left + (clickedData[i].rX * xdiscrepancy);
 				y = jQuery(element).first().offset().top + (clickedData[i].rY * ydiscrepancy);	
-			}			
+			}	*/		
 			var point = {
 							type : "click",
-							x : x,
-							y : y,
-							startTime : clickedData[i].t*1000
+							pX : clickedData[i].pX,
+							pY : clickedData[i].pY,
+							w : clickedData[i].w,
+							h : clickedData[i].h,
+							rX : clickedData[i].rX,
+							rY : clickedData[i].rY,
+							startTime : clickedData[i].t*1000,
+							cp : clickedData[i].cp
 					};
 			if(i<(clickedData.length-1)) {
 				point.d = (clickedData[i+1].t - clickedData[i].t)*1000;
@@ -253,12 +253,37 @@ function constructClickArray() {
 	console.log(clickArray);
 }
 
+function constructViewportsArray() {
+	console.log(recordingData.viewports);
+	var viewportData = recordingData.viewports;
+	viewportArray = [];
+	viewportIndex = 0;
+	
+	for (var i=0; i<viewportData.length; i++) {
+		try {
+				var viewport = {
+				        type : "viewport",
+						w : viewportData[i].w,
+						h : viewportData[i].h,
+				        startTime : viewportData[i].t*1000
+				};
+				
+				viewportArray.push(viewport);			
+		} catch (err) {
+			console.log(err.message);	
+			//console.log(value.cp);					
+		}
+	}
+	console.log(scrollArray);
+}
+
 function normalizeEvents() {
 	allEventsIndex = 0;
 	allEventsArray = [];
 	allEventsArray = allEventsArray.concat(movementArray);
 	allEventsArray = allEventsArray.concat(scrollArray);
 	allEventsArray = allEventsArray.concat(clickArray);
+	allEventsArray = allEventsArray.concat(viewportArray);
 	allEventsArray.sort(compare);
 	if(allEventsArray.length>0) {
 		initialWait = allEventsArray[0].startTime;
@@ -277,7 +302,7 @@ function animate() {
 	//console.log("Calling animate : " + allEventsIndex + " - " + new Date().getTime());
 	//console.log(cursorTween);
 	//alert("Calling animate : " + pointIndex);
-	if(allEventsIndex<allEventsArray.length) {
+	if(allEventsIndex<allEventsArray.length && !paused) {
 		//alert("Inside animate : " + pointIndex);
 		var event = allEventsArray[allEventsIndex];
 		//console.log(event.type);
@@ -290,18 +315,32 @@ function animate() {
 				movementTime = 10;
 				waitTime = event.d;
 			}
-			var x = 0;
-			var y = 0;
-			if(event.x>4) {
-				x = event.x-4;				
-			} else {
-				x = event.x;
+			var element = jQuery( document ).find(event.cp);
+			var x = event.pX;
+			var y = event.pY;
+			if(element.length > 0) {
+				var xdiscrepancy = 1;
+				var ydiscrepancy = 1;
+				
+				if(event.w > 0) {
+					xdiscrepancy = jQuery(element).width()/event.w;
+				}
+				
+				if(event.h > 0) {
+					ydiscrepancy = jQuery(element).height()/event.h;
+				}
+
+				x = jQuery(element).first().offset().left + (event.rX * xdiscrepancy);
+				y = jQuery(element).first().offset().top + (event.rY * ydiscrepancy);	
 			}
-			if(event.y>8) {
-				y = event.y-4;				
-			} else {
-				y = event.y;
+			
+			if(x>4) {
+				x = x-4;				
 			}
+			if(y>8) {
+				y = y-4;				
+			}
+			
 			var midPt = new createjs.Point(oldPt.x + x>>1, oldPt.y+y>>1);
 			drawingCanvas.graphics.setStrokeStyle(5, 'round', 'round').beginStroke("#828b20").moveTo(midPt.x, midPt.y).curveTo(oldPt.x, oldPt.y, oldMidPt.x, oldMidPt.y);
 			oldPt.x = x;
@@ -325,10 +364,32 @@ function animate() {
 			},duration,function() {
 				setTimeout(animate,delay);
 			});
+		} else if(event.type === "viewport") {
+			var delay = event.d;
+			window.parent.resizeFrame(event.h,event.w);
+			setTimeout(animate,delay);
 		} else if(event.type === "click") {
 			var click = new createjs.Bitmap(clickImage);
-			click.x=event.x - 16; //to adjust with click image size
-			click.y=event.y - 10; //to adjust with click image size
+			var element = jQuery( document ).find(event.cp);
+			var x = event.pX;
+			var y = event.pY;
+			if(element.length > 0) {
+				var xdiscrepancy = 1;
+				var ydiscrepancy = 1;
+				
+				if(event.w > 0) {
+					xdiscrepancy = jQuery(element).width()/event.w;
+				}
+				
+				if(event.h > 0) {
+					ydiscrepancy = jQuery(element).height()/event.h;
+				}
+
+				x = jQuery(element).first().offset().left + (event.rX * xdiscrepancy);
+				y = jQuery(element).first().offset().top + (event.rY * ydiscrepancy);	
+			}
+			click.x = x - 16; //to adjust with click image size
+			click.y = y - 10; //to adjust with click image size
 			stage.addChild(click);
 			setTimeout(animate,event.d);
 		}
@@ -353,10 +414,20 @@ function handleTick(event) {
 
 
 function play() {
-	constructMovementArray();
-	constructScrollArray();
-	constructClickArray();
-	normalizeEvents();
-	initializePlayer();	
-	//setTimeout(animate(),6000);
+	paused = false;
+	if(allEventsIndex === 0) {
+		setTimeout(animate,initialWait);
+	} else {
+		setTimeout(animate,0);
+	}
+	
+}
+
+function pause() {
+	paused = true;
+}
+
+function stop() {
+	paused = true;
+	allEventsIndex = 0;
 }

@@ -135,12 +135,23 @@
     scrollStopped: true,
     currentScrollTop: 0,
     currentScrollLeft: 0,
+    viewPorts:         [],
     
     find_in_array: function(arr, name, value) {
         for (var i = 0, len = arr.length; i<len; i++) {
             if (name in arr[i] && arr[i][name] == value) return i;
         };
         return false;
+    },
+    
+    captureViewPorts: function()
+    {
+    	var viewPort = {
+    			w: jQuery_1_10_2(window).width(),
+    			h: jQuery_1_10_2(window).height(),
+    			t: smtRec.getTime()
+    	}
+    	smtRec.viewPorts.push(viewPort);
     },
     
     recordScrolls: function(eventType,scrollStopDelay)
@@ -368,8 +379,7 @@
       requestData += "&screenh="   + screen.height;
       requestData += "&pagew="     + smtRec.page.width;
       requestData += "&pageh="     + smtRec.page.height;
-      requestData += "&vpw="       + jQuery_1_10_2(window).width();
-      requestData += "&vph="       + jQuery_1_10_2(window).height();
+      requestData += "&vp="        + encodeURIComponent(JSON.stringify(smtRec.viewPorts));
       requestData += "&time="      + smtRec.getTime();
       requestData += "&fps="       + smtOpt.fps;
       requestData += "&ftu="       + smtRec.ftu;
@@ -541,6 +551,7 @@
 	      requestData += "&elclicked=" + encodeURIComponent(JSON.stringify(smtRec.elem.clicked));
 	      requestData += "&ellostfocus=" + encodeURIComponent(JSON.stringify(smtRec.elem.lostFocus));
 	      requestData += "&scrolls=" + encodeURIComponent(JSON.stringify(smtRec.scrolls));
+	      requestData += "&vp="        + encodeURIComponent(JSON.stringify(smtRec.viewPorts));
 	      requestData += "&lostFocusCount=" + smtRec.lostFocusCount;
 	      requestData += "&focusedTime=" + smtRec.getFocusTime();
 	      requestData += "&scrollPercentage=" + smtRec.scrollPercentage;
@@ -601,6 +612,7 @@
 	      requestData += "&elclicked=" + encodeURIComponent(JSON.stringify(smtRec.elem.clicked));
 	      requestData += "&ellostfocus=" + encodeURIComponent(JSON.stringify(smtRec.elem.lostFocus));
 	      requestData += "&scrolls=" + encodeURIComponent(JSON.stringify(smtRec.scrolls));
+	      requestData += "&vp="        + encodeURIComponent(JSON.stringify(smtRec.viewPorts));
 	      requestData += "&lostFocusCount=" + smtRec.lostFocusCount;
 	      requestData += "&focusedTime=" + smtRec.getFocusTime();
 	      requestData += "&scrollPercentage=" + smtRec.scrollPercentage;
@@ -927,6 +939,7 @@
 	    smtRec.lastBlurTimeStamp = (new Date()).getTime();
 	    smtRec.lastFocusTimeStamp = (new Date()).getTime();
       smtRec.computeAvailableSpace();
+      smtRec.captureViewPorts();
       // get this location BEFORE making the AJAX request
       smtRec.url = escape(window.location.href);
       // get user-defined recording timeout (if any)
@@ -937,7 +950,7 @@
       var enableHandler = true;
       setInterval(function(){
     	    enableHandler = true;
-    	}, 100);
+    	}, 50);
       
       // allow mouse tracking over Flash animations
       aux.allowTrackingOnFlashObjects(document);
@@ -966,7 +979,7 @@
       aux.addEvent(document, "touchstart", onPress);
       aux.addEvent(document, "touchmove",  onMove);
       aux.addEvent(document, "touchend",   smtRec.releaseClick);
-      aux.addEvent(window,   "resize",     smtRec.computeAvailableSpace);
+      aux.addEvent(window,   "resize",     smtRec.captureViewPorts);
       //aux.addEvent(document, "keydown",    smtRec.keyHandler);
       //aux.addEvent(document, "keyup",      smtRec.keyHandler);
       // check if recording should persist when current tab/window is not active

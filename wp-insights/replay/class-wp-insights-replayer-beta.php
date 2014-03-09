@@ -25,6 +25,8 @@ class WP_Insights_Replayer_Beta {
 	
 	protected $viewPortHeight = null;
 	
+	protected $viewports = null;
+	
 	protected $cachedFilePath = null;
 	
 	protected $doc = null;
@@ -150,6 +152,19 @@ class WP_Insights_Replayer_Beta {
 			$this->scrolls = $this->record['scrolls'];
 		}
 		
+		if($this->record['viewports'] == null || $this->record['viewports'] === "") {
+			$this->viewports = "[]";
+		} else {
+			$this->viewports = $this->record['viewports'];
+		}
+		
+		$viewports_array = json_decode($this->viewports);
+		error_log(print_r($viewports_array,true));
+		if(sizeof($viewports_array)>0) {
+			$this->viewPortHeight = $viewports_array[0]->h;
+			$this->viewPortWidth = $viewports_array[0]->w;
+		}
+		
 	}
 	
 	protected function createUserDataScript() {
@@ -164,7 +179,8 @@ class WP_Insights_Replayer_Beta {
 				hovered:  '.$this->hovered.',
 				clicked:  '.$this->clicked.',
 				lost_focus:  '.$this->lostFocus.',
-				scrolls:  '.$this->scrolls.'
+				scrolls:  '.$this->scrolls.',
+				viewports: '.$this->viewports.'
 				};
 			  window.parent.resizeFrame(recordingData.vp_height,recordingData.vp_width);
 			//]]>

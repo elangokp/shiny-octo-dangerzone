@@ -270,8 +270,6 @@ class WP_Insights_DB_Utils {
         ip           VARCHAR(15)             NOT NULL,
         scr_width    SMALLINT      unsigned  NOT NULL,
         scr_height   SMALLINT      unsigned  NOT NULL,
-        vp_width     SMALLINT      unsigned  NOT NULL,
-        vp_height    SMALLINT      unsigned  NOT NULL,
         doc_width    SMALLINT      unsigned  NOT NULL,
         doc_height   SMALLINT      unsigned  NOT NULL,
         sess_date    TIMESTAMP     default   CURRENT_TIMESTAMP,
@@ -283,10 +281,11 @@ class WP_Insights_DB_Utils {
         coords_x     MEDIUMTEXT              NOT NULL,
         coords_y     MEDIUMTEXT              NOT NULL,
         clicks       MEDIUMTEXT              NOT NULL,
+        viewports    LONGTEXT                NOT NULL,
         hovered      LONGTEXT                NOT NULL,
         clicked      LONGTEXT                NOT NULL,
-        lost_focus   LONGTEXT                NULL,
-        scrolls      LONGTEXT                NULL,
+        lost_focus   LONGTEXT                NOT NULL,
+        scrolls      LONGTEXT                NOT NULL,
         PRIMARY KEY  (id) ) DEFAULT CHARSET utf8";
               
 		dbDelta( $records_table_sql );
