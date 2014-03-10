@@ -19,6 +19,7 @@ var initialWait = 0;
 var cursorImage = null;
 var clickImage = null;
 var cursor = null;
+var clicks = [];
 
 var drawingCanvas;
 var oldPt;
@@ -390,6 +391,7 @@ function animate() {
 			}
 			click.x = x - 16; //to adjust with click image size
 			click.y = y - 10; //to adjust with click image size
+			clicks.push(click);
 			stage.addChild(click);
 			setTimeout(animate,event.d);
 		}
@@ -429,5 +431,10 @@ function pause() {
 
 function stop() {
 	paused = true;
+	drawingCanvas.graphics.clear();
+	for (var i=0; i<clicks.length; i++) {
+		stage.removeChild(clicks[i]);
+	}
+	clicks = [];
 	allEventsIndex = 0;
 }
