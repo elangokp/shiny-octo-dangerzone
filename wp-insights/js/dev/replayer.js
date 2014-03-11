@@ -24,7 +24,6 @@ var clicks = [];
 var drawingCanvas;
 var oldPt;
 var oldMidPt;
-var stroke;
 
 var paused = false;
 
@@ -57,7 +56,6 @@ function initializePlayer() {
 		new createjs.Ticker.addEventListener("tick", handleTick);	
 		drawingCanvas = new createjs.Shape();
 		stage.addChild(drawingCanvas);
-		stroke = Math.random()*30 + 10 | 0;
 		oldPt = new createjs.Point(0, 0);
 		oldMidPt = oldPt;
 		console.log("Image Loaded : " + new Date().getTime());
@@ -437,4 +435,13 @@ function stop() {
 	}
 	clicks = [];
 	allEventsIndex = 0;
+	window.parent.resizeFrame(recordingData.vp_height,recordingData.vp_width);
+	jQuery('body').animate({
+		scrollTop: 0,
+		scrollLeft: 0
+	},500,function() {});
+	createjs.Tween.get(cursor).to({x:0,y:0}, 500);
+	oldPt = new createjs.Point(0, 0);
+	oldMidPt = oldPt;
+	
 }
