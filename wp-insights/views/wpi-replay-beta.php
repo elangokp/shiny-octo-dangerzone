@@ -56,6 +56,13 @@ header('Expires: 0'); // Proxies.
     	//$("#pauseButton").removeAttr('disabled');
     	//$("#stopButton").removeAttr('disabled');
     }
+
+    function replayCompleted() {
+    	$("#stopButton").attr('disabled',true);
+		$("#pauseButton").attr('disabled',true);
+		$("#playButton").removeAttr('disabled');
+		window.alert("Replay Completed");
+    }
     
 
     $(function(){

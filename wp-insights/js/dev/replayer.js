@@ -1,4 +1,5 @@
 var stage = null;
+var queue = null;
 var cursor = null;
 var cursorTween = null;
 var initialMoveWait = 0;
@@ -38,13 +39,14 @@ function initializePlayer() {
 	canvas.style.cssText = "position:absolute;top:0;left:0;z-index:10000000;";
 	jQuery("body").append(canvas);
 	stage = new createjs.Stage("replayerCanvas");
-	var queue = new createjs.LoadQueue();
+	queue = new createjs.LoadQueue();
 	queue.loadManifest([
 	                    {id: "cursorImage", src:cursorImageUrl, type:createjs.LoadQueue.IMAGE},
 	                    {id: "clickImage", src:clickImageUrl, type:createjs.LoadQueue.IMAGE}
 	                ]);
-	queue.load();
-	setTimeout(function() {
+	//queue.load();
+	queue.on("complete",queueCompleteListener);
+	/*setTimeout(function() {
 		cursorImage = queue.getResult("cursorImage");
 		console.log(cursorImage);
 		clickImage = queue.getResult("clickImage");
@@ -65,9 +67,33 @@ function initializePlayer() {
 	constructScrollArray();
 	constructClickArray();
 	constructViewportsArray();
-	normalizeEvents();
+	normalizeEvents();*/
 	 
 }
+
+function queueCompleteListener() {
+	cursorImage = queue.getResult("cursorImage");
+	console.log(cursorImage);
+	clickImage = queue.getResult("clickImage");
+	console.log(clickImage);
+	cursor = new createjs.Bitmap(cursorImage);
+	cursor.x=0;
+	cursor.y=0;
+	stage.addChild(cursor);
+	new createjs.Ticker.addEventListener("tick", handleTick);	
+	drawingCanvas = new createjs.Shape();
+	stage.addChild(drawingCanvas);
+	oldPt = new createjs.Point(0, 0);
+	oldMidPt = oldPt;
+	console.log("Image Loaded : " + new Date().getTime());
+	constructMovementArray();
+	constructScrollArray();
+	constructClickArray();
+	constructViewportsArray();
+	normalizeEvents();
+	window.parent.playerLoaded();
+}
+
 
 function constructMovementArray() {
 	console.log(recordingData.hovered);
@@ -124,26 +150,6 @@ function constructMovementArray() {
 	console.log(movementArray);
 }
 
-function cursorAnimate() {
-	console.log("Calling cursorAnimate : " + pointIndex + " - " + new Date().getTime());
-	//console.log(cursorTween);
-	//alert("Calling animate : " + pointIndex);
-	if(pointIndex<movementArray.length) {
-		//alert("Inside animate : " + pointIndex);
-		var point = movementArray[pointIndex];
-		var movementTime,waitTime = 0;
-		if(point.d>500) {
-			movementTime = 500 + 10;
-			waitTime = point.d - 500;
-		} else {
-			movementTime = 10;
-			waitTime = point.d;
-		}
-		pointIndex++;
-		createjs.Tween.get(cursor).to({x:point.x,y:point.y}, movementTime).wait(waitTime).call(cursorAnimate);
-
-	}
-}
 
 function constructScrollArray() {
 	console.log(recordingData.scrolls);
@@ -179,22 +185,6 @@ function constructScrollArray() {
 		}
 	}
 	console.log(scrollArray);
-}
-
-function scrollAnimate() {
-	console.log("Calling scrollAnimate : " + scrollIndex + " - " + new Date().getTime());
-	if(scrollIndex<scrollArray.length) {
-		//alert("Inside animate : " + pointIndex);
-		var scroll = scrollArray[scrollIndex];
-		scrollIndex++;	
-		jQuery('body').animate({
-			scrollTop: scroll.top,
-			scrollLeft: scroll.left
-		},scroll.duration,function() {
-			setTimeout(scrollAnimate,scroll.wait);
-		});
-
-	}
 }
 
 function constructClickArray() {
@@ -347,6 +337,7 @@ function animate() {
 			oldMidPt.x = midPt.x;
 			oldMidPt.y = midPt.y;
 			createjs.Tween.get(cursor).to({x:x,y:y}, movementTime).wait(waitTime).call(animate);
+			jQuery(element).trigger("mousemove");			
 			
 		} else if(event.type === "scroll") {
 			var duration = event.duration;
@@ -391,12 +382,16 @@ function animate() {
 			click.y = y - 10; //to adjust with click image size
 			clicks.push(click);
 			stage.addChild(click);
+			jQuery(element).trigger("click");
 			setTimeout(animate,event.d);
 		}
 		
 		allEventsIndex++;	
 
+	} else if (allEventsIndex >= allEventsArray.length) {
+		window.parent.replayCompleted();
 	}
+	
 }
 
 
@@ -417,6 +412,9 @@ function play() {
 	paused = false;
 	if(allEventsIndex === 0) {
 		setTimeout(animate,initialWait);
+	} else if(allEventsIndex >= allEventsArray.length){ //If the replay completed without user stopping the replay.
+		stop();
+		play();
 	} else {
 		setTimeout(animate,0);
 	}

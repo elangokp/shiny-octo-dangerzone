@@ -548,7 +548,7 @@ class WP_Insights {
 		 * Change 'plugin-name' to the name of your plugin
 		 */
 		$this->wp_insights_admin_main_menu_hook_suffix = add_menu_page(
-			'WP Insights Recordings',
+			'WP Insights Visitor Recordings',
 			'WP Insights',
 			'manage_options',
 			$this->plugin_slug.'-admin-main-menu',
@@ -560,7 +560,7 @@ class WP_Insights {
 		
 		$this->wp_insights_recordings_sub_menu_hook_suffix = add_submenu_page(
 				$this->plugin_slug.'-admin-main-menu',
-				'WP Insights Recordings',
+				'WP Insights Visitor Recordings',
 				'Recordings',
 				'manage_options',
 				$this->plugin_slug.'-admin-main-menu',

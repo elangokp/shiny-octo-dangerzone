@@ -250,7 +250,7 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
     	);
     }
     
-     function full_row_actions($item) {
+     /*function full_row_actions($item) {
     	$displayId = 'id='.$item['id'];
     	// wait for very recent visits
     	$timeDiff = time() - (strtotime($item['sess_date']) + $item['sess_time']);
@@ -277,7 +277,7 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
     	}
     	$rowActions.='</div>';
     	return $rowActions;
-    } 
+    } */
     
     function column_replay($item){
     	
@@ -291,17 +291,16 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
     	$tableColumn = '<span style="color:silver">';
     	if (!$receivingData)
     	{
-    		// append dynamically the API to the query string, based on browser capabilities
-    		$tableColumn .= '<a href="'.$views_url.'wpi-replay.php?'.$displayId.'&api=js" class="green-gradient-button" target="_blank" title="Play">Realtime</a>'.PHP_EOL;    	
-    		$tableColumn .= '<a href="'.$views_url.'wpi-replay.php?'.$displayId.'&api=js&realTime=0" class="green-gradient-button" target="_blank" title="Play">Static</a>'.PHP_EOL;
-    		$tableColumn .= '<a href="'.$views_url.'wpi-replay.php?'.$displayId.'&api=swf" class="green-gradient-button" target="_blank" title="Play">As Flash</a>'.PHP_EOL;
-    		//$tableColumn .= ' <a href="analyze.php?'.$displayId.'" title="Analyze log"><img src="'.$assets_url.'track-analyze.png" alt="analyze"/></a>'.PHP_EOL;
-    		//$tableColumn .= ' <a href="download.php?'.$displayId.'" title="Download log"><img src="'.$assets_url.'track-download.png" alt="download"/></a>'.PHP_EOL;
-    		//$tableColumn .= ' <a href="delete.php?'.$displayId.'" class="del" title="Delete log"><img src="'.$assets_url.'track-remove.png" alt="delete"/></a>'.PHP_EOL;
+    		if($item['file'] != "0") {
+    			$tableColumn .= '<a href="'.$this->views_url.'wpi-replay-beta.php?'.$displayId.'&api=js&realTime=0" class="button" target="_blank" title="Show">Replay</a>'.PHP_EOL;
+    			$tableColumn .= '<a id="wpi_ps_rec_stats_button_'.$item['id'].'" href="javascript:void(0)" data-rid="'.$item['id'].'" class="button" target="_blank" title="Page Section Stats">Page Section Stats</a>'.PHP_EOL;
+    		} else {
+    			$tableColumn .= '<em>Couldnt record this session.</em>';
+    		}
     	}
     	else
     	{
-    		$tableColumn .= '<em>receiving data...</em>';
+    		$tableColumn .= '<em>Recording in Progress...</em>';
     	}
     	$tableColumn.='</span>';
     	return $tableColumn;
@@ -334,8 +333,8 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
         	//'interaction_time' => 'Interaction Time',
         	//'no_of_clicks' => '# Clicks',
         	'lost_focus_count' => 'Lost Focus Count',
-        	'focused_time' => 'Focused Browsing Time'
-        	//'replay' => 'Replay'
+        	'focused_time' => 'Focused Browsing Time',
+        	'replay' => 'Replay'
         );
         return $columns;
     }

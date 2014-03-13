@@ -200,7 +200,7 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
     }
     
     function column_browser($item){
-    
+    	
     	return sprintf('%1$s',
     			$item['browser_name']
     	);
@@ -298,20 +298,32 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         $columns = array(
             //'cb'        => '<input type="checkbox" />', //Render a checkbox instead of text
             //'recording_id'     => 'ID',
-            'ip'    => 'IP',
+            'ip'    => 'Visitor IP'
         	//'url' => 'url',
-        	'browser' => 'Browser',
-        	'os' => 'OS',
-        	'last_visit'  => 'Last Visit',
-            'display_date'  => 'Display Date',
-        	'browsing_time' => 'Browser Open Time',
+        	//'browser' => 'Browser',
+        	//'os' => 'OS',
+        	//'last_visit'  => 'Last Visit',
+            //'display_date'  => 'Display Date',
+        	//'browsing_time' => 'Browser Open Time',
         	//'interaction_time' => 'Interaction Time',
         	//'no_of_clicks' => '# Clicks',
         	//'lost_focus_count' => 'Lost Focus Count',
-        	'focused_time' => 'Focused Browsing Time',
+        	//'focused_time' => 'Focused Browsing Time',
         	//'replay' => 'Replay',
-        	'actions' => 'Actions'
+        	//'actions' => 'Actions'
         );
+        
+        if(isset($_GET['wpidev']) && $_GET['wpidev'] === "true") {
+        	$columns['browser'] =  'Browser';
+        	$columns['os'] =  'OS';
+        }
+        
+        $columns['last_visit'] =  'Last Visit Before';
+        $columns['display_date'] =  'Last Visited Time';
+        $columns['browsing_time'] =  'Browser Open Time';
+        $columns['focused_time'] =  'Focused Browsing Time';
+        $columns['actions'] =  'Actions';
+        
         return $columns;
     }
     
