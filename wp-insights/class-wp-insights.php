@@ -32,7 +32,7 @@ class WP_Insights {
 	 *
 	 * @const   string
 	 */
-	const VERSION = '0.8.6Beta';
+	const VERSION = '0.8.7Beta';
 
 	/**
 	 * Unique identifier for your plugin.
