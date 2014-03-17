@@ -337,7 +337,10 @@ function animate() {
 			oldMidPt.x = midPt.x;
 			oldMidPt.y = midPt.y;
 			createjs.Tween.get(cursor).to({x:x,y:y}, movementTime).wait(waitTime).call(animate);
-			jQuery(element).trigger("mousemove");			
+			var event = jQuery.Event("hover");
+			event.pageX = x;
+			event.pageY = y;
+			jQuery(element).trigger(event);			
 			
 		} else if(event.type === "scroll") {
 			var duration = event.duration;
