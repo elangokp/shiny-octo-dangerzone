@@ -62,7 +62,9 @@ class WP_Insights_Event_Data {
 	
 	protected function loadMouseEventData() {
 		$sql = "select
-		R1.id as id,";
+		R1.id as id,
+		R1.is_exit as is_exit,
+		R1.is_session_exit as is_session_exit, ";
 
 		if($this->dataType == 'mvh' || $this->dataType == 'exith' || $this->dataType == 'mph') {
 			$sql = $sql."R1.hovered as mousepositions";
@@ -151,7 +153,7 @@ class WP_Insights_Event_Data {
 		} else if($this->dataType == 'exith') {
 			foreach ($this->records as $i => $record)
 			{
-				if($record['mousepositions'] != ""){
+				if($record['mousepositions'] != "" && $record['is_session_exit'] == 1){
 					$JsonArrayStrings = explode("|~|",$record['mousepositions']);
 					$lastJsonArrayString = end($JsonArrayStrings);
 					//error_log(print_r($lastJsonArrayString, true));

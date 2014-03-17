@@ -58,6 +58,19 @@ class WP_Insights_Recorder {
 		}
 		$browserAndOSId = $this->getBrowserAndOSDetails();
 		
+		if (isset($_COOKIE['smt-id'])) {
+			$id = $_COOKIE['smt-id'];
+			$exitUpdateQuery = "UPDATE wp_wp_ins_records
+								SET is_exit = 0,
+								is_session_exit = CASE UNIX_TIMESTAMP(current_timestamp()) < (UNIX_TIMESTAMP(sess_date) + sess_time + 60) 
+								WHEN true THEN 0
+								WHEN false THEN 1 END
+								WHERE client_id='".$id."'
+								ORDER BY id DESC
+								LIMIT 1";
+			$this->wp_insights_db_utils->db_query($exitUpdateQuery);
+		}
+		
 		$viewPorts_json = urldecode(stripslashes($_REQUEST['vp']));
 
 		/* create database entry ---------------------------------------------------- */
@@ -85,7 +98,9 @@ class WP_Insights_Recorder {
 				//"coords_y" => $_REQUEST['ycoords'],
 				//"clicks" => $_REQUEST['clicks'],
 				"focus_time" => $_REQUEST['focusedTime'],
-				"lost_focus_count" => $_REQUEST['lostFocusCount']
+				"lost_focus_count" => $_REQUEST['lostFocusCount'],
+				"is_exit" => 1,
+				"is_session_exit" => 1
 		);
 		$recorddetailsformat = array(
 				'%s',
@@ -106,6 +121,8 @@ class WP_Insights_Recorder {
 				'%f',
 				'%d',
 				'%f',
+				'%d',
+				'%d',
 				'%d'
 		);
 		
