@@ -252,7 +252,7 @@ class WP_Insights_Page_PS_Stats_List_Table extends WPI_WP_List_Table {
 		ps.section_name as section_name, 
 		count(ps.section_id) as loaded_by,
 		count(CASE WHEN ps.sess_time>0 THEN 1 ELSE NULL END) as seen_by,
-		count(CASE WHEN ps.current_page_section>0 THEN 1 ELSE NULL END) as exited_by,
+		count(CASE WHEN ps.current_page_section>0 AND r.is_session_exit=1 THEN 1 ELSE NULL END) as exited_by,
 		SEC_TO_TIME(ROUND(AVG(ps.sess_time))) as avg_sess_time, 
 		SEC_TO_TIME(ROUND(AVG(ps.focus_time))) avg_focus_time,
 		SUM(ps.lost_focus_count) as lost_focus_count

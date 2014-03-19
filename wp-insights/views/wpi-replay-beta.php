@@ -37,11 +37,16 @@ header('Expires: 0'); // Proxies.
 <title>Session Player</title>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+<script src="../js/dev/jquery.blockUI.js"></script>
 <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
 </head>
 <body>
 <script type="text/javascript">
 
+	jQuery( window ).ready(function(e) {
+		jQuery.blockUI({ message: jQuery('#playerLoadingMessage') });
+	    });
+    
 	var replayer = null;
 	
     function resizeFrame(frameHeight, frameWidth) {
@@ -52,6 +57,7 @@ header('Expires: 0'); // Proxies.
     }
 
     function playerLoaded() {
+    	jQuery.unblockUI();
     	$("#playButton").removeAttr('disabled');
     	//$("#pauseButton").removeAttr('disabled');
     	//$("#stopButton").removeAttr('disabled');
@@ -108,6 +114,10 @@ header('Expires: 0'); // Proxies.
 <iframe id="iframePlayer" style="border:1px solid black" src="recorded-session.php?rid=<?php echo $rid ?>" seamless >
 
 </iframe>
+</div>
+<div id="playerLoadingMessage" style="display:none;"> 
+    <p>Hey there Smarty... Player is being loaded... Please be patient for a moment.</p> 
+    <p><img src="../assets/progressBar.gif"/></p>
 </div>
 </body>
 </html>

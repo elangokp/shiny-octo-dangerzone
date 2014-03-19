@@ -904,54 +904,58 @@ class WP_Insights {
 					
 					if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay") < 0 
 						&& addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-heat.php") < 0) {
-	
-				  				jQuery.getScript( "<?php echo $wpi_js_url.'?v='.self::VERSION?>", function() 
+
+						        jQuery.ajax({
+									  url: "<?php echo $wpi_js_url.'?v='.self::VERSION?>",
+									  dataType: "script",
+									  cache: true,
+									  success: function() 
 				  		  			  {
-					  					jQuery_1_10_2 = $.noConflict(true);
-										jQuery_1_10_2.fn.getcssPath = function () {
-										    if (this.length != 1) throw 'Requires one element.';
-				
-										    var path, node = this;
-										    while (node.length) {
-										        var realNode = node[0], name = realNode.localName || realNode.nodeName;
-										        if (!name) break;
-				
-										        name = name.toLowerCase();
-										        if (realNode.id) {
-										            // As soon as an id is found, there's no need to specify more.
-										            return name + '#' + realNode.id + (path ? '>' + path : '');
-										        } else if (realNode.className) {
-										            name += '.' + realNode.className.split(/\s+/).join('.');
-										            name = name.replace(/\.+$/,"");
-										        }
-				
-										        var parent = node.parent(), siblings = parent.children(name);
-										        if (siblings.length > 1) name += ':eq(' + siblings.index(node) + ')';
-										        path = name + (path ? '>' + path : '');
-				
-										        node = parent;
-										    }
-				
-										    return path;
-										};
-				
-										jQuery_1_10_2.fn.scrollStopped = function(delay,callback) {           
-											jQuery_1_10_2(this).scroll(function(){
-									            var self = this, $this = jQuery_1_10_2(self);
-									            if ($this.data('scrollTimeout')) {
-									              clearTimeout($this.data('scrollTimeout'));
-									            }
-									            $this.data('scrollTimeout', setTimeout(callback,delay,self));
-									        });
-									    };
-					  					smt2.record({
-										      recTime: 3000,
-										      trackingUrl: "<?php echo $smt_tracking_url?>",
-										      postInterval: 7
-										    });
-	
-				  			  			}
-				  		  			);
+						  					jQuery_1_10_2 = $.noConflict(true);
+											jQuery_1_10_2.fn.getcssPath = function () {
+											    if (this.length != 1) throw 'Requires one element.';
+					
+											    var path, node = this;
+											    while (node.length) {
+											        var realNode = node[0], name = realNode.localName || realNode.nodeName;
+											        if (!name) break;
+					
+											        name = name.toLowerCase();
+											        if (realNode.id) {
+											            // As soon as an id is found, there's no need to specify more.
+											            return name + '#' + realNode.id + (path ? '>' + path : '');
+											        } else if (realNode.className) {
+											            name += '.' + realNode.className.split(/\s+/).join('.');
+											            name = name.replace(/\.+$/,"");
+											        }
+					
+											        var parent = node.parent(), siblings = parent.children(name);
+											        if (siblings.length > 1) name += ':eq(' + siblings.index(node) + ')';
+											        path = name + (path ? '>' + path : '');
+					
+											        node = parent;
+											    }
+					
+											    return path;
+											};
+					
+											jQuery_1_10_2.fn.scrollStopped = function(delay,callback) {           
+												jQuery_1_10_2(this).scroll(function(){
+										            var self = this, $this = jQuery_1_10_2(self);
+										            if ($this.data('scrollTimeout')) {
+										              clearTimeout($this.data('scrollTimeout'));
+										            }
+										            $this.data('scrollTimeout', setTimeout(callback,delay,self));
+										        });
+										    };
+						  					smt2.record({
+											      recTime: 3000,
+											      trackingUrl: "<?php echo $smt_tracking_url?>",
+											      postInterval: 7
+											    });
+		
+					  			  			}
+									});
 	
 					}	  			
 					//]]>

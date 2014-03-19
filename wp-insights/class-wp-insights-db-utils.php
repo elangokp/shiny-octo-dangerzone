@@ -277,6 +277,8 @@ class WP_Insights_DB_Utils {
         focus_time   FLOAT(7,2)    unsigned  NULL,
         lost_focus_count  TINYINT  unsigned  NULL,
         exit_page_section VARCHAR(255)       NULL,
+        is_exit      TINYINT(1)              NOT NULL,
+        is_session_exit TINYINT(1)           NOT NULL,
         fps          TINYINT       unsigned  NOT NULL,
         coords_x     MEDIUMTEXT              NOT NULL,
         coords_y     MEDIUMTEXT              NOT NULL,
