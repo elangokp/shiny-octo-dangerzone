@@ -470,7 +470,7 @@
 	    if ('XDomainRequest' in window && window.XDomainRequest !== null) {
     	    // Use Microsoft XDR
     	    var xdr = new XDomainRequest();
-    	    xdr.open("post", gatewayUrl+"?action=wpicachepage&isXDR=true");
+    	    xdr.open("post", gatewayUrl+"?action=wpicachepage&isXDR=true&_="+(new Date()).getTime());
     	    xdr.onload = function () {};
     	    xdr.onprogress = function(){};
     	    xdr.ontimeout = function(){};
@@ -481,7 +481,8 @@
     	} else {
     		jQuery_1_10_2.ajax({
       		  type: "POST",
-      		  url:  gatewayUrl,
+      		  url:  gatewayUrl+"?action=wpicachepage&_="+(new Date()).getTime(),
+      		  cache: false,
       		  data: requestData
     		});
     	}
@@ -567,7 +568,7 @@
   	    // Use Microsoft XDR
     	smt2fn.log('XDomainRequest');
   	    var xdr = new XDomainRequest();
-  	    xdr.open("post", gatewayUrl+"?action=wpiappend&isXDR=true");
+  	    xdr.open("post", gatewayUrl+"?action=wpiappend&isXDR=true&_="+(new Date()).getTime());
   	    xdr.onload = function () {};
   	    xdr.onprogress = function(){};
   	    xdr.ontimeout = function(){};
@@ -578,7 +579,8 @@
 	} else {
 		jQuery_1_10_2.ajax({
 			  type: "POST",
-			  url:  gatewayUrl,
+			  url:  gatewayUrl+"?action=wpiappend&_="+(new Date()).getTime(),
+			  cache: false,
 			  data: requestData
 		});
 	}
@@ -627,7 +629,7 @@
       if ('XDomainRequest' in window && window.XDomainRequest !== null) {
   	    // Use Microsoft XDR
   	    var xdr = new XDomainRequest();
-  	    xdr.open("post", gatewayUrl+"?action=wpiexit&isXDR=true");
+  	    xdr.open("post", gatewayUrl+"?action=wpiexit&isXDR=true&_="+(new Date()).getTime());
   	    xdr.onload = function () {};
   	    xdr.onprogress = function(){};
   	    xdr.ontimeout = function(){};
@@ -638,7 +640,8 @@
 	} else {
 		jQuery_1_10_2.ajax({
 			  type: "POST",
-			  url:  gatewayUrl,
+			  url:  gatewayUrl+"?action=wpiexit&_="+(new Date()).getTime(),
+			  cache: false,
 			  data: requestData
 		});
 	}
