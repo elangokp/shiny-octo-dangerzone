@@ -57,7 +57,10 @@ class WP_Insights_Recorder {
 			exit;
 		}
 		$browserAndOSId = $this->getBrowserAndOSDetails();
-		
+		/*select count(*) from wp_wp_ins_records where 
+UNIX_TIMESTAMP(current_timestamp()) < (UNIX_TIMESTAMP(sess_date)+ sess_time + 30)
+and is_session_exit=1
+group by client_id*/
 		if (isset($_COOKIE['smt-id'])) {
 			$id = $_COOKIE['smt-id'];
 			$exitUpdateQuery = "UPDATE wp_wp_ins_records
