@@ -57,12 +57,18 @@ class WP_Insights_Recorder {
 			exit;
 		}
 		$browserAndOSId = $this->getBrowserAndOSDetails();
-		/*select count(*) from wp_wp_ins_records where 
-UNIX_TIMESTAMP(current_timestamp()) < (UNIX_TIMESTAMP(sess_date)+ sess_time + 30)
-and is_session_exit=1
-group by client_id*/
+		/*SELECT COUNT( * ) AS clients, SUM( connections ) AS connections
+FROM (
+
+SELECT COUNT( * ) AS connections
+FROM wp_wp_ins_records
+WHERE UNIX_TIMESTAMP( CURRENT_TIMESTAMP( ) ) < ( UNIX_TIMESTAMP( sess_date ) + sess_time +30 ) 
+GROUP BY client_id
+) AS c*/
 		if (isset($_COOKIE['smt-id'])) {
+			error_log("Cookie is set");
 			$id = $_COOKIE['smt-id'];
+			error_log("Cookie is set :  $id");
 			$exitUpdateQuery = "UPDATE wp_wp_ins_records
 								SET is_exit = 0,
 								is_session_exit = CASE UNIX_TIMESTAMP(current_timestamp()) < (UNIX_TIMESTAMP(sess_date) + sess_time + 60) 
@@ -71,6 +77,7 @@ group by client_id*/
 								WHERE client_id='".$id."'
 								ORDER BY id DESC
 								LIMIT 1";
+			error_log($exitUpdateQuery);
 			$this->wp_insights_db_utils->db_query($exitUpdateQuery);
 		}
 		

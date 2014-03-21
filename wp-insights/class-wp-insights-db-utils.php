@@ -258,7 +258,7 @@ class WP_Insights_DB_Utils {
 		$records_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_RECORDS;
         $records_table_sql  = "CREATE TABLE $records_table (
         id           BIGINT        unsigned  NOT NULL auto_increment,
-        client_id    VARCHAR(20)             NOT NULL,
+        client_id    VARCHAR(36)             NOT NULL,
         file     	 VARCHAR(255)            NOT NULL,
         raw_url      VARCHAR(255)            NOT NULL,
         cleansed_url VARCHAR(255)            NOT NULL,
