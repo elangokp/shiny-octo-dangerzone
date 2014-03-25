@@ -33,6 +33,7 @@
 /* if(!class_exists('WP_List_Table')){
     require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 } */
+require_once(plugin_dir_path(__FILE__).'class-wp-insights-filters.php');
 require_once(plugin_dir_path(__FILE__).'class-wpi-wp-list-table.php');
 require_once(plugin_dir_path(dirname(__FILE__)).'class-wp-insights-db-utils.php');
 require_once(plugin_dir_path(dirname(__FILE__)).'class-wp-insights-utils.php');
@@ -55,6 +56,8 @@ class WP_Insights_Page_PS_Stats_List_Table extends WPI_WP_List_Table {
     
     protected $recording_id = null;
     
+    protected $WP_Insights_Filters_Instance = null;
+    
     /** ************************************************************************
      * REQUIRED. Set up a constructor that references the parent constructor. We 
      * use the parent reference to set some default configs.
@@ -70,6 +73,8 @@ class WP_Insights_Page_PS_Stats_List_Table extends WPI_WP_List_Table {
             ) );
         
         $this->recording_id = $recording_id;
+        
+        $this->WP_Insights_Filters_Instance = new WP_Insights_Filters();
         
     }
     
@@ -247,6 +252,8 @@ class WP_Insights_Page_PS_Stats_List_Table extends WPI_WP_List_Table {
          * use sort and pagination data to build a custom query instead, as you'll
          * be able to use your precisely-queried data immediately.
          */
+        $fromDate = $this->WP_Insights_Filters_Instance->getFromDate();
+        $tillDate = $this->WP_Insights_Filters_Instance->getTillDate();
         
         $sql = "select 
 		ps.section_name as section_name, 
@@ -260,6 +267,8 @@ class WP_Insights_Page_PS_Stats_List_Table extends WPI_WP_List_Table {
 		inner join $recordingsTable as r on r.id = ps.record_id
 		inner join $recordingsTable as r1 on r1.cleansed_url = r.cleansed_url
 		where r1.id = '$this->recording_id'
+		AND r.sess_date >= '$fromDate'
+        AND r.sess_date <= '$tillDate 23:59:59'
 		group by ps.section_id
 		ORDER BY ps.section_order asc
 		LIMIT ".($current_page-1)*$per_page.",".$per_page;

@@ -83,6 +83,10 @@ class WP_Insights_Event_Data {
 			$sql = $sql." AND R1.sess_date >= '$this->fromDate'
 			AND R1.sess_date <= '$this->tillDate'";
 		}
+		
+		if($this->dataType == 'exith') {
+			$sql = $sql." AND R1.is_session_exit = 1";
+		}
 		$fromRecordNumber = $this->fromRecordNumber;
 		$recordsPerPage = $this->recordsPerPage;
 		error_log($fromRecordNumber);
@@ -153,7 +157,7 @@ class WP_Insights_Event_Data {
 		} else if($this->dataType == 'exith') {
 			foreach ($this->records as $i => $record)
 			{
-				if($record['mousepositions'] != "" && $record['is_session_exit'] == 1){
+				if($record['mousepositions'] != ""){
 					$JsonArrayStrings = explode("|~|",$record['mousepositions']);
 					$lastJsonArrayString = end($JsonArrayStrings);
 					//error_log(print_r($lastJsonArrayString, true));

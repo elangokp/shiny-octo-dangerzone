@@ -136,6 +136,8 @@
     currentScrollTop: 0,
     currentScrollLeft: 0,
     viewPorts:         [],
+    lastScrollsLength: 0,
+    lastViewPortsLenght: 0,
     
     find_in_array: function(arr, name, value) {
         for (var i = 0, len = arr.length; i<len; i++) {
@@ -340,7 +342,7 @@
      * Tracks mouse coords when they're inside the client window, 
      * so zero and null values are not taken into account.     
      */
-    recMouse: function() 
+    /*recMouse: function() 
     {
       // track mouse only if window is active (has focus)
       if (smtRec.paused) { return; }
@@ -357,7 +359,7 @@
     	}
     	// next step
     	++smtRec.i;
-    },
+    },*/
     /** 
      * Sends data in background via an XHR object (asynchronous request).
      * This function starts the tracking session.
@@ -539,8 +541,16 @@
      */   
     appendMouseData: function() 
     {
-      if (!smtRec.rec || smtRec.paused) { return false; }
+      //if (!smtRec.rec || smtRec.paused) { return false; }
       // prepare data
+      if(smtRec.elem.hovered.length === 0 
+    		  && smtRec.elem.clicked.length === 0
+    		  && smtRec.elem.lostFocus.length === 0 
+    		  && smtRec.scrolls.length === smtRec.lastScrollsLength 
+    		  && smtRec.viewPorts.length === smtRec.lastViewPortsLength) {
+    	  return false;
+      }
+     
       var requestData  = "uid="        + smtRec.userId;
 	      requestData += "&time="      + smtRec.getTime();
 	      //requestData += "&pagew="     + smtRec.page.width;
@@ -561,7 +571,11 @@
           requestData += "&action="    + "wpiappend";
           requestData += "&remote="    + smtOpt.storageServer;
           
-      smt2fn.log("Inside append mouse data");
+      smtRec.lastScrollsLength = smtRec.scrolls.length;
+      smtRec.lastViewPortsLength = smtRec.viewPorts.length;
+      
+      //smt2fn.log("Inside append mouse data");
+      console.log("Inside append mouse data");
       // send request
       var gatewayUrl = smtOpt.trackingUrl;
       if ('XDomainRequest' in window && window.XDomainRequest !== null) {
@@ -601,8 +615,16 @@
      */   
     appendExitMouseData: function() 
     {
-      if (!smtRec.rec || smtRec.paused) { return false; }
+      //if (!smtRec.rec || smtRec.paused) { return false; }
       // prepare data
+    	
+    	if(smtRec.elem.hovered.length === 0 
+      		  && smtRec.elem.clicked.length === 0
+      		  && smtRec.elem.lostFocus.length === 0 
+      		  && smtRec.scrolls.length === smtRec.lastScrollsLength 
+      		  && smtRec.viewPorts.length === smtRec.lastViewPortsLength) {
+      	  return false;
+        }
       var requestData  = "uid="        + smtRec.userId;
 	      requestData += "&time="      + smtRec.getTime();
 	      //requestData += "&pagew="     + smtRec.page.width;
@@ -622,7 +644,9 @@
 	      requestData += "&currentPageSection=" + smtRec.currentPageSection;
 	      requestData += "&action="    + "wpiexit";
 	      requestData += "&remote="    + smtOpt.storageServer;
-	      
+      
+	  smtRec.lastScrollsLength = smtRec.scrolls.length;
+      smtRec.lastViewPortsLength = smtRec.viewPorts.length;
       //alert("Inside append mouse data");
       // send request
       var gatewayUrl = smtOpt.trackingUrl;
@@ -949,7 +973,7 @@
       smtRec.timeout = smtOpt.fps * smtOpt.recTime;
       // set main function: the (smt)2 recording interval
       var interval = Math.round(1000/smtOpt.fps);
-      smtRec.rec   = setInterval(smtRec.recMouse, interval);
+      //smtRec.rec   = setInterval(smtRec.recMouse, interval);
       var enableHandler = true;
       setInterval(function(){
     	    enableHandler = true;

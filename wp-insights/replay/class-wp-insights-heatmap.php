@@ -56,7 +56,8 @@ class WP_Insights_Heatmap {
 		$this->recordsTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
 		$this->cacheTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE;
 		$this->heatmapJsPath = plugins_url('js/dev/heatmap.js?v='.$this->version, dirname(__FILE__));
-		$this->loadCacheFile();
+		//$this->loadCacheFile();
+		$this->loadLiveFile();
 		
 		if($hmtype == 'mph') {
 			$this->createMousePathScriptElements();
@@ -90,7 +91,7 @@ class WP_Insights_Heatmap {
 				LIMIT 0,1";
 		$relativeCacheFilePath = $this->wp_insights_db_utils->db_query($sql);
 		$this->cachedFile = $this->cache_dir.$relativeCacheFilePath[0]['file'];
-		error_log($this->cachedFile);
+		//error_log($this->cachedFile);
 		$this->doc = new DOMUtil();
 		if (!is_file($this->cachedFile)) {
 			$this->cachedFile = WP_Insights_Utils::error_webpage('<h1>Page not found on cache!</h1><p>That\'s because either it was deleted from cache or the request could not be processed.</p>');
@@ -100,6 +101,24 @@ class WP_Insights_Heatmap {
 			// load (UTF-8 encoded) log
 			@$this->doc->loadHTMLFile( utf8_decode($this->cachedFile) );
 		}
+	}
+	
+	protected function loadLiveFile() {
+		$sql = "SELECT r1.cleansed_url as cleansed_url FROM $this->recordsTable r1 where r1.id=$this->lrid LIMIT 0,1";
+		$result = $this->wp_insights_db_utils->db_query($sql);
+		$transfer = @WP_Insights_Utils::get_remote_webpage($result[0]['cleansed_url']);
+		error_log(print_r($transfer,true));
+		error_log(isset($transfer['errmsg']));
+		error_log(strlen($transfer['errmsg']));
+		$this->doc = new DOMUtil();
+		if(isset($transfer['errmsg']) && strlen($transfer['errmsg'])>0) {
+			@$this->doc->loadHTML(WP_Insights_Utils::error_webpage('<h1>Page not found!</h1><p>That\'s because either it was deleted from cache or the request could not be processed.</p>'));
+		} else {
+			@$this->doc->loadHTML(WP_Insights_Utils::parseContent($transfer['content'])->saveHTML());
+		}
+		
+		
+		//$this->doc = WP_Insights_Utils::parseContent($transfer['content']);
 	}
 	
 	public function getMouseMovementDataByUserByPage(){
@@ -427,10 +446,11 @@ class WP_Insights_Heatmap {
 															setTimeout(getData(),0);
 														} else {
 															console.log("No More Records Available");
-															//heatmapOptions.heatmapCompleted = true;	
+															//heatmapOptions.heatmapCompleted = true;
+															console.log(heatmap.store.exportDataSet());	
 															heatmap.store.drawNow();
 															window.parent.heatmapComplete();
-															console.log(heatmap.store.exportDataSet());
+															
 														}
 					}
 					
@@ -449,7 +469,7 @@ class WP_Insights_Heatmap {
 					}
 					
 					jQuery(document).ready(function(){
-										heatmap = h337.create({"element":document.getElementsByTagName("body")[0], "radius":40, "visible":true});
+										heatmap = h337.create({"element":document.getElementsByTagName("body")[0], "radius":40, "visible":true, "width":jQuery(document).outerWidth( true ), "height":jQuery(document).outerHeight( true )});
 										setTimeout(getData(),0);				
 		});';
 		$this->invokeheatmapJsElement = $this->doc->createInlineScript($cdata);
@@ -540,7 +560,6 @@ class WP_Insights_Heatmap {
 														} else {
 															console.log("No More Records Available");
 															window.parent.heatmapComplete();
-															console.log(heatmap.store.exportDataSet());
 														}
 					}
 					
@@ -558,11 +577,11 @@ class WP_Insights_Heatmap {
 													});	
 					}
 					
-					jQuery(document).ready(function(){
+					jQuery(window).load(function(){
 										stage = new Kinetic.Stage({
 												container: "kineticContainer",
-												width: jQuery( document ).width(),
-												height: jQuery( document ).height(),
+												width: jQuery( document ).outerWidth( true ),
+												height: jQuery( document ).outerHeight( true ),
 												opacity: 0.5,
 												visible: true
 											  });

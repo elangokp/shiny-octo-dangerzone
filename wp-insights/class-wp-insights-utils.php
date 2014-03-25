@@ -1,6 +1,38 @@
 <?php
 
 class WP_Insights_Utils {
+	
+	/** askapache_get_process_count()
+	 * Returns the number of running processes
+	 *
+	 * @version 1.4
+	 *
+	 * @return int
+	 */
+	public static function askapache_get_process_count() {
+		static $ver, $runs = 0;
+	
+		// check if php version supports clearstatcache params, but only check once
+		if ( is_null( $ver ) )
+			$ver = version_compare( PHP_VERSION, '5.3.0', '>=' );
+	
+		// Only call clearstatcache() if function called more than once */
+		if ( $runs++ > 0 ) { // checks if $runs > 0, then increments $runs by one.
+	
+			// if php version is >= 5.3.0
+			if ( $ver ) {
+				clearstatcache( true, '/proc' );
+			} else {
+				// if php version is < 5.3.0
+				clearstatcache();
+			}
+		}
+	
+		$stat = stat( '/proc' );
+	
+		// if stat succeeds and nlink value is present return it, otherwise return 0
+		return ( ( false !== $stat && isset( $stat[3] ) ) ? $stat[3] : 0 );
+	}
 
 	/**
 	 * Gets URL contents within the HTTP server response header fields.
@@ -64,6 +96,53 @@ class WP_Insights_Utils {
 		// $transfer['url'] is the final URL after redirections, if CURLOPT_FOLLOWLOCATION is set to true
 
 		return $transfer;
+	}
+	
+	public static function removejscssfile(&$dom, $filename, $filetype){
+		if($filetype === "js"){
+			$targetelement = "script";
+		}elseif ($filetype === "css") {
+			$targetelement = "link";
+		}else {
+			$targetelement = "none";
+		}
+	
+		if($filetype === "js"){
+			$targetattr = "src";
+		}elseif ($filetype === "css") {
+			$targetattr = "href";
+		}else {
+			$targetattr = "none";
+		}
+	
+		$allsuspects = $dom->getElementsByTagName($targetelement);
+	
+		foreach($allsuspects as $anSuspect) {
+			if(!is_null($anSuspect->getAttribute($targetattr)) && strpos($anSuspect->getAttribute($targetattr), $filename) !== FALSE) {
+				$anSuspect->parentNode->removeChild($anSuspect);
+			}
+		}
+	
+	}
+	
+	public static function parseContent($webpage) {
+		// use the DOM to parse webpage contents
+		$dom = new DOMDocument();
+		$dom->formatOutput = true;
+		$dom->preserveWhiteSpace = false;
+		// hide warnings when parsing non valid (X)HTML pages
+		@$dom->loadHTML('<?xml encoding="utf-8" ?>' . $webpage);
+		$wpiScriptElement = $dom->getElementById('wpi-trigger-script');
+		//error_log($wpiScriptElement->nodeValue);
+		if(!is_null($wpiScriptElement)){
+			$wpiScriptElement->parentNode->removeChild($wpiScriptElement);
+		}
+	
+		WP_Insights_Utils::removejscssfile($dom, "smt-record.js", "js");
+		WP_Insights_Utils::removejscssfile($dom, "smt-aux.js", "js");
+		WP_Insights_Utils::removejscssfile($dom, "wpi-js.min.js", "js");
+	
+		return $dom;
 	}
 
 	/**

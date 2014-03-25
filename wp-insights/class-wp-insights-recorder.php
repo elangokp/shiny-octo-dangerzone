@@ -65,11 +65,12 @@ FROM wp_wp_ins_records
 WHERE UNIX_TIMESTAMP( CURRENT_TIMESTAMP( ) ) < ( UNIX_TIMESTAMP( sess_date ) + sess_time +30 ) 
 GROUP BY client_id
 ) AS c*/
+		$recordsTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
 		if (isset($_COOKIE['smt-id'])) {
-			error_log("Cookie is set");
+			//error_log("Cookie is set");
 			$id = $_COOKIE['smt-id'];
-			error_log("Cookie is set :  $id");
-			$exitUpdateQuery = "UPDATE wp_wp_ins_records
+			//error_log("Cookie is set :  $id");
+			$exitUpdateQuery = "UPDATE $recordsTable
 								SET is_exit = 0,
 								is_session_exit = CASE UNIX_TIMESTAMP(current_timestamp()) < (UNIX_TIMESTAMP(sess_date) + sess_time + 60) 
 								WHEN true THEN 0
@@ -77,7 +78,7 @@ GROUP BY client_id
 								WHERE client_id='".$id."'
 								ORDER BY id DESC
 								LIMIT 1";
-			error_log($exitUpdateQuery);
+			//error_log($exitUpdateQuery);
 			$this->wp_insights_db_utils->db_query($exitUpdateQuery);
 		}
 		
@@ -137,7 +138,7 @@ GROUP BY client_id
 		);
 		
 		/* if (get_magic_quotes_gpc()) {
-			error_log("Magic Quotes is enabled");
+			//error_log("Magic Quotes is enabled");
 			$hovered_json = urldecode(stripslashes($_POST['elhovered']));
 			$clicked_json = urldecode(stripslashes($_POST['elclicked']));
 		} else {
@@ -147,20 +148,20 @@ GROUP BY client_id
 
 		/* $hovered = json_decode($hovered_json, true);
 		$clicked = json_decode($clicked_json, true);
-		error_log("Store");
-		error_log($_POST['elhovered']);
-		error_log($hovered_json);
-		error_log(print_r($hovered,true));
-		error_log($_POST['elclicked']);
-		error_log($clicked_json);
-		error_log(print_r($clicked,true)); */
+		//error_log("Store");
+		//error_log($_POST['elhovered']);
+		//error_log($hovered_json);
+		//error_log(print_r($hovered,true));
+		//error_log($_POST['elclicked']);
+		//error_log($clicked_json);
+		//error_log(print_r($clicked,true)); */
 		
 		/* $hovered_json = urldecode(stripslashes($_REQUEST['elhovered']));
 		$clicked_json = urldecode(stripslashes($_REQUEST['elclicked']));
 		$lostFocus_json = urldecode(stripslashes($_REQUEST['ellostfocus']));
 		
 		if(!empty($hovered_json) && strlen($hovered_json)>2) {
-			error_log("Store Inside not empty hovered");
+			//error_log("Store Inside not empty hovered");
 			$recorddetails = array_merge($recorddetails,array(
 				"hovered" => $hovered_json
 			));
@@ -168,7 +169,7 @@ GROUP BY client_id
 		}
 		
 		if(!empty($clicked_json) && strlen($clicked_json)>2) {
-			error_log("Store Inside not empty clicked");
+			//error_log("Store Inside not empty clicked");
 			$recorddetails = array_merge($recorddetails,array(
 				"clicked" => $clicked_json
 			));
@@ -176,17 +177,17 @@ GROUP BY client_id
 		}
 		
 		if(!empty($lostFocus_json) && strlen($lostFocus_json)>2) {
-			error_log("Store Inside not empty lost Focus");
+			//error_log("Store Inside not empty lost Focus");
 			$recorddetails = array_merge($recorddetails,array(
 					"lost_focus" => $lostFocus_json
 			));
 			array_push($recorddetailsformat,"%s");
 		} */
 		
-		//error_log(print_r($recorddetails, true));
-		//error_log(print_r($recorddetailsformat, true));
+		////error_log(print_r($recorddetails, true));
+		////error_log(print_r($recorddetailsformat, true));
 
-		$uid = $this->wp_insights_db_utils->db_insert($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS, $recorddetails, $recorddetailsformat);
+		$uid = $this->wp_insights_db_utils->db_insert($recordsTable, $recorddetails, $recorddetailsformat);
 
 		// send user ID back to the record script
 		return $uid;
@@ -235,7 +236,7 @@ GROUP BY client_id
 			$userAgent = "unknown";
 		}
 
-		//error_log(print_r($current_browser, true));
+		////error_log(print_r($current_browser, true));
 		// save browser id
 		$bname = $this->wp_insights_db_utils->db_select($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_BROWSERS, "id", "name='".$browserName."'");
 		if (!$bname) {
@@ -304,76 +305,31 @@ GROUP BY client_id
 		}
 		$liveHTML = $liveDom->saveHTML();
 		$cachedHTML = $cachedDom->saveHTML();
-		//error_log($liveHTML);
-		//error_log($cachedHTML);
+		////error_log($liveHTML);
+		////error_log($cachedHTML);
 		if($liveHTML == $cachedHTML) {
-			error_log("DOM files are equal");
+			//error_log("DOM files are equal");
 			return false;
 		} else {
-			error_log("DOM files are not equal");
+			//error_log("DOM files are not equal");
 			return true;
 		}
 	}  */
 	
-	protected function parseContent($webpage) {
-		// use the DOM to parse webpage contents
-		$dom = new DOMDocument();
-		$dom->formatOutput = true;
-		$dom->preserveWhiteSpace = false;
-		// hide warnings when parsing non valid (X)HTML pages
-		@$dom->loadHTML($webpage);
-		$wpiScriptElement = $dom->getElementById('wpi-trigger-script');
-		//error_log($wpiScriptElement->nodeValue);
-		if(!is_null($wpiScriptElement)){
-			$wpiScriptElement->parentNode->removeChild($wpiScriptElement);
-		}	
-
-		$this->removejscssfile($dom, "smt-record.js", "js");
-		$this->removejscssfile($dom, "smt-aux.js", "js");
-		$this->removejscssfile($dom, "wpi-js.min.js", "js");
-		return $dom;
-	}
 	
 	/* protected function getCachedDOM($cachelog) {
 		$cachedWebpageFilePath = $this->cache_dir.$cachelog['file'];
-		//error_log($cachedWebpageFilePath);
+		////error_log($cachedWebpageFilePath);
 		if(is_file($cachedWebpageFilePath)) {
-			//error_log("Cached html is a file");
+			////error_log("Cached html is a file");
 			$cachedWebpage = file_get_contents($this->cache_dir.$cachelog['file']);
 			$cachedDom = $this->parseContent($cachedWebpage);
 			return $cachedDom;
 		} else {
-			//error_log("Cached html is not a file");
+			////error_log("Cached html is not a file");
 			return false;
 		}		
 	} */
-	
-	protected function removejscssfile($dom, $filename, $filetype){
-		if($filetype === "js"){
-			$targetelement = "script";
-		}elseif ($filetype === "css") {
-			$targetelement = "link";
-		}else {
-			$targetelement = "none";
-		}
-		
-		if($filetype === "js"){
-			$targetattr = "src";
-		}elseif ($filetype === "css") {
-			$targetattr = "href";
-		}else {
-			$targetattr = "none";
-		}
-
-		$allsuspects = $dom->getElementsByTagName($targetelement);
-		
-		foreach($allsuspects as $anSuspect) {
-			if(!is_null($anSuspect->getAttribute($targetattr)) && strpos($anSuspect->getAttribute($targetattr), $filename) !== FALSE) {
-				$anSuspect->parentNode->removeChild($anSuspect);
-			}
-		}
-
-	}
 
 	public function cache() {
 		
@@ -387,7 +343,7 @@ GROUP BY client_id
 
 		$recordingId = $_POST['uid'];
 		$html  = rawurldecode(stripslashes($_POST['html']));
-		$liveDom = $this->parseContent($html);
+		$liveDom = WP_Insights_Utils::parseContent($html);
 		
 		
 		$year = date("Y");
@@ -455,7 +411,7 @@ GROUP BY client_id
 		}
 		
 		if($cacheExpired) {
-			//error_log("Cache didnt expire");
+			////error_log("Cache didnt expire");
 			// get remote webpage
 			$request = WP_Insights_Utils::get_remote_webpage(
 					$URL,
@@ -466,7 +422,7 @@ GROUP BY client_id
 			
 			if ($request['errnum'] != CURLE_OK || $request['http_code'] != 200)
 			{
-				//error_log("Inside remote webpage not ok");
+				////error_log("Inside remote webpage not ok");
 				$webpage = error_webpage('<h1>Could not fetch page</h1><pre>'.print_r($request, true).'</pre>');
 			} 
 			
@@ -474,21 +430,21 @@ GROUP BY client_id
 			$cachedDom = $this->getCachedDOM($cachelog);
 			
 			if($cachedDom != false){
-				//error_log("Cached webpage file is available");
+				////error_log("Cached webpage file is available");
 				if($this->hasDOMChanged($liveDom, $cachedDom)){
-					//error_log("DOM has changed");
+					////error_log("DOM has changed");
 					$shouldSaveLiveDom = true;
 				} else {
-					//error_log("DOM has not changed");
+					////error_log("DOM has not changed");
 					$shouldSaveLiveDom = false;
 				}
 			} else {
-				//error_log("Cached webpage file is not available");
+				////error_log("Cached webpage file is not available");
 				$shouldSaveLiveDom = true;
 			}
 			
 			if($shouldSaveLiveDom){
-				//error_log("Should save live DOM");
+				////error_log("Should save live DOM");
 				// set HTML log name
 				$date = date("Ymd-His");
 				$ext = ".html";
@@ -515,7 +471,7 @@ GROUP BY client_id
 				);
 				$cacheLogid = $this->wp_insights_db_utils->db_insert($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE, $cachelogdetails, $cachelogdetailsformat);
 			} else {
-				//error_log("Can use the cached DOM");
+				////error_log("Can use the cached DOM");
 				// get HTML log id
 				$cacheLogid = $cachelog['id'];
 				$cacheValues =  "saved = '".current_time('mysql')."'";
@@ -523,7 +479,7 @@ GROUP BY client_id
 			}
 			
 		} else {
-			//error_log("Cache expired");
+			////error_log("Cache expired");
 			// get HTML log id
 			$cacheLogid = $cachelog['id'];
 		}*/		
@@ -551,7 +507,7 @@ GROUP BY client_id
 		$values .= "clicks    = CONCAT(COALESCE(clicks,   ''), ',". $_POST['clicks']  ."')";
 
 		/* if (get_magic_quotes_gpc()) {
-			error_log("Magic Quotes is enabled");
+			//error_log("Magic Quotes is enabled");
 			$hovered_json = urldecode(stripslashes($_POST['elhovered']));
 			$clicked_json = urldecode(stripslashes($_POST['elclicked']));
 		} else {
@@ -566,36 +522,36 @@ GROUP BY client_id
 		
 		/* $hovered = json_decode($hovered_json, true);
 		$clicked = json_decode($clicked_json, true);
-		error_log("Append");
-		error_log($_POST['elhovered']);
-		error_log($hovered_json);
-		error_log(print_r($hovered,true));
-		error_log($_POST['elclicked']);
-		error_log($clicked_json);
-		error_log(print_r($clicked,true)); */
+		//error_log("Append");
+		//error_log($_POST['elhovered']);
+		//error_log($hovered_json);
+		//error_log(print_r($hovered,true));
+		//error_log($_POST['elclicked']);
+		//error_log($clicked_json);
+		//error_log(print_r($clicked,true)); */
 		
 		if(!empty($hovered_json) && strlen($hovered_json)>2) {
-			error_log("Append Inside not empty hovered");
+			//error_log("Append Inside not empty hovered");
 			$values .= ",hovered   = CONCAT(COALESCE(hovered,  ''), '|~|". esc_sql($hovered_json) ."')";
 		}
 		
 		if(!empty($clicked_json) && strlen($clicked_json)>2) {
-			error_log("Append Inside not empty clicked");
+			//error_log("Append Inside not empty clicked");
 			$values .= ",clicked   = CONCAT(COALESCE(clicked,  ''), '|~|". esc_sql($clicked_json) ."')";
 		}
 		
 		if(!empty($lostFocus_json) && strlen($lostFocus_json)>2) {
-			error_log("Append Inside not empty lost focus");
+			//error_log("Append Inside not empty lost focus");
 			$values .= ",lost_focus   = CONCAT(COALESCE(lost_focus,  ''), '|~|". esc_sql($lostFocus_json) ."')";
 		}
 		
 		if(!empty($scrolls_json) && strlen($scrolls_json)>2) {
-			error_log("Append Inside not empty scrolls");
+			//error_log("Append Inside not empty scrolls");
 			$values .= ",scrolls = '".$scrolls_json."'";
 		}
 		
 		if(!empty($viewPorts_json) && strlen($viewPorts_json)>2) {
-			error_log("Append Inside not empty view ports");
+			//error_log("Append Inside not empty view ports");
 			$values .= ",viewports = '".$viewPorts_json."'";
 		}
 
@@ -608,11 +564,11 @@ GROUP BY client_id
 		if(sizeof($pageSections) > 0) {
 			$pagesections_table = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_PAGE_SECTIONS;
 			$psInsertCheckQuery = "SELECT count(id) as count from $pagesections_table WHERE record_id = '".$_POST['uid']."'";
-			error_log("psInsertCheckQuery : $psInsertCheckQuery");
+			//error_log("psInsertCheckQuery : $psInsertCheckQuery");
 			$psRecordCount = $this->wp_insights_db_utils->db_query($psInsertCheckQuery);
-			error_log("psRecordCount : ".print_r($psRecordCount,true));
+			//error_log("psRecordCount : ".print_r($psRecordCount,true));
 			if(null != $psRecordCount[0]['count'] && $psRecordCount[0]['count']>0) {
-				error_log("Inside update");
+				//error_log("Inside update");
 				$pageSectionUpdateQuery = "UPDATE $pagesections_table SET ";
 				$currentPageSectionCaseStmt = "current_page_section = CASE section_id ";
 				$sessTimeCaseStmt = "sess_time = CASE section_id ";
@@ -666,7 +622,7 @@ GROUP BY client_id
 				$pageSectionUpdateQuery .= "WHERE record_id = ".$_POST['uid'];
 				$this->wp_insights_db_utils->db_query($pageSectionUpdateQuery);
 			} else {
-				error_log("Inside insert");
+				//error_log("Inside insert");
 				$pageSectionInsertQuery = "INSERT into $pagesections_table (record_id, section_order, section_id, section_name, sess_time, focus_time, current_page_section, lost_focus_count, entryTimes, exitTimes, focusedEntryTimes, focusedExitTimes) VALUES ";
 				$pageSectionValues = " ";
 				foreach($pageSections as $pageSection){
@@ -691,9 +647,9 @@ GROUP BY client_id
 
 		
 		
-		//error_log(print_r($pageSections, true));
+		////error_log(print_r($pageSections, true));
 		
 		
-		//error_log(print_r($pageSectionUpdateQuery, true));
+		////error_log(print_r($pageSectionUpdateQuery, true));
 	}
 }

@@ -32,7 +32,7 @@ class WP_Insights {
 	 *
 	 * @const   string
 	 */
-	const VERSION = '0.8.7Beta';
+	const VERSION = '0.9.0Beta';
 
 	/**
 	 * Unique identifier for your plugin.
@@ -79,6 +79,16 @@ class WP_Insights {
 	protected static $cache_dir = null;
 	
 	protected static $browscap_cache_dir = null;
+	
+	protected static $recording_option_name = "wpi_recording_status";
+	
+	protected static $default_recording_option_value = "ON";
+	
+	protected static $max_concurrent_recordings_option_name = "wpi_max_concurrent_recordings";
+	
+	protected static $default_max_concurrent_recordings_option_value = 5;
+	
+	protected static $default_recording_interval = 7; //in seconds
 
 	/**
 	 * Initialize the plugin by setting localization, filters, and administration functions.
@@ -232,6 +242,14 @@ class WP_Insights {
 		//$WP_Insights_DB_Utils_Instance = WP_Insights_DB_Utils::get_instance();
 		//$WP_Insights_DB_Utils_Instance->setWpdb(self::get_instance()->wp_insights_wpdb);
 		self::$WP_Insights_DB_Utils_Instance->wpinsights_db_install();
+		if(get_option(self::$recording_option_name) === false){
+			update_option(self::$recording_option_name, self::$default_recording_option_value );
+		}
+		
+		if(get_option(self::$max_concurrent_recordings_option_name) === false){
+			update_option(self::$max_concurrent_recordings_option_name, self::$default_max_concurrent_recordings_option_value );
+		}
+		
 		WP_Insights_Utils::createDirectory(self::$cache_dir);
 		WP_Insights_Utils::createDirectory(self::$browscap_cache_dir);
 	}
@@ -268,7 +286,8 @@ class WP_Insights {
 	}
 	
 	public function setRecorderStatus() {
-		$recording_status = @ self::$WP_Insights_DB_Utils_Instance->db_option("recording_status");
+		//$recording_status = @ self::$WP_Insights_DB_Utils_Instance->db_option("recording_status");
+		$recording_status = get_option(self::$recording_option_name, self::$default_recording_option_value);
 		//error_log("recording_status is ".$recording_status);
 		if(strcasecmp(trim($recording_status), 'ON') == 0) {
 			//error_log("Inside matches ON");
@@ -608,18 +627,30 @@ class WP_Insights {
 	public function display_wp_insights_settings_page() {
 		if(isset($_POST['change_recorder_status'])){
 			if($_POST['change_recorder_status'] == 'start') {
-				self::$WP_Insights_DB_Utils_Instance->db_set_option("recording_status","ON");
+				update_option(self::$recording_option_name, "ON" );
+				//self::$WP_Insights_DB_Utils_Instance->db_set_option("recording_status","ON");
 			} else if($_POST['change_recorder_status'] == 'stop') {
-				self::$WP_Insights_DB_Utils_Instance->db_set_option("recording_status","OFF");
+				update_option(self::$recording_option_name, "OFF" );
+				//self::$WP_Insights_DB_Utils_Instance->db_set_option("recording_status","OFF");
 			}
 			$this->setRecorderStatus();
 		}
+		
+		if(isset($_POST['max_concurrent_recordings'])){
+			update_option(self::$max_concurrent_recordings_option_name, $_POST['max_concurrent_recordings']);
+		}
 		$recording_status_display = $this->getRecordingStatusDisplay();
+		
 		if(has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
 			$is_recording = true;
 		} else {
 			$is_recording = false;
 		}
+		
+		$max_concurrent_recordings = get_option(self::$max_concurrent_recordings_option_name, self::$default_max_concurrent_recordings_option_value);
+		
+		error_log($max_concurrent_recordings);
+		
 		include_once( 'views/settings.php' );
 	}
 	
@@ -809,6 +840,7 @@ class WP_Insights {
 		//wp_enqueue_script('smt-aux');
 		//wp_enqueue_script('smt-record');
 		error_log(print_r($_GET,true));
+		
 		if(!empty($_GET['wpidev']) && $_GET['wpidev'] === "true") {?>
 
 		<!-- Powered by WP Insights version <?php echo self::VERSION?>-->
@@ -882,7 +914,7 @@ class WP_Insights {
 					  					smt2.record({
 										      recTime: 3000,
 										      trackingUrl: "<?php echo $smt_tracking_url?>",
-										      postInterval: 7
+										      postInterval: <?php echo self::$default_recording_interval;?>
 										    });
 	
 				  			  			}
@@ -895,72 +927,94 @@ class WP_Insights {
 					}	  			
 					//]]>
 			</script>
-		<?php }else { ?>
-		<!-- Powered by WP Insights version <?php echo self::VERSION?>-->
-		  <script id='wpi-trigger-script' type="text/javascript">
-					//<![CDATA[
-					var addressBarURL = top.location.href;
-					var isFullyLoaded = false;
+		<?php }else { 
+						if(!isset($_COOKIE['smt-id'])) {
+							$recordsTable = self::$WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
+							$concurrent_recording_query = "SELECT COUNT( * ) AS clients, SUM( client_connections ) AS total_connections
+															FROM (
+															SELECT COUNT( * ) AS client_connections
+															FROM $recordsTable
+															WHERE UNIX_TIMESTAMP( CURRENT_TIMESTAMP( ) ) < ( UNIX_TIMESTAMP( sess_date ) + sess_time + ".(self::$default_recording_interval * 3)." )
+															GROUP BY client_id	) AS c";
+							$concurrent_recording_details = self::$WP_Insights_DB_Utils_Instance->db_query($concurrent_recording_query);
+							$concurrent_recordings = $concurrent_recording_details[0]['clients'];
+							error_log($concurrent_recordings);
+							error_log(get_option(self::$max_concurrent_recordings_option_name,self::$default_max_concurrent_recordings_option_value));
+							error_log("Concurrent : " . ($concurrent_recordings < get_option(self::$max_concurrent_recordings_option_name,self::$default_max_concurrent_recordings_option_value)));
+						}
+						
+						//error_log(WP_Insights_Utils::askapache_get_process_count());
+						
+						$max_concurrent_recordings = get_option(self::$max_concurrent_recordings_option_name,self::$default_max_concurrent_recordings_option_value);
+												
+						if(isset($_COOKIE['smt-id']) || $max_concurrent_recordings === 0 || ($concurrent_recordings < $max_concurrent_recordings)) 
+						{?>
+						<!-- Powered by WP Insights version <?php echo self::VERSION?>-->
+						  <script id='wpi-trigger-script' type="text/javascript">
+									//<![CDATA[
+									var addressBarURL = top.location.href;
+									var isFullyLoaded = false;
+									
+									if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay") < 0 
+										&& addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-heat.php") < 0) {
+				
+										        jQuery.ajax({
+													  url: "<?php echo $wpi_js_url.'?v='.self::VERSION?>",
+													  dataType: "script",
+													  cache: true,
+													  success: function() 
+								  		  			  {
+										  					jQuery_1_10_2 = $.noConflict(true);
+															jQuery_1_10_2.fn.getcssPath = function () {
+															    if (this.length != 1) throw 'Requires one element.';
+									
+															    var path, node = this;
+															    while (node.length) {
+															        var realNode = node[0], name = realNode.localName || realNode.nodeName;
+															        if (!name) break;
+									
+															        name = name.toLowerCase();
+															        if (realNode.id) {
+															            // As soon as an id is found, there's no need to specify more.
+															            return name + '#' + realNode.id + (path ? '>' + path : '');
+															        } else if (realNode.className) {
+															            name += '.' + realNode.className.split(/\s+/).join('.');
+															            name = name.replace(/\.+$/,"");
+															        }
+									
+															        var parent = node.parent(), siblings = parent.children(name);
+															        if (siblings.length > 1) name += ':eq(' + siblings.index(node) + ')';
+															        path = name + (path ? '>' + path : '');
+									
+															        node = parent;
+															    }
+									
+															    return path;
+															};
+									
+															jQuery_1_10_2.fn.scrollStopped = function(delay,callback) {           
+																jQuery_1_10_2(this).scroll(function(){
+														            var self = this, $this = jQuery_1_10_2(self);
+														            if ($this.data('scrollTimeout')) {
+														              clearTimeout($this.data('scrollTimeout'));
+														            }
+														            $this.data('scrollTimeout', setTimeout(callback,delay,self));
+														        });
+														    };
+										  					smt2.record({
+															      recTime: 3000,
+															      trackingUrl: "<?php echo $smt_tracking_url;?>",
+															      postInterval: <?php echo self::$default_recording_interval;?>
+															    });
+						
+									  			  			}
+													});
 					
-					if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay") < 0 
-						&& addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-heat.php") < 0) {
-
-						        jQuery.ajax({
-									  url: "<?php echo $wpi_js_url.'?v='.self::VERSION?>",
-									  dataType: "script",
-									  cache: true,
-									  success: function() 
-				  		  			  {
-						  					jQuery_1_10_2 = $.noConflict(true);
-											jQuery_1_10_2.fn.getcssPath = function () {
-											    if (this.length != 1) throw 'Requires one element.';
-					
-											    var path, node = this;
-											    while (node.length) {
-											        var realNode = node[0], name = realNode.localName || realNode.nodeName;
-											        if (!name) break;
-					
-											        name = name.toLowerCase();
-											        if (realNode.id) {
-											            // As soon as an id is found, there's no need to specify more.
-											            return name + '#' + realNode.id + (path ? '>' + path : '');
-											        } else if (realNode.className) {
-											            name += '.' + realNode.className.split(/\s+/).join('.');
-											            name = name.replace(/\.+$/,"");
-											        }
-					
-											        var parent = node.parent(), siblings = parent.children(name);
-											        if (siblings.length > 1) name += ':eq(' + siblings.index(node) + ')';
-											        path = name + (path ? '>' + path : '');
-					
-											        node = parent;
-											    }
-					
-											    return path;
-											};
-					
-											jQuery_1_10_2.fn.scrollStopped = function(delay,callback) {           
-												jQuery_1_10_2(this).scroll(function(){
-										            var self = this, $this = jQuery_1_10_2(self);
-										            if ($this.data('scrollTimeout')) {
-										              clearTimeout($this.data('scrollTimeout'));
-										            }
-										            $this.data('scrollTimeout', setTimeout(callback,delay,self));
-										        });
-										    };
-						  					smt2.record({
-											      recTime: 3000,
-											      trackingUrl: "<?php echo $smt_tracking_url?>",
-											      postInterval: 7
-											    });
-		
-					  			  			}
-									});
-	
-					}	  			
-					//]]>
-			</script>
+									}	  			
+									//]]>
+							</script>
 		<?php }
+		}
 	}
 	
 	public function add_wpinsights_admin_scripts(){
