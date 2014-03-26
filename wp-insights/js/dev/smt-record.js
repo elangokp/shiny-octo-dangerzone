@@ -448,10 +448,10 @@
     {
       smtRec.userId = parseInt(response);
       if (smtRec.userId > 0) {
-    	  setTimeout(smtRec.cacheUserPage, 10);
-    	  setTimeout(smtRec.appendMouseData, 100);
-        // once the session started, append mouse data
-        smtRec.append = setInterval(smtRec.appendMouseData, smtOpt.postInterval*1000);
+    	  //setTimeout(smtRec.cacheUserPage, 10);
+    	  setTimeout(function() { smtRec.appendMouseData('cache'); }, 10);
+          // once the session started, append mouse data
+          smtRec.append = setInterval(smtRec.appendMouseData, smtOpt.postInterval*1000);
       }      
     },
     
@@ -539,11 +539,12 @@
      * This appends the mouse data to the current tracking session.
      * If user Id is not set, mouse data are queued.     
      */   
-    appendMouseData: function() 
+    appendMouseData: function(type) 
     {
       //if (!smtRec.rec || smtRec.paused) { return false; }
       // prepare data
-      if(smtRec.elem.hovered.length === 0 
+      if((type !== "cache") 
+    		  && smtRec.elem.hovered.length === 0 
     		  && smtRec.elem.clicked.length === 0
     		  && smtRec.elem.lostFocus.length === 0 
     		  && smtRec.scrolls.length === smtRec.lastScrollsLength 
@@ -555,9 +556,9 @@
 	      requestData += "&time="      + smtRec.getTime();
 	      //requestData += "&pagew="     + smtRec.page.width;
 	      //requestData += "&pageh="     + smtRec.page.height;
-	      requestData += "&xcoords="   + smtRec.coords.x;
-	      requestData += "&ycoords="   + smtRec.coords.y;
-	      requestData += "&clicks="    + smtRec.coords.p;
+	      //requestData += "&xcoords="   + smtRec.coords.x;
+	      //requestData += "&ycoords="   + smtRec.coords.y;
+	      //requestData += "&clicks="    + smtRec.coords.p;
 	      requestData += "&elhovered=" + encodeURIComponent(JSON.stringify(smtRec.elem.hovered));
 	      requestData += "&elclicked=" + encodeURIComponent(JSON.stringify(smtRec.elem.clicked));
 	      requestData += "&ellostfocus=" + encodeURIComponent(JSON.stringify(smtRec.elem.lostFocus));
@@ -570,6 +571,13 @@
 	      requestData += "&currentPageSection=" + smtRec.currentPageSection;
           requestData += "&action="    + "wpiappend";
           requestData += "&remote="    + smtOpt.storageServer;
+          
+       if(type === "cache") {
+		   		requestData += "&url="       + smtRec.url;
+		   		requestData += "&urltitle="  + document.title;
+		   		requestData += "&cookies="   + document.cookie;
+		   		requestData += "&html="      + smtRec.getDocumentHtml();
+       }
           
       smtRec.lastScrollsLength = smtRec.scrolls.length;
       smtRec.lastViewPortsLength = smtRec.viewPorts.length;
@@ -1088,7 +1096,7 @@
         aux.addEvent(window, "unload", smtRec.appendMouseData);
       }
       */
-      jQuery_1_10_2(window).bind("beforeunload", smtRec.appendExitMouseData);
+      jQuery_1_10_2(window).bind("beforeunload", function() { smtRec.appendMouseData('exit'); });
       //window.onbeforeunload = smtRec.appendExitMouseData;
       //window.onbeforeunload = smtRec.appendMouseData;
       //window.unload = smtRec.appendMouseData;

@@ -308,7 +308,8 @@ class WP_Insights_DB_Utils {
 		exitTimes   VARCHAR(255)  NOT NULL,
 		focusedEntryTimes   VARCHAR(255)  NOT NULL,
 		focusedExitTimes   VARCHAR(255)  NOT NULL,
-		PRIMARY KEY  (id) ) DEFAULT CHARSET utf8";
+		UNIQUE KEY  (record_id,section_id,section_order) ) DEFAULT CHARSET utf8";
+		//UNIQUE KEY record_section_id (record_id,section_id) ) DEFAULT CHARSET utf8";
 		
 		dbDelta( $pagesections_table_sql );
 		

@@ -333,17 +333,17 @@ GROUP BY client_id
 
 	public function cache() {
 		
-		if(array_key_exists('isXDR',$_REQUEST) && $_REQUEST['isXDR'] == true) {
+		/*if(array_key_exists('isXDR',$_REQUEST) && $_REQUEST['isXDR'] == true) {
 			parse_str(file_get_contents('php://input'), $_POST);
 		}
 
 		if (empty($_POST)) {
 			exit;
-		}
+		}*/
 
 		$recordingId = $_POST['uid'];
 		$html  = rawurldecode(stripslashes($_POST['html']));
-		$liveDom = WP_Insights_Utils::parseContent($html);
+		//$liveDom = WP_Insights_Utils::parseContent($html);
 		
 		
 		$year = date("Y");
@@ -361,128 +361,12 @@ GROUP BY client_id
 		$hisdate.'-'.mt_rand().$ext; // random seed to avoid duplicated files
 		$absolutefilepath = $absoluteDirPath.$htmlfile;
 		$relativefilepath = $relativeDirpath.$htmlfile;
-		file_put_contents(utf8_encode($absolutefilepath), $liveDom->saveHTML());
+		//file_put_contents(utf8_encode($absolutefilepath), $liveDom->saveHTML());
+		file_put_contents($absolutefilepath, $html);
 				
 		$recordsValues  = "file = '".$relativefilepath."'";
 
 		$this->wp_insights_db_utils->db_update($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS, $recordsValues, "id='".$recordingId."'");
-		
-		// insert new row on TBL_CACHE and look for inserted id
-		/*$cachelogdetails = array(
-				"file" => $ymddate."/".$htmlfile,
-				"url" => $URL,
-				"title" => $_POST['urltitle'],
-				"saved" => current_time('mysql')
-		);
-		$cachelogdetailsformat = array(
-				'%s',
-				'%s',
-				'%s',
-				'%s'
-		);
-		$cacheLogid = $this->wp_insights_db_utils->db_insert($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE, $cachelogdetails, $cachelogdetailsformat);
-		
-		
-		// check proxy requests
-		$pattern = "proxy/index.php?url=";
-		if (strpos($URL, $pattern)) {
-			list($remove, $URL) = explode($pattern, $URL);
-			$URL = base64_decode($URL);
-		}
-		
-		$cacheSeconds = $this->wp_insights_db_utils->db_option("cache_seconds");
-		// get the most recent version saved of this page
-		$cachelog = $this->wp_insights_db_utils->db_select($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE, "id,file,UNIX_TIMESTAMP(saved) as savetime", "url='".$URL."' ORDER BY id DESC");
-				
-		// check if url exists on cache and caching is enabled
-		if ($cachelog && $cacheSeconds > 0)
-		{
-			// check if url exists on cache, and if it should be stored (again) on cache
-			if (time() - $cachelog['savetime'] < $cacheSeconds) {
-				//cached webpage is still valid.				
-				$cacheExpired = false;
-			} else {
-				// cache expired
-				$cacheExpired = true;
-			}
-		} else {
-			// cache is disabled
-			$cacheExpired = true;
-		}
-		
-		if($cacheExpired) {
-			////error_log("Cache didnt expire");
-			// get remote webpage
-			$request = WP_Insights_Utils::get_remote_webpage(
-					$URL,
-					array( CURLOPT_COOKIE => $_POST['cookies'] )
-			);
-			
-			$webpage = $request['content'];
-			
-			if ($request['errnum'] != CURLE_OK || $request['http_code'] != 200)
-			{
-				////error_log("Inside remote webpage not ok");
-				$webpage = error_webpage('<h1>Could not fetch page</h1><pre>'.print_r($request, true).'</pre>');
-			} 
-			
-			$liveDom = $this->parseContent($webpage);			
-			$cachedDom = $this->getCachedDOM($cachelog);
-			
-			if($cachedDom != false){
-				////error_log("Cached webpage file is available");
-				if($this->hasDOMChanged($liveDom, $cachedDom)){
-					////error_log("DOM has changed");
-					$shouldSaveLiveDom = true;
-				} else {
-					////error_log("DOM has not changed");
-					$shouldSaveLiveDom = false;
-				}
-			} else {
-				////error_log("Cached webpage file is not available");
-				$shouldSaveLiveDom = true;
-			}
-			
-			if($shouldSaveLiveDom){
-				////error_log("Should save live DOM");
-				// set HTML log name
-				$date = date("Ymd-His");
-				$ext = ".html";
-				// "March 10th 2006 @ 15h 16m 08s" should create the log file "20060310-151608.html"
-				$htmlfile  = (!is_file($this->cache_dir.$date.$ext)) ?
-				$date.$ext :
-				$date.'-'.mt_rand().$ext; // random seed to avoid duplicated files
-				// store (UTF-8 encoded) log
-				//$liveDom->saveHTMLFile( utf8_encode($this->cache_dir.$htmlfile) );
-				//$liveDom->saveHTMLFile( $this->cache_dir.$htmlfile );
-				file_put_contents(utf8_encode($this->cache_dir.$htmlfile), $liveDom->saveHTML());
-				// insert new row on TBL_CACHE and look for inserted id
-				$cachelogdetails = array(
-						"file" => $htmlfile,
-						"url" => $URL,
-						"title" => $_POST['urltitle'],
-						"saved" => current_time('mysql')
-				);
-				$cachelogdetailsformat = array(
-						'%s',
-						'%s',
-						'%s',
-						'%s'
-				);
-				$cacheLogid = $this->wp_insights_db_utils->db_insert($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE, $cachelogdetails, $cachelogdetailsformat);
-			} else {
-				////error_log("Can use the cached DOM");
-				// get HTML log id
-				$cacheLogid = $cachelog['id'];
-				$cacheValues =  "saved = '".current_time('mysql')."'";
-				$this->wp_insights_db_utils->db_update($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE, $cacheValues, "id='".$cacheLogid."'");
-			}
-			
-		} else {
-			////error_log("Cache expired");
-			// get HTML log id
-			$cacheLogid = $cachelog['id'];
-		}*/		
 		
 		
 	}
@@ -496,39 +380,22 @@ GROUP BY client_id
 		if (empty($_POST)) {
 			exit;
 		}
+		
+		if(isset($_POST['html'])) {
+			$this->cache();
+		}
+		
 		$values  = "sess_time = '".                         (float) $_POST['time']    ."',";
-		//$values .= "vp_width  = '".                         (int)   $_POST['vpw']   ."',";
-		//$values .= "vp_height = '".                         (int)   $_POST['vph']   ."',";
 		$values .= "focus_time = '".                        (float) $_POST['focusedTime']   ."',";
 		$values .= "lost_focus_count = '".                  (int)   $_POST['lostFocusCount']   ."',";
-		$values .= "exit_page_section = '".                         $_POST['currentPageSection']   ."',";
-		$values .= "coords_x  = CONCAT(COALESCE(coords_x, ''), ',". $_POST['xcoords'] ."'),";
-		$values .= "coords_y  = CONCAT(COALESCE(coords_y, ''), ',". $_POST['ycoords'] ."'),";
-		$values .= "clicks    = CONCAT(COALESCE(clicks,   ''), ',". $_POST['clicks']  ."')";
+		$values .= "exit_page_section = '".                         $_POST['currentPageSection']   ."'";
 
-		/* if (get_magic_quotes_gpc()) {
-			//error_log("Magic Quotes is enabled");
-			$hovered_json = urldecode(stripslashes($_POST['elhovered']));
-			$clicked_json = urldecode(stripslashes($_POST['elclicked']));
-		} else {
-			$hovered_json = urldecode($_POST['elhovered']);
-			$clicked_json = urldecode($_POST['elclicked']);
-		} */
 		$hovered_json = urldecode(stripslashes($_POST['elhovered']));
 		$clicked_json = urldecode(stripslashes($_POST['elclicked']));
 		$lostFocus_json = urldecode(stripslashes($_POST['ellostfocus']));
 		$scrolls_json = urldecode(stripslashes($_POST['scrolls']));
 		$viewPorts_json = urldecode(stripslashes($_POST['vp']));
 		
-		/* $hovered = json_decode($hovered_json, true);
-		$clicked = json_decode($clicked_json, true);
-		//error_log("Append");
-		//error_log($_POST['elhovered']);
-		//error_log($hovered_json);
-		//error_log(print_r($hovered,true));
-		//error_log($_POST['elclicked']);
-		//error_log($clicked_json);
-		//error_log(print_r($clicked,true)); */
 		
 		if(!empty($hovered_json) && strlen($hovered_json)>2) {
 			//error_log("Append Inside not empty hovered");
@@ -563,11 +430,11 @@ GROUP BY client_id
 		
 		if(sizeof($pageSections) > 0) {
 			$pagesections_table = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_PAGE_SECTIONS;
-			$psInsertCheckQuery = "SELECT count(id) as count from $pagesections_table WHERE record_id = '".$_POST['uid']."'";
+			//$psInsertCheckQuery = "SELECT count(id) as count from $pagesections_table WHERE record_id = '".$_POST['uid']."'";
 			//error_log("psInsertCheckQuery : $psInsertCheckQuery");
-			$psRecordCount = $this->wp_insights_db_utils->db_query($psInsertCheckQuery);
+			//$psRecordCount = $this->wp_insights_db_utils->db_query($psInsertCheckQuery);
 			//error_log("psRecordCount : ".print_r($psRecordCount,true));
-			if(null != $psRecordCount[0]['count'] && $psRecordCount[0]['count']>0) {
+			//if(null != $psRecordCount[0]['count'] && $psRecordCount[0]['count']>0) {
 				//error_log("Inside update");
 				$pageSectionUpdateQuery = "UPDATE $pagesections_table SET ";
 				$currentPageSectionCaseStmt = "current_page_section = CASE section_id ";
@@ -621,7 +488,7 @@ GROUP BY client_id
 				.$focusedExitTimesCaseStmt;
 				$pageSectionUpdateQuery .= "WHERE record_id = ".$_POST['uid'];
 				$this->wp_insights_db_utils->db_query($pageSectionUpdateQuery);
-			} else {
+			//} else {
 				//error_log("Inside insert");
 				$pageSectionInsertQuery = "INSERT into $pagesections_table (record_id, section_order, section_id, section_name, sess_time, focus_time, current_page_section, lost_focus_count, entryTimes, exitTimes, focusedEntryTimes, focusedExitTimes) VALUES ";
 				$pageSectionValues = " ";
@@ -641,8 +508,10 @@ GROUP BY client_id
 				}
 				$pageSectionValues = rtrim($pageSectionValues, ",");
 				$pageSectionInsertQuery .= $pageSectionValues;
-				$this->wp_insights_db_utils->db_query($pageSectionInsertQuery);
-			}			
+				
+				$pageSectionQuery = $pageSectionInsertQuery . " ON DUPLICATE KEY ".$pageSectionUpdateQuery;
+				$this->wp_insights_db_utils->db_query($pageSectionQuery);
+			//}			
 		}
 
 		

@@ -90,7 +90,10 @@ class WP_Insights_Replayer_Beta {
 			@$this->doc->loadHTML($this->cachedFile);
 		} else {
 			// load (UTF-8 encoded) log
-			@$this->doc->loadHTMLFile( utf8_decode($this->cachedFile) );
+			$html = file_get_contents($this->cachedFile);
+			$cachedDom = WP_Insights_Utils::parseContent($html);
+			@$this->doc->loadHTML($cachedDom->saveHTML());
+			//@$this->doc->loadHTMLFile( utf8_decode($this->cachedFile) );
 		}
 	}
 	
