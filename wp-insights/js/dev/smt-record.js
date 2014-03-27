@@ -460,9 +460,9 @@
 	{
     	var requestData  = "uid="    + smtRec.userId;
 		requestData += "&action="    + "wpicachepage";
-		requestData += "&url="       + smtRec.url;
-		requestData += "&urltitle="  + document.title;
-		requestData += "&cookies="   + document.cookie;
+		//requestData += "&url="       + smtRec.url;
+		//requestData += "&urltitle="  + document.title;
+		//requestData += "&cookies="   + document.cookie;
 		requestData += "&html="      + smtRec.getDocumentHtml();
 		requestData += "&remote="    + smtOpt.storageServer;
 		
