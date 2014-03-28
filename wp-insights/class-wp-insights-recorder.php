@@ -341,9 +341,9 @@ GROUP BY client_id
 			exit;
 		}
 
-		$recordingId = $_POST['uid'];*/
+		$recordingId = $_POST['uid'];
 		$html  = rawurldecode(stripslashes($_POST['html']));
-		//$liveDom = WP_Insights_Utils::parseContent($html);
+		//$liveDom = WP_Insights_Utils::parseContent($html);*/
 		
 		
 		$year = date("Y");
@@ -360,7 +360,7 @@ GROUP BY client_id
 		
 		$absolutefilepath = $absoluteDirPath.$htmlfile;
 		$relativefilepath = $relativeDirpath.$htmlfile;
-		file_put_contents($absolutefilepath, $html);
+		file_put_contents($absolutefilepath, $_POST['html']);
 		return $relativefilepath;
 		
 		/*$htmlfile  = (!is_file($hisdate.$ext)) ?
@@ -436,11 +436,11 @@ GROUP BY client_id
 			$pageSections  = json_decode($pageSections_json, true);
 			if(sizeof($pageSections) > 0) {
 				$pagesections_table = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_PAGE_SECTIONS;
-				$psInsertCheckQuery = "SELECT EXISTS(SELECT 1 from $pagesections_table WHERE record_id = ".$_POST['uid']." LIMIT 1)";
+				$psInsertCheckQuery = "SELECT EXISTS(SELECT 1 from $pagesections_table WHERE record_id = ".$_POST['uid']." LIMIT 1) as is_inserted";
 				//error_log("psInsertCheckQuery : $psInsertCheckQuery");
 				$psRecordCount = $this->wp_insights_db_utils->db_query($psInsertCheckQuery);
-				//error_log("psRecordCount : ".print_r($psRecordCount,true));
-				if(null != $psRecordCount[0]['count'] && $psRecordCount[0]['count']>0) {
+				error_log("psRecordCount : ".print_r($psRecordCount,true));
+				if($psRecordCount[0]['is_inserted']>0) {
 					//error_log("Inside update");
 					$pageSectionUpdateQuery = "UPDATE $pagesections_table SET ";
 					$currentPageSectionCaseStmt = "current_page_section = CASE section_id ";

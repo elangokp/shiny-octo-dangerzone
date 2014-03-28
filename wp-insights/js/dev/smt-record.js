@@ -456,7 +456,7 @@
     },
     
     /** Send a request to server to cache the page. */
-    cacheUserPage: function()
+    /*cacheUserPage: function()
 	{
     	var requestData  = "uid="    + smtRec.userId;
 		requestData += "&action="    + "wpicachepage";
@@ -488,7 +488,7 @@
       		  data: requestData
     		});
     	}
-	},
+	},*/
 	
 	getDocumentHtml: function() {
         for (var dt = window.document.doctype, de = window.document.documentElement, dt = (dt && null != dt ? "<!DOCTYPE " + dt.name + ("" != dt.publicId ? ' PUBLIC "' + dt.publicId + '" "' + dt.systemId + '"' : "") + ">\n" : "<!DOCTYPE html>\n") + "<html", attrId = 0; attrId < de.attributes.length; attrId++) 
@@ -543,14 +543,17 @@
     {
       //if (!smtRec.rec || smtRec.paused) { return false; }
       // prepare data
-      if((type !== "cache") 
-    		  && smtRec.elem.hovered.length === 0 
-    		  && smtRec.elem.clicked.length === 0
-    		  && smtRec.elem.lostFocus.length === 0 
-    		  && smtRec.scrolls.length === smtRec.lastScrollsLength 
-    		  && smtRec.viewPorts.length === smtRec.lastViewPortsLength) {
-    	  return false;
+      if (window.location.search.indexOf('nowpipause=yes') < 0) {
+    	  if((type !== "cache") 
+        		  && smtRec.elem.hovered.length === 0 
+        		  && smtRec.elem.clicked.length === 0
+        		  && smtRec.elem.lostFocus.length === 0 
+        		  && smtRec.scrolls.length === smtRec.lastScrollsLength 
+        		  && smtRec.viewPorts.length === smtRec.lastViewPortsLength) {
+        	  return false;
+          }
       }
+      
      
       var requestData  = "uid="        + smtRec.userId;
 	      requestData += "&time="      + smtRec.getTime();

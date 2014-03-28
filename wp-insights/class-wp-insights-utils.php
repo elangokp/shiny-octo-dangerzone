@@ -130,8 +130,9 @@ class WP_Insights_Utils {
 		$dom = new DOMDocument();
 		$dom->formatOutput = true;
 		$dom->preserveWhiteSpace = false;
+		$decoded_webpage  = rawurldecode(stripslashes($webpage));
 		// hide warnings when parsing non valid (X)HTML pages
-		@$dom->loadHTML('<?xml encoding="utf-8" ?>' . $webpage);
+		@$dom->loadHTML('<?xml encoding="utf-8" ?>' . $decoded_webpage);
 		$wpiScriptElement = $dom->getElementById('wpi-trigger-script');
 		//error_log($wpiScriptElement->nodeValue);
 		if(!is_null($wpiScriptElement)){
