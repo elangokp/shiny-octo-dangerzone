@@ -753,7 +753,7 @@ class WP_Insights {
 	}
 	
 	public function exit_user_data() {
-		//error_log("Exit call triggered");
+		error_log("Exit call triggered");
 		$this->append_user_data();
 	}
 	

@@ -554,6 +554,11 @@
           }
       }
       
+      $action = "wpiappend";
+      if(type === "exit") {
+    	  $action = "wpiexit";
+      }      
+      
      
       var requestData  = "uid="        + smtRec.userId;
 	      requestData += "&time="      + smtRec.getTime();
@@ -572,7 +577,7 @@
 	      requestData += "&scrollPercentage=" + smtRec.scrollPercentage;
 	      requestData += "&pageSections=" + encodeURIComponent(JSON.stringify(smtRec.pageSections));
 	      requestData += "&currentPageSection=" + smtRec.currentPageSection;
-          requestData += "&action="    + "wpiappend";
+          requestData += "&action="    + $action;
           requestData += "&remote="    + smtOpt.storageServer;
           
        if(type === "cache") {
@@ -586,14 +591,14 @@
       smtRec.lastViewPortsLength = smtRec.viewPorts.length;
       
       //smt2fn.log("Inside append mouse data");
-      console.log("Inside append mouse data");
+      console.log("Inside "+$action+" append mouse data");
       // send request
       var gatewayUrl = smtOpt.trackingUrl;
       if ('XDomainRequest' in window && window.XDomainRequest !== null) {
   	    // Use Microsoft XDR
     	smt2fn.log('XDomainRequest');
   	    var xdr = new XDomainRequest();
-  	    xdr.open("post", gatewayUrl+"?action=wpiappend&isXDR=true&_="+(new Date()).getTime());
+  	    xdr.open("post", gatewayUrl+"?action="+$action+"&isXDR=true&_="+(new Date()).getTime());
   	    xdr.onload = function () {};
   	    xdr.onprogress = function(){};
   	    xdr.ontimeout = function(){};
@@ -604,7 +609,7 @@
 	} else {
 		jQuery_1_10_2.ajax({
 			  type: "POST",
-			  url:  gatewayUrl+"?action=wpiappend&_="+(new Date()).getTime(),
+			  url:  gatewayUrl+"?action="+$action+"&_="+(new Date()).getTime(),
 			  cache: false,
 			  data: requestData
 		});
@@ -1099,7 +1104,8 @@
         aux.addEvent(window, "unload", smtRec.appendMouseData);
       }
       */
-      jQuery_1_10_2(window).bind("beforeunload", function() { smtRec.appendMouseData('exit'); });
+      jQuery_1_10_2(window).on("beforeunload", function() { smtRec.appendMouseData('exit'); });
+      jQuery_1_10_2(window).on("unload", function() { smtRec.appendMouseData('exit'); })
       //window.onbeforeunload = smtRec.appendExitMouseData;
       //window.onbeforeunload = smtRec.appendMouseData;
       //window.unload = smtRec.appendMouseData;
