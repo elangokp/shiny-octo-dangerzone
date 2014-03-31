@@ -9,6 +9,12 @@ class WP_Insights_DB_Utils {
 	/** Table prefix for all wp insights tables. */
 	const TBL_PLUGIN_PREFIX = 'wp_ins_';
 	
+	/** Table for storing wp insights visitors. */
+	const TBL_VISITORS = 'visitors';
+	
+	/** Table for storing wp insights pages. */
+	const TBL_PAGES = 'pages';
+	
 	/** Table for storing wp insights records. */
 	const TBL_RECORDS = 'records';
 	
@@ -252,24 +258,36 @@ class WP_Insights_DB_Utils {
 	}
 	
 	public function wpinsights_db_install() {
+		
+		/* create visitors table ---------------------------------------------------- */
+		
+		$visitors_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_VISITORS;
+		$visitors_table_sql = "CREATE TABLE $visitors_table (
+		id           BIGINT        unsigned  NOT NULL auto_increment,
+		os_id        TINYINT       unsigned  NOT NULL,
+        browser_id   TINYINT       unsigned  NOT NULL,
+        browser_ver  FLOAT(2,1)    unsigned  NOT NULL,
+        user_agent   VARCHAR(255)            NOT NULL,
+        ip           VARCHAR(15)             NOT NULL,
+		PRIMARY KEY  (id) ) DEFAULT CHARSET utf8";
+		
+		/* create pages table ---------------------------------------------------- */
+		
+		$pages_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_PAGES;
+		$pages_table_sql = "CREATE TABLE $pages_table (
+		id           BIGINT        unsigned  NOT NULL auto_increment,
+		url          VARCHAR(255)            NOT NULL,
+		PRIMARY KEY  (id) ) DEFAULT CHARSET utf8";
 	
 		/* create records table ----------------------------------------------------- */
 	
 		$records_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_RECORDS;
         $records_table_sql  = "CREATE TABLE $records_table (
         id           BIGINT        unsigned  NOT NULL auto_increment,
-        client_id    VARCHAR(36)             NOT NULL,
-        file     	 VARCHAR(255)            NOT NULL,
-        raw_url      VARCHAR(255)            NOT NULL,
-        cleansed_url VARCHAR(255)            NOT NULL,
-        os_id        TINYINT       unsigned  NOT NULL,
-        browser_id   TINYINT       unsigned  NOT NULL,
-        browser_ver  FLOAT(2,1)    unsigned  NOT NULL,
-        user_agent   VARCHAR(255)            NOT NULL,
-        ftu          TINYINT(1)              NOT NULL,
-        ip           VARCHAR(15)             NOT NULL,
-        scr_width    SMALLINT      unsigned  NOT NULL,
-        scr_height   SMALLINT      unsigned  NOT NULL,
+        visitor_id   BIGINT        unsigned  NOT NULL,
+        page_id      BIGINT        unsigned  NOT NULL,
+        file     	 VARCHAR(255)            NOT NULL,        
+        cleansed_url VARCHAR(255)            NOT NULL,        
         doc_width    SMALLINT      unsigned  NOT NULL,
         doc_height   SMALLINT      unsigned  NOT NULL,
         sess_date    TIMESTAMP     default   CURRENT_TIMESTAMP,
@@ -279,10 +297,6 @@ class WP_Insights_DB_Utils {
         exit_page_section VARCHAR(255)       NULL,
         is_exit      TINYINT(1)              NOT NULL,
         is_session_exit TINYINT(1)           NOT NULL,
-        fps          TINYINT       unsigned  NOT NULL,
-        coords_x     MEDIUMTEXT              NOT NULL,
-        coords_y     MEDIUMTEXT              NOT NULL,
-        clicks       MEDIUMTEXT              NOT NULL,
         viewports    LONGTEXT                NOT NULL,
         hovered      LONGTEXT                NOT NULL,
         clicked      LONGTEXT                NOT NULL,
