@@ -277,9 +277,10 @@ class WP_Insights_DB_Utils {
 		$pages_table_sql = "CREATE TABLE $pages_table (
 		id           BIGINT        unsigned  NOT NULL auto_increment,
 		url          VARCHAR(255)            NOT NULL,
-		cleansed_url VARCHAR(255)            NOT NULL,
-		css_paths    LONGTEXT                NOT NULL,
-		PRIMARY KEY  (id) ) DEFAULT CHARSET utf8";
+		cleansed_url VARCHAR(255)            NULL,
+		css_paths    LONGTEXT                NULL,
+		PRIMARY KEY  (id),
+		UNIQUE KEY  (url)) DEFAULT CHARSET utf8";
 	
 		/* create records table ----------------------------------------------------- */
 	
@@ -288,8 +289,7 @@ class WP_Insights_DB_Utils {
         id           BIGINT        unsigned  NOT NULL auto_increment,
         visitor_id   BIGINT        unsigned  NOT NULL,
         page_id      BIGINT        unsigned  NOT NULL,
-        file     	 VARCHAR(255)            NOT NULL,        
-        cleansed_url VARCHAR(255)            NOT NULL,        
+        file     	 VARCHAR(255)            NOT NULL,               
         doc_width    SMALLINT      unsigned  NOT NULL,
         doc_height   SMALLINT      unsigned  NOT NULL,
         sess_date    TIMESTAMP     default   CURRENT_TIMESTAMP,

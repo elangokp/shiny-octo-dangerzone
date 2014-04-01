@@ -47,14 +47,10 @@ class WP_Insights_Recorder {
 		$this->wp_insights_db_utils = $given_wp_insights_db_utils;
 	}
 	
-	public function init_recording() {
-		$browserAndOSId = $this->getBrowserAndOSDetails();
-		$recordsTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
+	protected function insert_visitor() {
 		if (isset($_COOKIE['wpi-visitor-id'])) {
-			//error_log("Cookie is set");
+			$recordsTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
 			$visitor_id = $_COOKIE['wpi-visitor-id'];
-			//error_log("Cookie is set :  $id");
-			//60*60*24 = 86400 ( 1 day in seconds)
 			$exitUpdateQuery = "UPDATE $recordsTable
 			SET is_exit = 0,
 			is_session_exit = CASE UNIX_TIMESTAMP(current_timestamp()) < (UNIX_TIMESTAMP(sess_date) + sess_time + 86400)
@@ -63,68 +59,75 @@ class WP_Insights_Recorder {
 			WHERE visitor_id ='".$visitor_id."'
 			ORDER BY id DESC
 			LIMIT 1";
-			//error_log($exitUpdateQuery);
 			$this->wp_insights_db_utils->db_query($exitUpdateQuery);
-			
-			
-			/* create database entry ---------------------------------------------------- */
-			$recorddetails = array(
-					"visitor_id" => $visitor_id,
-					"file" => "0",
-					"raw_url" => $_REQUEST['url'],
-					"cleansed_url" => $_REQUEST['url'],
+			return $visitor_id;
+		} else {
+			$browserAndOSId = $this->getBrowserAndOSDetails();
+			$visitors_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_VISITORS;
+			$visitor_details = array(
 					"os_id" => $browserAndOSId['os_id'],
 					"browser_id" => $browserAndOSId['browser_id'],
 					"browser_ver" => $browserAndOSId['browser_ver'],
 					"user_agent" => $browserAndOSId['user_agent'],
-					"ftu" => (int) $_REQUEST['ftu'],
-					"ip" => WP_Insights_Utils::get_client_ip() ,
-					"scr_width" => (int) $_REQUEST['screenw'],
-					"scr_height" => (int) $_REQUEST['screenh'],
-					"viewports" => $viewPorts_json,
-					"doc_width" => (int) $_REQUEST['pagew'],
-					"doc_height" => (int) $_REQUEST['pageh'],
-					//"sess_date" => current_time('mysql'),
-					//"sess_date" => 'NOW()',
-					"sess_time" => (float) $_REQUEST['time'],
-					"fps" => (int)   $_REQUEST['fps'],
-					//"coords_x" => $_REQUEST['xcoords'],
-					//"coords_y" => $_REQUEST['ycoords'],
-					//"clicks" => $_REQUEST['clicks'],
-					"focus_time" => $_REQUEST['focusedTime'],
-					"lost_focus_count" => $_REQUEST['lostFocusCount'],
-					"is_exit" => 1,
-					"is_session_exit" => 1
+					"ip" => WP_Insights_Utils::get_client_ip()
 			);
-			$recorddetailsformat = array(
-					'%s',
-					'%s',
-					'%s',
-					'%s',
+			$visitor_details_format = array(
 					'%d',
 					'%d',
 					'%f',
 					'%s',
-					'%d',
-					'%s',
-					'%d',
-					'%d',
-					'%s',
-					'%d',
-					'%d',
-					'%f',
-					'%d',
-					'%f',
-					'%d',
-					'%d',
 					'%d'
 			);
-			
-			$recording_id = $this->wp_insights_db_utils->db_insert($recordsTable, $recorddetails, $recorddetailsformat);
-			
-			// send user ID back to the record script
-			return $recording_id;
+			$visitor_id = $this->wp_insights_db_utils->db_insert($visitors_table, $visitor_details, $visitor_details_format);
+			return $visitor_id;
 		}
+	}
+	
+	protected function insert_page() {
+		$current_url = WP_Insights_Utils::getCurrentPageURL();
+		$pages_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_PAGES;
+		$page_check_query = "SELECT id as page_id from $pages_table WHERE url = '".$current_url."' LIMIT 1";
+		$page_id_resultset = $this->wp_insights_db_utils->db_query($page_check_query);
+		if(!isset($page_id_resultset[0]['page_id'])) {
+			$page_details = array(
+					"url" => $current_url
+			);
+			$page_details_format = array(
+					'%s'
+			);
+			$page_id = $this->wp_insights_db_utils->db_insert($pages_table, $page_details, $page_details_format);
+			return $page_id;
+		} else {
+			return $page_id_resultset[0]['page_id'];
+		}
+	}
+	
+	public function init_recording() {
+		
+		$visitor_id = $this->insert_visitor();
+		$page_id = $this->insert_page();
+		$recordsTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
+			
+		/* create database entry ---------------------------------------------------- */
+		$recorddetails = array(
+				"visitor_id" => $visitor_id,
+				"page_id" => $page_id,
+				"file" => "0",
+				"is_exit" => 1,
+				"is_session_exit" => 1
+		);
+		$recorddetailsformat = array(
+				'%d',
+				'%d',
+				'%s',
+				'%d',
+				'%d'
+		);
+		
+		$recording_id = $this->wp_insights_db_utils->db_insert($recordsTable, $recorddetails, $recorddetailsformat);
+		
+		// send user ID back to the record script
+		return $recording_id;
 		
 	}
 

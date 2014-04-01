@@ -851,14 +851,14 @@ class WP_Insights {
 					
 					if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay") < 0 
 						&& addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-heat.php") < 0) {
-			  			var jQuery_1_10_2_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
+			  			var wpi_jquery_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
 			  			var jQuery_UI_1_10_3_url = "//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js";
 	
 			  			jQuery.getScript( "<?php echo $json3_js_url?>");
 	
-			  			jQuery.getScript(jQuery_1_10_2_url, function() { 
-			  				jQuery_1_10_2 = $.noConflict(true);
-							jQuery_1_10_2.fn.getcssPath = function () {
+			  			jQuery.getScript(wpi_jquery_url, function() { 
+			  				wpi_jquery = $.noConflict(true);
+			  				wpi_jquery.fn.getcssPath = function () {
 							    if (this.length != 1) throw 'Requires one element.';
 	
 							    var path, node = this;
@@ -885,9 +885,9 @@ class WP_Insights {
 							    return path;
 							};
 	
-							jQuery_1_10_2.fn.scrollStopped = function(delay,callback) {           
-								jQuery_1_10_2(this).scroll(function(){
-						            var self = this, $this = jQuery_1_10_2(self);
+							wpi_jquery.fn.scrollStopped = function(delay,callback) {           
+								wpi_jquery(this).scroll(function(){
+						            var self = this, $this = wpi_jquery(self);
 						            if ($this.data('scrollTimeout')) {
 						              clearTimeout($this.data('scrollTimeout'));
 						            }
@@ -896,7 +896,7 @@ class WP_Insights {
 						    };
 						    
 	
-						    /*jQuery_1_10_2(window).scroll(function(event){
+						    /*wpi_jquery(window).scroll(function(event){
 								   var st = jQuery(this).scrollTop();
 								   if (st > lastScrollTop){
 									   scrollDirection = "down";
@@ -964,8 +964,8 @@ class WP_Insights {
 													  cache: true,
 													  success: function() 
 								  		  			  {
-										  					jQuery_1_10_2 = $.noConflict(true);
-															jQuery_1_10_2.fn.getcssPath = function () {
+														  wpi_jquery = $.noConflict(true);
+														  wpi_jquery.fn.getcssPath = function () {
 															    if (this.length != 1) throw 'Requires one element.';
 									
 															    var path, node = this;
@@ -992,9 +992,9 @@ class WP_Insights {
 															    return path;
 															};
 									
-															jQuery_1_10_2.fn.scrollStopped = function(delay,callback) {           
-																jQuery_1_10_2(this).scroll(function(){
-														            var self = this, $this = jQuery_1_10_2(self);
+															wpi_jquery.fn.scrollStopped = function(delay,callback) {           
+																wpi_jquery(this).scroll(function(){
+														            var self = this, $this = wpi_jquery(self);
 														            if ($this.data('scrollTimeout')) {
 														              clearTimeout($this.data('scrollTimeout'));
 														            }
