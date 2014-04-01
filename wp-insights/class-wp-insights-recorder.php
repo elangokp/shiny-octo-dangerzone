@@ -46,6 +46,87 @@ class WP_Insights_Recorder {
 	public function set_wp_insights_db_utils($given_wp_insights_db_utils) {
 		$this->wp_insights_db_utils = $given_wp_insights_db_utils;
 	}
+	
+	public function init_recording() {
+		$browserAndOSId = $this->getBrowserAndOSDetails();
+		$recordsTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
+		if (isset($_COOKIE['wpi-visitor-id'])) {
+			//error_log("Cookie is set");
+			$visitor_id = $_COOKIE['wpi-visitor-id'];
+			//error_log("Cookie is set :  $id");
+			//60*60*24 = 86400 ( 1 day in seconds)
+			$exitUpdateQuery = "UPDATE $recordsTable
+			SET is_exit = 0,
+			is_session_exit = CASE UNIX_TIMESTAMP(current_timestamp()) < (UNIX_TIMESTAMP(sess_date) + sess_time + 86400)
+			WHEN true THEN 0
+			WHEN false THEN 1 END
+			WHERE visitor_id ='".$visitor_id."'
+			ORDER BY id DESC
+			LIMIT 1";
+			//error_log($exitUpdateQuery);
+			$this->wp_insights_db_utils->db_query($exitUpdateQuery);
+			
+			
+			/* create database entry ---------------------------------------------------- */
+			$recorddetails = array(
+					"visitor_id" => $visitor_id,
+					"file" => "0",
+					"raw_url" => $_REQUEST['url'],
+					"cleansed_url" => $_REQUEST['url'],
+					"os_id" => $browserAndOSId['os_id'],
+					"browser_id" => $browserAndOSId['browser_id'],
+					"browser_ver" => $browserAndOSId['browser_ver'],
+					"user_agent" => $browserAndOSId['user_agent'],
+					"ftu" => (int) $_REQUEST['ftu'],
+					"ip" => WP_Insights_Utils::get_client_ip() ,
+					"scr_width" => (int) $_REQUEST['screenw'],
+					"scr_height" => (int) $_REQUEST['screenh'],
+					"viewports" => $viewPorts_json,
+					"doc_width" => (int) $_REQUEST['pagew'],
+					"doc_height" => (int) $_REQUEST['pageh'],
+					//"sess_date" => current_time('mysql'),
+					//"sess_date" => 'NOW()',
+					"sess_time" => (float) $_REQUEST['time'],
+					"fps" => (int)   $_REQUEST['fps'],
+					//"coords_x" => $_REQUEST['xcoords'],
+					//"coords_y" => $_REQUEST['ycoords'],
+					//"clicks" => $_REQUEST['clicks'],
+					"focus_time" => $_REQUEST['focusedTime'],
+					"lost_focus_count" => $_REQUEST['lostFocusCount'],
+					"is_exit" => 1,
+					"is_session_exit" => 1
+			);
+			$recorddetailsformat = array(
+					'%s',
+					'%s',
+					'%s',
+					'%s',
+					'%d',
+					'%d',
+					'%f',
+					'%s',
+					'%d',
+					'%s',
+					'%d',
+					'%d',
+					'%s',
+					'%d',
+					'%d',
+					'%f',
+					'%d',
+					'%f',
+					'%d',
+					'%d',
+					'%d'
+			);
+			
+			$recording_id = $this->wp_insights_db_utils->db_insert($recordsTable, $recorddetails, $recorddetailsformat);
+			
+			// send user ID back to the record script
+			return $recording_id;
+		}
+		
+	}
 
 	public function store() {	
 
@@ -81,8 +162,6 @@ GROUP BY client_id
 			//error_log($exitUpdateQuery);
 			$this->wp_insights_db_utils->db_query($exitUpdateQuery);
 		}
-		
-		$viewPorts_json = urldecode(stripslashes($_REQUEST['vp']));
 
 		/* create database entry ---------------------------------------------------- */
 		$recorddetails = array(

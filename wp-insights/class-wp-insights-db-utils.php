@@ -277,6 +277,8 @@ class WP_Insights_DB_Utils {
 		$pages_table_sql = "CREATE TABLE $pages_table (
 		id           BIGINT        unsigned  NOT NULL auto_increment,
 		url          VARCHAR(255)            NOT NULL,
+		cleansed_url VARCHAR(255)            NOT NULL,
+		css_paths    LONGTEXT                NOT NULL,
 		PRIMARY KEY  (id) ) DEFAULT CHARSET utf8";
 	
 		/* create records table ----------------------------------------------------- */
