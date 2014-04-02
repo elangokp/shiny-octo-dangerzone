@@ -150,22 +150,19 @@ class WP_Insights_Utils {
 	 * Assigns an unique identifier for each client machine.
 	 * @return  string
 	 */
-	public static function get_client_id()
+	public static function get_visitor_id()
 	{
-		if (isset($_COOKIE['smt-id'])) {
-			$id = $_COOKIE['smt-id'];
+		if (isset($_COOKIE['wpi-visitor-id'])) {
+			$id = $_COOKIE['wpi-visitor-id'];
 		} else {
-			$id = md5( mt_rand() + date("now") + mt_rand() );
-			$expires = time() + 60 * 60 * 24 * 365; // 1 year
-			setcookie('smt-id', $id, $expires, "/");
+			$id = 0;
 		}
-
 		return $id;
 	}
 	
 	public static function getCurrentPageURL() {
 		$pageURL = 'http';
-		if ($_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
+		if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
 		$pageURL .= "://";
 		if ($_SERVER["SERVER_PORT"] != "80") {
 			$pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];

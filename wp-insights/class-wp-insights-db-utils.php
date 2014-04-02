@@ -271,6 +271,8 @@ class WP_Insights_DB_Utils {
         ip           VARCHAR(15)             NOT NULL,
 		PRIMARY KEY  (id) ) DEFAULT CHARSET utf8";
 		
+		dbDelta( $visitors_table_sql );
+		
 		/* create pages table ---------------------------------------------------- */
 		
 		$pages_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_PAGES;
@@ -281,6 +283,8 @@ class WP_Insights_DB_Utils {
 		css_paths    LONGTEXT                NULL,
 		PRIMARY KEY  (id),
 		UNIQUE KEY  (url)) DEFAULT CHARSET utf8";
+		
+		dbDelta( $pages_table_sql );
 	
 		/* create records table ----------------------------------------------------- */
 	
@@ -324,6 +328,7 @@ class WP_Insights_DB_Utils {
 		exitTimes   VARCHAR(255)  NOT NULL,
 		focusedEntryTimes   VARCHAR(255)  NOT NULL,
 		focusedExitTimes   VARCHAR(255)  NOT NULL,
+		PRIMARY KEY  (id),
 		UNIQUE KEY  (record_id,section_id,section_order) ) DEFAULT CHARSET utf8";
 		//UNIQUE KEY record_section_id (record_id,section_id) ) DEFAULT CHARSET utf8";
 		

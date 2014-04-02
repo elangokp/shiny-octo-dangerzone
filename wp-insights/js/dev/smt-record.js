@@ -1,23 +1,6 @@
-/*! 
- * (smt)2 simple mouse tracking v2.1.0
- * Copyleft (cc) 2006-2012 Luis Leiva
- * http://smt2.googlecode.com & http://smt.speedzinemedia.com
- */
-/** 
- * (smt)2 simple mouse tracking - record script (smt-record.js)
- * Copyleft (cc) 2006-2012 Luis Leiva
- * Release date: March 23 2012
- * http://smt2.googlecode.com & http://smt.speedzinemedia.com
- * @class smt2-record
- * @requires smt2-aux Auxiliary (smt)2 functions  
- * @version 2.1.0
- * @author Luis Leiva 
- * @license Dual licensed under the MIT (MIT-LICENSE.txt) and GPL (GPL-LICENSE.txt) licenses. 
- * @see smt2fn
- */
 (function(){
   /** 
-   * (smt)2 default recording options.
+   * WP Insights default recording options.
    * This Object can be overriden when calling the smt2.record method.
    */
   var wpiOpt = {
@@ -41,17 +24,12 @@
      * @type int     
      */
     cookieDays: 365,
+    postInterval: 10,
+    recordingId: 0
   };
-  
-  
-  /* do not edit below this line -------------------------------------------- */
-  
-  // get auxiliar functions
-  var aux = window.smt2fn;
-  if (typeof aux === "undefined") { throw("auxiliar (smt)2 functions not found"); }
     
   /** 
-   * (smt)2 recording object.
+   * Wp Insights recording object.
    * This Object is private. Methods are cited but not documented.
    */
   var wpiRec = {
@@ -68,9 +46,6 @@
     paused:    false,                      // check active window
     clicked:   false,                      // no mouse click yet
     timestamp: null,                       // current date's timestamp
-    timeout:   null,                       // tracking timeout
-    xmlhttp:   aux.createXMLHTTPObject(),  // common XHR object
-    ftu:       1,                          // assume a first time user initially
     ip:		   null,					   // IP of the visitor
     scrollPercentage: 0,                   // Percentage of page seen by visitor
     lostFocusCount:   0,                   // Number of times a visitor got distracted from the page
@@ -86,6 +61,110 @@
     viewPorts:         [],
     lastScrollsLength: 0,
     lastViewPortsLenght: 0,
+    
+    /**
+     * Cookies management object.
+     * This cookies object allows you to store and retrieve cookies easily.
+     * Cookies can be picked up by any other web pages in the correct domain.
+     * Cookies are set to expire after a certain length of time.
+     */
+    cookies: {
+      /**
+       * Stores a cookie variable.
+       * @return void
+       * @param {string} name
+       * @param {mixed}  value
+       * @param {string} expiredays (optional) default: no expire
+       * @param {string} domainpath (optional) default: root domain
+       */
+      setCookie: function(name,value,expiredays,domainpath)
+      {
+        var path = domainpath || "/";
+        var expires = "";
+        if (expiredays) {
+          var date = new Date();
+          date.setTime(date.getTime() + (expiredays*24*60*60*1000)); // ms
+          expires = "; expires=" + date.toGMTString();
+        }
+        document.cookie = name +"="+ escape(value) + expires +"; path=" + path;
+      },
+      /**
+       * Retrieves a cookie variable.
+       * @return {string}       cookie value, or false on failure
+       * @param {string} name   cookie name
+       */
+      getCookie: function(name)
+      {
+        var cStart,cEnd;
+        if (document.cookie.length > 0) {
+          cStart = document.cookie.indexOf(name+"=");
+          if (cStart != -1) {
+            cStart = cStart + name.length + 1;
+            cEnd   = document.cookie.indexOf(";", cStart);
+            if (cEnd == -1) {
+              cEnd = document.cookie.length;
+            }
+
+            return unescape(document.cookie.substring(cStart, cEnd));
+          }
+        }
+        return false;
+      },
+      /**
+       * Checks if a cookie exists.
+       * @return {boolean}       true on success, or false on failure
+       * @param {string}  name   cookie name
+       */
+      checkCookie: function(name)
+      {
+        var c = this.getCookie(name);
+        return (c);
+      },
+      /**
+       * Deletes a cookie.
+       * @param {string}  name   cookie name
+       */
+      deleteCookie: function(name)
+      {
+        if (this.checkCookie(name)) {
+          this.setCookie(name, null, -1);
+        }
+      }
+    },
+    
+    /**
+     * Overrides (smt) tracking options object with custom-provided options object
+     * @return void
+     * @param {object} smtOptionsObj
+     * @param {object} customOptionsObj
+     * @see <code>smtOpt</code> object either in <code>smtRecord</code> or <code>smtReplay</code> classes
+     */
+    overrideTrackingOptions: function(smtOptionsObj, customOptionsObj)
+    {
+      for (var prop in smtOptionsObj)
+      {
+        if (customOptionsObj.hasOwnProperty(prop) && customOptionsObj[prop] !== null) {
+          smtOptionsObj[prop] = customOptionsObj[prop];
+        }
+      }
+    },
+    
+    /**
+     * Traces any kind of objects in the debug console (if available).
+     * @return void
+     */
+    log: function()
+    {
+      // check if console is available
+      if (window.console && window.console.log) { 
+      	console.log(arguments);
+      } else {
+      	return false;
+      }
+      
+      // display messages in the console
+      
+    },
     
     find_in_array: function(arr, name, value) {
         for (var i = 0, len = arr.length; i<len; i++) {
@@ -111,10 +190,10 @@
     	var scrollLeft = wpi_jquery(window).scrollLeft();
     	
     	if(eventType === "scrollStart" && wpiRec.scrollStopped){
-    		smt2fn.log("scrollStart");
+    		wpiRec.log("scrollStart");
     		wpiRec.scrollStopped = false;
-    		smt2fn.log("scrollTop : " + wpiRec.currentScrollTop);
-    		smt2fn.log("scrollLeft : " + wpiRec.currentScrollLeft);
+    		wpiRec.log("scrollTop : " + wpiRec.currentScrollTop);
+    		wpiRec.log("scrollLeft : " + wpiRec.currentScrollLeft);
     		var scroll = {
  	                     startTop: wpiRec.currentScrollTop,
  	                     startLeft: wpiRec.currentScrollLeft,
@@ -124,21 +203,21 @@
 					     endTime: null,
  	                 };
     		wpiRec.scrolls.push(scroll);
-    		smt2fn.log(wpiRec.scrolls);
+    		wpiRec.log(wpiRec.scrolls);
     	} else if(eventType === "scrollStop" && !wpiRec.scrollStopped) {
-    		smt2fn.log("scrollStop");
+    		wpiRec.log("scrollStop");
     		scrollStopDelay = (scrollStopDelay === undefined) ? 0 : scrollStopDelay;
     		wpiRec.currentScrollTop = wpi_jquery(window).scrollTop();
     		wpiRec.currentScrollLeft = wpi_jquery(window).scrollLeft();
-    		smt2fn.log("scrollTop : " + wpiRec.currentScrollTop);
-    		smt2fn.log("scrollLeft : " + wpiRec.currentScrollLeft);
+    		wpiRec.log("scrollTop : " + wpiRec.currentScrollTop);
+    		wpiRec.log("scrollLeft : " + wpiRec.currentScrollLeft);
     		if(wpiRec.scrolls.length > 0){
-    			smt2fn.log("scrolls length greater than 0");
+    			wpiRec.log("scrolls length greater than 0");
     			wpiRec.scrolls[wpiRec.scrolls.length-1].endTop = wpiRec.currentScrollTop;
         		wpiRec.scrolls[wpiRec.scrolls.length-1].endLeft = wpiRec.currentScrollLeft;
         		wpiRec.scrolls[wpiRec.scrolls.length-1].endTime = wpiRec.getTime()-scrollStopDelay;
     		} 
-    		smt2fn.log(wpiRec.scrolls);
+    		wpiRec.log(wpiRec.scrolls);
     		wpiRec.scrollStopped = true;
     		
     	}    	
@@ -149,7 +228,7 @@
     {
     	var scrollTop = wpi_jquery(window).scrollTop();
 		var center = scrollTop + ((wpi_jquery(window).height())/2);
-		smt2fn.log("updatePageSections");
+		wpiRec.log("updatePageSections");
 		wpi_jquery.each(wpiRec.pageSections, function(index){
 			var sectionTop = wpiRec.pageSections[index].top;
 			var sectionBottom = wpiRec.pageSections[index].bottom;
@@ -197,14 +276,14 @@
      * Sends data in background via an XHR object (asynchronous request).
      * This function starts the tracking session.
      */   
-    initMouseData: function() 
+    /*initMouseData: function() 
     {
       wpiRec.computeAvailableSpace();
-      smt2fn.log("Inside init mouse data");
-      smt2fn.log("Window Height : " + wpi_jquery(window).height());
-      smt2fn.log("Window Width : " + wpi_jquery(window).width());
-      smt2fn.log("Doc Height : " + wpi_jquery(document).height());
-      smt2fn.log("Doc Width : " + wpi_jquery(document).width());
+      wpiRec.log("Inside init mouse data");
+      wpiRec.log("Window Height : " + wpi_jquery(window).height());
+      wpiRec.log("Window Width : " + wpi_jquery(window).width());
+      wpiRec.log("Doc Height : " + wpi_jquery(document).height());
+      wpiRec.log("Doc Width : " + wpi_jquery(document).width());
       
       // prepare data
       var requestData  = "url="        + wpiRec.url;
@@ -217,7 +296,6 @@
       requestData += "&vp="        + encodeURIComponent(JSON.stringify(wpiRec.viewPorts));
       requestData += "&time="      + wpiRec.getTime();
       requestData += "&fps="       + wpiOpt.fps;
-      requestData += "&ftu="       + wpiRec.ftu;
       //requestData += "&xcoords="   + wpiRec.coords.x;
       //requestData += "&ycoords="   + wpiRec.coords.y;
       //requestData += "&clicks="    + wpiRec.coords.p;
@@ -231,34 +309,6 @@
       requestData += "&remote="    + wpiOpt.storageServer;
       
       var gatewayUrl = wpiOpt.trackingUrl;
-      /*if ('XDomainRequest' in window && window.XDomainRequest !== null) {
-    	    // Use Microsoft XDR
-    	    var xdr = new XDomainRequest();
-    	    xdr.open("post", gatewayUrl+"?action=wpistore&isXDR=true");
-    	    xdr.onload = function () {
-    	    var responseData = xdr.responseText;
-    	    if (responseData == null || typeof (responseData) == 'undefined')
-    	    {
-    	    	responseData = data.firstChild.textContent;
-    	    }
-    	    wpiRec.setUserId(responseData);
-    	    };
-    	    xdr.onprogress = function(){};
-    	    xdr.ontimeout = function(){};
-    	    xdr.onerror = function(){};
-    	    setTimeout(function(){
-    	        xdr.send(requestData);
-    	    }, 0);
-    	} else {
-    		wpi_jquery.ajax({
-      		  type: "POST",
-      		  url:  gatewayUrl,
-      		  data: requestData,
-      		  success: function(data) {
-      			  wpiRec.setUserId(data);
-      		  }
-    		});
-    	}*/
       
       wpi_jquery.ajax({
   		  type: "GET",
@@ -271,13 +321,13 @@
       
       // clean
       //wpiRec.clearMouseData();
-    },
+    },*/
     /**
      * Sets the user ID.
      * @return void
      * @param {string} response  XHR response text
      */
-    setUserId: function(response) 
+    /*setUserId: function(response) 
     {
       wpiRec.userId = parseInt(response);
       if (wpiRec.userId > 0) {
@@ -286,7 +336,7 @@
           // once the session started, append mouse data
           wpiRec.append = setInterval(wpiRec.appendMouseData, wpiOpt.postInterval*1000);
       }      
-    },
+    },*/
     
     /** Send a request to server to cache the page. */
     /*cacheUserPage: function()
@@ -343,13 +393,13 @@
       var ms = 0;
       if(document.hasFocus()) {
     	  ms = ((new Date()).getTime() - wpiRec.timestamp) - wpiRec.blurTime; 
-    	  smt2fn.log("Document Has Focus : " + ms/1000);
+    	  wpiRec.log("Document Has Focus : " + ms/1000);
       } else {
-    	  smt2fn.log("Document Doesnt have Focus : lastBlurTimeStamp : " + wpiRec.lastBlurTimeStamp);
-    	  smt2fn.log("Document Doesnt have Focus : blurTime : " + wpiRec.blurTime);
-    	  smt2fn.log("Document Doesnt have Focus : time till last blur : " + (wpiRec.lastBlurTimeStamp - wpiRec.timestamp));
+    	  wpiRec.log("Document Doesnt have Focus : lastBlurTimeStamp : " + wpiRec.lastBlurTimeStamp);
+    	  wpiRec.log("Document Doesnt have Focus : blurTime : " + wpiRec.blurTime);
+    	  wpiRec.log("Document Doesnt have Focus : time till last blur : " + (wpiRec.lastBlurTimeStamp - wpiRec.timestamp));
     	  ms = (wpiRec.lastBlurTimeStamp - wpiRec.timestamp) - wpiRec.blurTime;
-    	  smt2fn.log("Document Doesnt have Focus : " + ms/1000);
+    	  wpiRec.log("Document Doesnt have Focus : " + ms/1000);
       }
       return ms/1000; // use seconds
     },
@@ -393,7 +443,7 @@
       }      
       
      
-      var requestData  = "uid="        + wpiRec.userId;
+      var requestData  = "rid="        + wpiOpt.recordingId;
 	      requestData += "&time="      + wpiRec.getTime();
 	      //requestData += "&pagew="     + wpiRec.page.width;
 	      //requestData += "&pageh="     + wpiRec.page.height;
@@ -423,13 +473,13 @@
       wpiRec.lastScrollsLength = wpiRec.scrolls.length;
       wpiRec.lastViewPortsLength = wpiRec.viewPorts.length;
       
-      //smt2fn.log("Inside append mouse data");
+      //wpiRec.log("Inside append mouse data");
       console.log("Inside "+$action+" append mouse data");
       // send request
       var gatewayUrl = wpiOpt.trackingUrl;
       if ('XDomainRequest' in window && window.XDomainRequest !== null) {
   	    // Use Microsoft XDR
-    	smt2fn.log('XDomainRequest');
+    	wpiRec.log('XDomainRequest');
   	    var xdr = new XDomainRequest();
   	    xdr.open("post", gatewayUrl+"?action="+$action+"&isXDR=true&_="+(new Date()).getTime());
   	    xdr.onload = function () {};
@@ -458,77 +508,6 @@
     },
     
     /** 
-     * Sends data (POST) in asynchronously mode via an XHR object.
-     * This appends the mouse data to the current tracking session.
-     * If user Id is not set, mouse data are queued.     
-     */   
-    appendExitMouseData: function() 
-    {
-      //if (!wpiRec.rec || wpiRec.paused) { return false; }
-      // prepare data
-    	
-    	if(wpiRec.elem.hovered.length === 0 
-      		  && wpiRec.elem.clicked.length === 0
-      		  && wpiRec.elem.lostFocus.length === 0 
-      		  && wpiRec.scrolls.length === wpiRec.lastScrollsLength 
-      		  && wpiRec.viewPorts.length === wpiRec.lastViewPortsLength) {
-      	  return false;
-        }
-      var requestData  = "uid="        + wpiRec.userId;
-	      requestData += "&time="      + wpiRec.getTime();
-	      //requestData += "&pagew="     + wpiRec.page.width;
-	      //requestData += "&pageh="     + wpiRec.page.height;
-	      requestData += "&xcoords="   + wpiRec.coords.x;
-	      requestData += "&ycoords="   + wpiRec.coords.y;
-	      requestData += "&clicks="    + wpiRec.coords.p;
-	      requestData += "&elhovered=" + encodeURIComponent(JSON.stringify(wpiRec.elem.hovered));
-	      requestData += "&elclicked=" + encodeURIComponent(JSON.stringify(wpiRec.elem.clicked));
-	      requestData += "&ellostfocus=" + encodeURIComponent(JSON.stringify(wpiRec.elem.lostFocus));
-	      requestData += "&scrolls=" + encodeURIComponent(JSON.stringify(wpiRec.scrolls));
-	      requestData += "&vp="        + encodeURIComponent(JSON.stringify(wpiRec.viewPorts));
-	      requestData += "&lostFocusCount=" + wpiRec.lostFocusCount;
-	      requestData += "&focusedTime=" + wpiRec.getFocusTime();
-	      requestData += "&scrollPercentage=" + wpiRec.scrollPercentage;
-	      requestData += "&pageSections=" + encodeURIComponent(JSON.stringify(wpiRec.pageSections));
-	      requestData += "&currentPageSection=" + wpiRec.currentPageSection;
-	      requestData += "&action="    + "wpiexit";
-	      requestData += "&remote="    + wpiOpt.storageServer;
-      
-	  wpiRec.lastScrollsLength = wpiRec.scrolls.length;
-      wpiRec.lastViewPortsLength = wpiRec.viewPorts.length;
-      //alert("Inside append mouse data");
-      // send request
-      var gatewayUrl = wpiOpt.trackingUrl;
-      if ('XDomainRequest' in window && window.XDomainRequest !== null) {
-  	    // Use Microsoft XDR
-  	    var xdr = new XDomainRequest();
-  	    xdr.open("post", gatewayUrl+"?action=wpiexit&isXDR=true&_="+(new Date()).getTime());
-  	    xdr.onload = function () {};
-  	    xdr.onprogress = function(){};
-  	    xdr.ontimeout = function(){};
-  	    xdr.onerror = function(){};
-  	    setTimeout(function(){
-  	        xdr.send(requestData);
-  	    }, 0);
-	} else {
-		wpi_jquery.ajax({
-			  type: "POST",
-			  url:  gatewayUrl+"?action=wpiexit&_="+(new Date()).getTime(),
-			  cache: false,
-			  data: requestData
-		});
-	}
-      /*
-      wpi_jquery.ajax({
-		  type: "POST",
-		  url:  gatewayUrl,
-		  data: requestData
-	});*/
-      // clean
-      wpiRec.clearMouseData();
-    },
-    
-    /** 
      * Clears mouse data from queue.        
      */
     clearMouseData: function()
@@ -541,30 +520,12 @@
       wpiRec.elem.lostFocus = [];
     },
     /** 
-     * Finds hovered or clicked DOM element.     
-     */
-    findElement: function(e)
-    {
-      if (!e) { e = window.event; }
-      // bind function to widget tracking object
-      wpiRec.findDOMElement(e, function(name){
-        if (e.type == "mousedown" || e.type == "touchstart") {
-          wpiRec.elem.clicked.push(name);
-          //smt2fn.log(JSON.stringify(wpiRec.elem.clicked));
-        } else if (e.type == "mousemove" || e.type == "touchmove") {
-          wpiRec.elem.hovered.push(name);
-          //smt2fn.log(JSON.stringify(wpiRec.elem.hovered));
-        }
-      });
-    },
-    /** 
      * Computes page size.
      */
     computeAvailableSpace: function()
     {
-      var doc = aux.getPageSize();
-      wpiRec.page.width  = doc.width;
-      wpiRec.page.height = doc.height;
+      wpiRec.page.width  = (wpi_jquery(window).width() > wpi_jquery(document).width()) ? wpi_jquery(window).width() : wpi_jquery(document).width();;
+      wpiRec.page.height = (wpi_jquery(window).height() > wpi_jquery(document).height()) ? wpi_jquery(window).height() : wpi_jquery(document).height();;
     },
     
     adjustPageSections: function()
@@ -660,7 +621,7 @@
     		   			wpiRec.pageSections.push(pageSection);			  								
     		   	            
     		   		});
-    		   		smt2fn.log(wpiRec.pageSections);
+    		   		wpiRec.log(wpiRec.pageSections);
     		   		wpiRec.updatePageSections();
     	
     	}
@@ -668,27 +629,19 @@
 		
     },
     
-    /**
-     * Finds the first available element with an ID.
-     * Traversing count starts from current element to node parents.
-     * This function should be registered on mouse move/down events.
-     * @return {object}            DOM node element
-     * @param {object}   e         DOM event
-     * @param {function} callback  response function
+    /** 
+     * Finds hovered or clicked DOM element.     
      */
-    findDOMElement: function(e,callback)
+    findElement: function(e)
     {
       if (!e) { e = window.event; }
-      // find the element
-      //var t = e.target || e.srcElement;
-      // defeat Safari bug
-      //if (t.nodeType == 3) { t = t.parentNode; }
-      // if the element has no ID, travese the DOM in reverse (find its parents)
-      /*var check = (t.id) ? this.getID(t) : this.getParents(t);
-      if (check) {
-        callback(check);
-      }*/
-      callback(this.getMousePositionDetails(e));
+      if (e.type == "click" || e.type == "touchstart") {
+        wpiRec.elem.clicked.push(this.getMousePositionDetails(e));
+        //wpiRec.log(JSON.stringify(wpiRec.elem.clicked));
+      } else if (e.type == "mousemove" || e.type == "touchmove") {
+        wpiRec.elem.hovered.push(this.getMousePositionDetails(e));
+        //wpiRec.log(JSON.stringify(wpiRec.elem.hovered));
+      }
     },
     
     getMousePositionDetails: function(event) {
@@ -704,16 +657,16 @@
     	if (pageX < 0 || !pageX) pageX = 0;
     	if (pageY < 0 || !pageY) pageY = 0;
     	pageX = Math.round(pageX);
-    	//smt2fn.log(pageX);
+    	//wpiRec.log(pageX);
     	pageY = Math.round(pageY);
-    	//smt2fn.log(pageY);
+    	//wpiRec.log(pageY);
     	var target = event.target || event.srcElement;
     	if (target.nodeType == 3) { target = target.parentNode; }
-    	//smt2fn.log(target);
+    	//wpiRec.log(target);
     	var elementX = Math.round(wpi_jquery(target).offset().left);
-    	//smt2fn.log(elementX);
+    	//wpiRec.log(elementX);
     	var elementY = Math.round(wpi_jquery(target).offset().top);
-    	//smt2fn.log(elementY);
+    	//wpiRec.log(elementY);
         var mousePosition = {
             cp: wpi_jquery(target).getcssPath(),//csspath
             t: wpiRec.getTime(),
@@ -728,9 +681,9 @@
             h: wpi_jquery(target).height()//h
         };
         
-        //smt2fn.log(wpi_jquery(target).getcssPath());
-        //smt2fn.log(wpi_jquery(target).width());
-        //smt2fn.log(wpi_jquery(target).height());
+        //wpiRec.log(wpi_jquery(target).getcssPath());
+        //wpiRec.log(wpi_jquery(target).width());
+        //wpiRec.log(wpi_jquery(target).height());
         return mousePosition;
     },
     
@@ -739,100 +692,100 @@
      * Assigns events and performs other initialization routines.
      */
     init: function() 
-    {
-    	// this is the best cross-browser method to store tracking data successfully
-    	setTimeout(wpiRec.initMouseData, 1000);
-	    wpiRec.timestamp = wpiRec.lastBlurTimeStamp = wpiRec.lastFocusTimeStamp  = (new Date()).getTime();
-	    wpiRec.computeAvailableSpace();
-	    wpiRec.captureViewPorts();
-        // get this location BEFORE making the AJAX request
-        wpiRec.url = escape(window.location.href);
-        var enableHandler = true;
-	    setInterval(function(){
-	        enableHandler = true;
-	    }, 50);
-      // reuse these functions for mobile clients
-      var onMove = function(e) {
-        if (e.touches) { e = e.touches[0] || e.targetTouches[0]; }
-        wpiRec.getMousePos(e);
-        if(enableHandler) {
-        	wpiRec.findElement(e); // elements hovered
-        	enableHandler = false;
-        }        
-      };
-      var onPress = function(e) {
-        if (e.touches) { e = e.touches[0] || e.targetTouches[0]; }      
-        wpiRec.setClick();
-        if(enableHandler) {
-        	wpiRec.findElement(e); // elements clicked
-        	enableHandler = false;
-        }
-      };
-      /*aux.addEvent(document, "mousedown",  onPress);
-      aux.addEvent(document, "mousemove",  onMove);
-      aux.addEvent(document, "mouseup",    wpiRec.releaseClick);      
-      aux.addEvent(document, "touchstart", onPress);
-      aux.addEvent(document, "touchmove",  onMove);
-      aux.addEvent(document, "touchend",   wpiRec.releaseClick);
-      aux.addEvent(window,   "resize",     wpiRec.captureViewPorts);*/
+    {      
+      if(wpiOpt.recordingId>0) {
+	    	  wpiRec.timestamp = wpiRec.lastBlurTimeStamp = wpiRec.lastFocusTimeStamp  = (new Date()).getTime();
+	  	    wpiRec.computeAvailableSpace();
+	  	    wpiRec.captureViewPorts();
+	          // get this location BEFORE making the AJAX request
+	          wpiRec.url = escape(window.location.href);
+	          var enableHandler = true;
+	  	    setInterval(function(){
+	  	        enableHandler = true;
+	  	    }, 50);
+	        // reuse these functions for mobile clients
+	        var onMove = function(e) {
+	          if (e.touches) { e = e.touches[0] || e.targetTouches[0]; }
+	          if(enableHandler) {
+	          	wpiRec.findElement(e); // elements hovered
+	          	enableHandler = false;
+	          }        
+	        };
+	        var onPress = function(e) {
+	          if (e.touches) { e = e.touches[0] || e.targetTouches[0]; }      
+	          wpiRec.findElement(e); // elements clicked
+	        };
+	        /*aux.addEvent(document, "mousedown",  onPress);
+	        aux.addEvent(document, "mousemove",  onMove);
+	        aux.addEvent(document, "mouseup",    wpiRec.releaseClick);      
+	        aux.addEvent(document, "touchstart", onPress);
+	        aux.addEvent(document, "touchmove",  onMove);
+	        aux.addEvent(document, "touchend",   wpiRec.releaseClick);
+	        aux.addEvent(window,   "resize",     wpiRec.captureViewPorts);*/
+	        
+	        wpi_jquery(window).on("click", onPress);
+	        wpi_jquery(window).on("mousemove", onMove);
+	        wpi_jquery(window).on("touchstart", onPress);
+	        wpi_jquery(window).on("touchmove", onMove);
+	        //wpi_jquery(window).on("touchend", onPress);
+	        wpi_jquery(window).on("resize", wpiRec.captureViewPorts);
+	
+	        wpiRec.initPageSections();
+	        wpiRec.currentScrollTop = wpi_jquery(window).scrollTop();
+	  	  wpiRec.currentScrollLeft = wpi_jquery(window).scrollLeft();
+	        wpi_jquery(window).load(function() {
+	      	  wpiRec.adjustPageSections();
+	        });
+	        
+	        wpi_jquery(window).focus(function() {
+	      		var thisFocusTimeStamp = new Date();
+	      		wpiRec.inFocus = true;
+	      		wpiRec.log("On Focus Timestamp: " + +thisFocusTimeStamp);
+	      		wpiRec.log("Previous Blur Time: " + wpiRec.blurTime);
+	      		//To avoid the effect of double fires on focus event in chrome
+	      		var thisFocusDifference = thisFocusTimeStamp - wpiRec.lastFocusTimeStamp;
+	      		wpiRec.log("thisFocusDifference: " + thisFocusDifference);
+	      		if(thisFocusDifference > 100) {
+	      			wpiRec.log("Will Add to blur time");
+	      			wpiRec.log("This time window was blurred for: " + (new Date() - wpiRec.lastBlurTimeStamp));
+	      			wpiRec.blurTime += (new Date() - wpiRec.lastBlurTimeStamp);
+	      		}    
+	      		wpiRec.log("After Blur Time: " + wpiRec.blurTime);
+	      	    wpiRec.lastFocusTimeStamp = new Date();
+	      	});
+	
+	        wpi_jquery(window).blur(function() {    		
+	      		wpiRec.lastBlurTimeStamp = +new Date();
+	      		wpiRec.inFocus = false;
+	      		wpiRec.lostFocusCount += 1;
+	      		wpiRec.elem.lostFocus.push(wpiRec.elem.hovered[wpiRec.elem.hovered.length - 1]);
+	      		var currentPageSectionIndex = wpiRec.find_in_array(wpiRec.pageSections,"sectionName",wpiRec.currentPageSection);
+	      		if(currentPageSectionIndex != false) {
+	      			wpiRec.pageSections[currentPageSectionIndex].lostFocusCount += 1;
+	      		}	
+	      		
+	      		wpiRec.log("On Blur Timestamp: " + wpiRec.lastBlurTimeStamp);
+	      	});
+	        
+	        
+	  	  wpi_jquery(window).scroll(function() {
+	  		  wpiRec.recordScrolls("scrollStart");		
+	  		});
+	  	  
+	  	  wpi_jquery(window).scrollStopped(500,function(){
+	  		  wpiRec.recordScrolls("scrollStop",500/1000);
+	  		  if(wpiRec.pageSections.length>0) {
+	  			  wpiRec.updatePageSections();
+	  		  } 
+	  		});
+	      wpi_jquery(window).on("beforeunload", function() { wpiRec.appendMouseData('exit'); });
+	      wpi_jquery(window).on("unload", function() { wpiRec.appendMouseData('exit'); })
+    	  setTimeout(function() { wpiRec.appendMouseData('cache'); }, 10);
+          // once the session started, append mouse data
+	      wpiRec.log(wpiOpt.postInterval);
+          wpiRec.append = setInterval(wpiRec.appendMouseData, wpiOpt.postInterval*1000);
+      }
       
-      wpi_jquery(window).on("click", onPress);
-      wpi_jquery(window).on("mousemove", onMove);
-      wpi_jquery(window).on("touchstart", onPress);
-      wpi_jquery(window).on("touchmove", onMove);
-      //wpi_jquery(window).on("touchend", onPress);
-      wpi_jquery(window).on("resize", wpiRec.captureViewPorts);
-
-      wpiRec.initPageSections();
-      wpiRec.currentScrollTop = wpi_jquery(window).scrollTop();
-	  wpiRec.currentScrollLeft = wpi_jquery(window).scrollLeft();
-      wpi_jquery(window).load(function() {
-    	  wpiRec.adjustPageSections();
-      });
-      
-      wpi_jquery(window).focus(function() {
-    		var thisFocusTimeStamp = new Date();
-    		wpiRec.inFocus = true;
-    		smt2fn.log("On Focus Timestamp: " + +thisFocusTimeStamp);
-    		smt2fn.log("Previous Blur Time: " + wpiRec.blurTime);
-    		//To avoid the effect of double fires on focus event in chrome
-    		var thisFocusDifference = thisFocusTimeStamp - wpiRec.lastFocusTimeStamp;
-    		smt2fn.log("thisFocusDifference: " + thisFocusDifference);
-    		if(thisFocusDifference > 100) {
-    			smt2fn.log("Will Add to blur time");
-    			smt2fn.log("This time window was blurred for: " + (new Date() - wpiRec.lastBlurTimeStamp));
-    			wpiRec.blurTime += (new Date() - wpiRec.lastBlurTimeStamp);
-    		}    
-    		smt2fn.log("After Blur Time: " + wpiRec.blurTime);
-    	    wpiRec.lastFocusTimeStamp = new Date();
-    	});
-
-      wpi_jquery(window).blur(function() {    		
-    		wpiRec.lastBlurTimeStamp = +new Date();
-    		wpiRec.inFocus = false;
-    		wpiRec.lostFocusCount += 1;
-    		wpiRec.elem.lostFocus.push(wpiRec.elem.hovered[wpiRec.elem.hovered.length - 1]);
-    		var currentPageSectionIndex = wpiRec.find_in_array(wpiRec.pageSections,"sectionName",wpiRec.currentPageSection);
-    		if(currentPageSectionIndex != false) {
-    			wpiRec.pageSections[currentPageSectionIndex].lostFocusCount += 1;
-    		}	
-    		
-    		smt2fn.log("On Blur Timestamp: " + wpiRec.lastBlurTimeStamp);
-    	});
-      
-      
-	  wpi_jquery(window).scroll(function() {
-		  wpiRec.recordScrolls("scrollStart");		
-		});
-	  
-	  wpi_jquery(window).scrollStopped(500,function(){
-		  wpiRec.recordScrolls("scrollStop",500/1000);
-		  if(wpiRec.pageSections.length>0) {
-			  wpiRec.updatePageSections();
-		  } 
-		});
-      wpi_jquery(window).on("beforeunload", function() { wpiRec.appendMouseData('exit'); });
-      wpi_jquery(window).on("unload", function() { wpiRec.appendMouseData('exit'); })
     }
   };
   
@@ -843,7 +796,7 @@
     // to begin recording, the tracking script must be called explicitly
     record: function(opts) {
       // load custom recording options, if any
-      if (typeof opts !== 'undefined') { aux.overrideTrackingOptions(wpiOpt, opts); }
+      if (typeof opts !== 'undefined') { wpiRec.overrideTrackingOptions(wpiOpt, opts); }
       wpiRec.init();
     } // end record
   }; // end expose

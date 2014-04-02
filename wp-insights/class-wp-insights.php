@@ -88,7 +88,7 @@ class WP_Insights {
 	
 	protected static $default_max_concurrent_recordings_option_value = 5;
 	
-	protected static $default_recording_interval = 7; //in seconds
+	protected static $default_recording_interval = 10; //in seconds
 
 	/**
 	 * Initialize the plugin by setting localization, filters, and administration functions.
@@ -163,6 +163,7 @@ class WP_Insights {
 			session_start();
 		}
 	}
+
 	
 	public function add_wpi_shortcode_button() {
 		
@@ -293,6 +294,13 @@ class WP_Insights {
 			//error_log("Inside matches ON");
 			if(!has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
 				//error_log("Inside matches ON and has NO Action");
+				if(!is_admin()) {
+					$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
+					$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
+					$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
+					$this->WP_Insights_Recorder_Instance->setBrowscapCacheDir(self::$browscap_cache_dir);
+					$this->WP_Insights_Recorder_Instance->init_recording();
+				}
 				add_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) );
 				//error_log(has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) ));
 			}
@@ -911,10 +919,11 @@ class WP_Insights {
 				  			  {
 				  				jQuery.getScript( "<?php echo $smt_record_js_url.'?v='.self::VERSION?>", function() 
 				  		  			  {
-					  					smt2.record({
+					  					wpi.record({
 										      recTime: 3000,
 										      trackingUrl: "<?php echo $smt_tracking_url?>",
-										      postInterval: <?php echo self::$default_recording_interval;?>
+										      postInterval: <?php echo self::$default_recording_interval;?>,
+											  recordingId: <?php echo $this->WP_Insights_Recorder_Instance->get_recording_id();?>
 										    });
 	
 				  			  			}
@@ -928,13 +937,13 @@ class WP_Insights {
 					//]]>
 			</script>
 		<?php }else { 
-						if(!isset($_COOKIE['smt-id'])) {
+						if(!isset($_COOKIE['wpi-visitor-id'])) {
 							$recordsTable = self::$WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
 							$concurrent_recording_query = "SELECT COUNT( * ) AS clients, SUM( client_connections ) AS total_connections
 															FROM (
 															SELECT COUNT( * ) AS client_connections
 															FROM $recordsTable
-															WHERE UNIX_TIMESTAMP( CURRENT_TIMESTAMP( ) ) < ( UNIX_TIMESTAMP( sess_date ) + sess_time + ".(self::$default_recording_interval * 3)." )
+															WHERE UNIX_TIMESTAMP( CURRENT_TIMESTAMP( ) ) < ( UNIX_TIMESTAMP( sess_date ) + sess_time + ".(self::$default_recording_interval * 4)." )
 															GROUP BY client_id	) AS c";
 							$concurrent_recording_details = self::$WP_Insights_DB_Utils_Instance->db_query($concurrent_recording_query);
 							$concurrent_recordings = $concurrent_recording_details[0]['clients'];
@@ -947,7 +956,7 @@ class WP_Insights {
 						
 						$max_concurrent_recordings = get_option(self::$max_concurrent_recordings_option_name,self::$default_max_concurrent_recordings_option_value);
 												
-						if(isset($_COOKIE['smt-id']) || $max_concurrent_recordings === 0 || ($concurrent_recordings < $max_concurrent_recordings)) 
+						if(isset($_COOKIE['wpi-visitor-id']) || $max_concurrent_recordings === 0 || ($concurrent_recordings < $max_concurrent_recordings)) 
 						{?>
 						<!-- Powered by WP Insights version <?php echo self::VERSION?>-->
 						  <script id='wpi-trigger-script' type="text/javascript">
@@ -1001,10 +1010,11 @@ class WP_Insights {
 														            $this.data('scrollTimeout', setTimeout(callback,delay,self));
 														        });
 														    };
-										  					smt2.record({
+										  					wpi.record({
 															      recTime: 3000,
 															      trackingUrl: "<?php echo $smt_tracking_url;?>",
-															      postInterval: <?php echo self::$default_recording_interval;?>
+															      postInterval: <?php echo self::$default_recording_interval;?>,
+															      recordingId: <?php echo $this->WP_Insights_Recorder_Instance->get_recording_id();?>
 															    });
 						
 									  			  			}
