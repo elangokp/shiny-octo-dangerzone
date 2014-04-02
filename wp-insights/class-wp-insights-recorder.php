@@ -443,7 +443,7 @@ GROUP BY client_id
 		
 		WP_Insights_Utils::createDirectory($absoluteDirPath);
 		// "March 10th 2006 @ 15h 16m 08s" should create the log file "20060310-151608.html"
-		$htmlfile = $_POST['uid']."-".$hisdate.$ext;
+		$htmlfile = $_POST['rid']."-".$hisdate.$ext;
 		
 		$absolutefilepath = $absoluteDirPath.$htmlfile;
 		$relativefilepath = $relativeDirpath.$htmlfile;

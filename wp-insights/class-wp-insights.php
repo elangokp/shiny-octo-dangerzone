@@ -270,6 +270,8 @@ class WP_Insights {
 		//error_log("Inside Uninstall");
 		//$WP_Insights_DB_Utils_Instance = WP_Insights_DB_Utils::get_instance();
 		//$WP_Insights_DB_Utils_Instance->setWpdb(self::get_instance()->wp_insights_wpdb);
+		delete_option(self::$recording_option_name);
+		delete_option(self::$max_concurrent_recordings_option_name);
 		self::$WP_Insights_DB_Utils_Instance->wpinsights_db_uninstall();
 		WP_Insights_Utils::deleteDirectory(self::$cache_dir);
 	}

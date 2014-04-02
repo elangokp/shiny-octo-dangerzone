@@ -440,6 +440,8 @@ class WP_Insights_Page_Stats_List_Table extends WPI_WP_List_Table {
         
         $recordsTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
         
+        $pagesTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_PAGES;
+        
         $browsersTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_BROWSERS;
         
         $osTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_OS;
@@ -449,9 +451,7 @@ class WP_Insights_Page_Stats_List_Table extends WPI_WP_List_Table {
         $fromDate = $this->WP_Insights_Filters_Instance->getFromDate();
         $tillDate = $this->WP_Insights_Filters_Instance->getTillDate();
         
-        $total_items = $wpdb->get_var("select count(DISTINCT cleansed_url) from ".$recordsTable." AS records  WHERE 
-								        records.sess_date >= '$fromDate'
-								        AND records.sess_date <= '$tillDate 23:59:59'" );
+        $total_items = $wpdb->get_var("select MAX(id) from ".$pagesTable." AS pages" );
         
         /**
          * Instead of querying a database, we're going to fetch the example data
@@ -476,8 +476,8 @@ class WP_Insights_Page_Stats_List_Table extends WPI_WP_List_Table {
         		$where." GROUP BY ".$cacheTable.".url"." ORDER BY visits DESC, ".$cacheTable.".url LIMIT ".($current_page-1)*$per_page.",".$per_page
         ); */
 
-		$sql = "SELECT records.cleansed_url as url, 
-    			max(records.id) as latest_record_id,
+		$sql = "SELECT pages.url as url, 
+    			pages.id as page_id,
     			COUNT(records.id ) AS visits, 
     			ROUND((COUNT(records1.id)/COUNT(records.id)*100),2) AS attention,
 				ROUND((COUNT(records2.id)/COUNT(records.id)*100),2) AS interest,
@@ -487,7 +487,8 @@ class WP_Insights_Page_Stats_List_Table extends WPI_WP_List_Table {
     			SEC_TO_TIME(ROUND(STD( records.sess_time ))) AS std_browsing_time, 
 			    SEC_TO_TIME(ROUND(MIN( records.sess_time ))) AS min_browsing_time, 
 			    SEC_TO_TIME(ROUND(MAX( records.sess_time ))) AS max_browsing_time
-				FROM $recordsTable AS records
+				FROM $pagesTable AS pages
+				LEFT OUTER JOIN $recordsTable AS records ON records.page_id = pages.id
 				LEFT OUTER JOIN $recordsTable AS records1 ON records.id = records1.id and records1.focus_time>60
 				LEFT OUTER JOIN $recordsTable AS records2 ON records.id = records2.id and records2.focus_time>120
 				LEFT OUTER JOIN $recordsTable AS records3 ON records.id = records3.id and records3.focus_time>300
@@ -495,8 +496,8 @@ class WP_Insights_Page_Stats_List_Table extends WPI_WP_List_Table {
 				WHERE
 		        records.sess_date >= '$fromDate'
 		        AND records.sess_date <= '$tillDate 23:59:59'
-				GROUP BY records.cleansed_url
-				ORDER BY visits desc 
+				GROUP BY pages.id
+				ORDER BY visits desc
         		LIMIT ".($current_page-1)*$per_page.",".$per_page;
 		
 		$data = $WP_Insights_DB_Utils_Instance->db_query($sql);
