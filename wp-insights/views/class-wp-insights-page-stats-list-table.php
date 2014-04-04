@@ -258,7 +258,7 @@ class WP_Insights_Page_Stats_List_Table extends WPI_WP_List_Table {
     			'<a id="wpi-cache-id-'.$item['cache_id'].'-stats-link" href="#" class="button wpi-cache-stats-link"  data-val="'.$item['cache_id'].'" data-status="show" title="Show Versions">Show Versions</a>'.PHP_EOL
     	); */
     	$views_url = plugins_url('/../views/', __FILE__);
-    	$displayId = 'lrid='.$item['latest_record_id'];
+    	$displayId = 'pid='.$item['page_id'];
     	$tableColumn = '<a id="detailedStats" href="admin.php?page='.$_REQUEST['page'].'&'.$displayId.'" class="button" title="Play">Detailed Stats</a>'.PHP_EOL;
     	return $tableColumn;
     }

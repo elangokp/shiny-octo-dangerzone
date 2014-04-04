@@ -8,7 +8,7 @@ class WP_Insights_Detailed_Page_Stats {
 	
 	protected $url = null;
 	
-	protected $lrid = null;
+	protected $pid = null;
 	
 	protected $pageViews = null;
 	
@@ -40,9 +40,9 @@ class WP_Insights_Detailed_Page_Stats {
 	
 	protected $WP_Insights_Filters_Instance = null;
 	
-	public function __construct($lrid) {
+	public function __construct($pid) {
 		global $wpdb;
-		$this->lrid = $lrid;
+		$this->pid = $pid;
 		$this->wp_insights_db_utils = WP_Insights_DB_Utils::get_instance();
 		$this->wp_insights_db_utils->setWpdb($wpdb);
 		error_log("Before calling WP_Insights_Filters constructors");
@@ -68,8 +68,8 @@ class WP_Insights_Detailed_Page_Stats {
 		$fromDate = $this->WP_Insights_Filters_Instance->getFromDate();
 		$tillDate = $this->WP_Insights_Filters_Instance->getTillDate();
 		
-		$sql = "SELECT records.cleansed_url as url, 
-    			max(records.id) as latest_record_id,
+		$sql = "SELECT pages.url as url, 
+    			pages.id as page_id,
     			COUNT(records.id ) AS visits, 
     			ROUND((COUNT(records1.id)/COUNT(records.id)*100),2) AS attention,
 				ROUND((COUNT(records2.id)/COUNT(records.id)*100),2) AS interest,
@@ -83,13 +83,13 @@ class WP_Insights_Detailed_Page_Stats {
     			SEC_TO_TIME(ROUND(STD( records.focus_time ))) AS std_focus_time, 
 			    SEC_TO_TIME(ROUND(MIN( records.focus_time ))) AS min_focus_time, 
 			    SEC_TO_TIME(ROUND(MAX( records.focus_time ))) AS max_focus_time
-				FROM $this->recordsTable AS records
-				INNER JOIN $this->recordsTable AS records0 ON records0.cleansed_url = records.cleansed_url
+				FROM $pagesTable AS pages
+				LEFT OUTER JOIN $recordsTable AS records ON records.page_id = pages.id
 				LEFT OUTER JOIN $this->recordsTable AS records1 ON records.id = records1.id and records1.focus_time>60
 				LEFT OUTER JOIN $this->recordsTable AS records2 ON records.id = records2.id and records2.focus_time>120
 				LEFT OUTER JOIN $this->recordsTable AS records3 ON records.id = records3.id and records3.focus_time>300
 				LEFT OUTER JOIN $this->recordsTable AS records4 ON records.id = records4.id and records4.focus_time>600
-				where records0.id=$this->lrid
+				where pages.id=$this->pid
 				AND records.sess_date >= '$fromDate'
         		AND records.sess_date <= '$tillDate 23:59:59'";
 				

@@ -11,12 +11,12 @@
  * @link      http://www.cybermint.com
  * @copyright 2013 CyberMint
  */
-if(isset($_GET['lrid'])) {
-	$lrid = $_GET['lrid'];
+if(isset($_GET['pid'])) {
+	$pid = $_GET['pid'];
 	$views_url = plugins_url('/../views/', __FILE__);
 	require_once(plugin_dir_path(__FILE__).'class-wp-insights-detailed-page-stats.php');
 	require_once(plugin_dir_path(__FILE__).'class-wp-insights-page-ps-stats-list-table.php');
-	$WP_Insights_Detailed_Page_Stats_Instance = new WP_Insights_Detailed_Page_Stats($lrid);
+	$WP_Insights_Detailed_Page_Stats_Instance = new WP_Insights_Detailed_Page_Stats($pid);
 	$fromDate = $WP_Insights_Detailed_Page_Stats_Instance->getFilters()->getFromDate();
 	$tillDate = $WP_Insights_Detailed_Page_Stats_Instance->getFilters()->getTillDate();
 	//$WP_Insights_Detailed_Page_Stats_Instance->process_stats();
