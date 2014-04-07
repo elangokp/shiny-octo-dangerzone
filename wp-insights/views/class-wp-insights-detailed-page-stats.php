@@ -34,6 +34,8 @@ class WP_Insights_Detailed_Page_Stats {
 	
 	protected $recordsTable = null;
 	
+	protected $pagesTable = null;
+	
 	protected $browsersTable = null;
 	
 	protected $cacheTable = null;
@@ -49,6 +51,8 @@ class WP_Insights_Detailed_Page_Stats {
 		$this->WP_Insights_Filters_Instance = new WP_Insights_Filters();
 		
 		$this->recordsTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
+		
+		$this->pagesTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_PAGES;
 		
 		$this->browsersTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_BROWSERS;
 		
@@ -83,8 +87,8 @@ class WP_Insights_Detailed_Page_Stats {
     			SEC_TO_TIME(ROUND(STD( records.focus_time ))) AS std_focus_time, 
 			    SEC_TO_TIME(ROUND(MIN( records.focus_time ))) AS min_focus_time, 
 			    SEC_TO_TIME(ROUND(MAX( records.focus_time ))) AS max_focus_time
-				FROM $pagesTable AS pages
-				LEFT OUTER JOIN $recordsTable AS records ON records.page_id = pages.id
+				FROM $this->pagesTable AS pages
+				LEFT OUTER JOIN $this->recordsTable AS records ON records.page_id = pages.id
 				LEFT OUTER JOIN $this->recordsTable AS records1 ON records.id = records1.id and records1.focus_time>60
 				LEFT OUTER JOIN $this->recordsTable AS records2 ON records.id = records2.id and records2.focus_time>120
 				LEFT OUTER JOIN $this->recordsTable AS records3 ON records.id = records3.id and records3.focus_time>300

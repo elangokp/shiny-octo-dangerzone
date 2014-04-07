@@ -216,14 +216,14 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
     function column_last_visit($item){
     	 
     	return sprintf('%1$s',
-    			WP_Insights_Utils::timeago($item['unix_sess_date'])
+    			WP_Insights_Utils::timeago($item['unix_last_visit_time'])
     	);
     }
     
     function column_display_date($item){
     	
     	return sprintf('%1$s',
-    			$item['sess_date']
+    			$item['last_visit_time']
     	);
     }
     
@@ -263,9 +263,9 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
     }
     
     function full_row_actions($item) {?>
-	     <div id="wpi-client-id-<?php  echo $item['client_id']?>-recordings" class="wpi-client-recordings" style="display:none">
+	     <div id="wpi-client-id-<?php  echo $item['id']?>-recordings" class="wpi-client-recordings" style="display:none">
 	    <?php
-	    $WP_Insights_Client_Recording_List_Table_Instance = new WP_Insights_Client_Recording_List_Table($item['client_id']);
+	    $WP_Insights_Client_Recording_List_Table_Instance = new WP_Insights_Client_Recording_List_Table($item['id']);
 	    $WP_Insights_Client_Recording_List_Table_Instance->prepare_items();
 	    $WP_Insights_Client_Recording_List_Table_Instance->display();
 	    ?>
@@ -276,7 +276,7 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
     function column_actions($item){
     
     	return sprintf('%1$s',
-    	 '<a id="wpi-client-id-'.$item['client_id'].'-recordings-link" href="javascript:void(0)" class="button wpi-client-recordings-link"  data-val="'.$item['client_id'].'" data-status="show" title="Show Recordings">Show Recordings</a>'.PHP_EOL
+    	 '<a id="wpi-client-id-'.$item['id'].'-recordings-link" href="javascript:void(0)" class="button wpi-client-recordings-link"  data-val="'.$item['id'].'" data-status="show" title="Show Recordings">Show Recordings</a>'.PHP_EOL
     	);
     }
     
@@ -320,8 +320,8 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         
         $columns['last_visit'] =  'Last Visit Before';
         $columns['display_date'] =  'Last Visited Time';
-        $columns['browsing_time'] =  'Browser Open Time';
-        $columns['focused_time'] =  'Focused Browsing Time';
+        //$columns['browsing_time'] =  'Browser Open Time';
+        //$columns['focused_time'] =  'Focused Browsing Time';
         $columns['actions'] =  'Actions';
         
         return $columns;
@@ -458,6 +458,8 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         
         $WP_Insights_DB_Utils_Instance->setWpdb($wpdb);
         
+        $visitorsTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_VISITORS;
+        
         $recordsTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
         
         $browsersTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_BROWSERS;
@@ -469,9 +471,9 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         $fromDate = $this->WP_Insights_Filters_Instance->getFromDate();
         $tillDate = $this->WP_Insights_Filters_Instance->getTillDate();
         
-        $total_items = $wpdb->get_var("select count(distinct records.client_id) from ".$recordsTable." AS records  WHERE 
-								        records.sess_date >= '$fromDate'
-								        AND records.sess_date <= '$tillDate 23:59:59'");
+        $total_items = $wpdb->get_var("select count(1) from ".$visitorsTable." AS visitors  WHERE 
+								        visitors.last_visit_time >= '$fromDate'
+								        AND visitors.last_visit_time <= '$tillDate 23:59:59'");
         
         /**
          * Instead of querying a database, we're going to fetch the example data
@@ -499,7 +501,7 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         ); */
 
 		      
-        $sql = "SELECT 
+       /* $sql = "SELECT 
         records.client_id,
         MAX(records.id) as id,
         records.os_id,
@@ -523,7 +525,23 @@ class WP_Insights_Recordings_List_Table extends WPI_WP_List_Table {
         AND records.sess_date <= '$tillDate 23:59:59'
         GROUP BY records.client_id
         ORDER BY id desc
-        LIMIT ".($current_page-1)*$per_page.",".$per_page;                
+        LIMIT ".($current_page-1)*$per_page.",".$per_page;    */
+
+        $sql = "select
+        visitors.id,
+        visitors.ip,
+        visitors.last_visit_time as last_visit_time,
+        UNIX_TIMESTAMP(visitors.last_visit_time) as unix_last_visit_time,
+        browsers.name as browser_name,
+        oses.name as os_name
+        FROM $visitorsTable as visitors
+        LEFT OUTER JOIN $browsersTable as browsers ON visitors.browser_id = browsers.id
+        LEFT OUTER JOIN $osTable as oses ON visitors.os_id = oses.id
+        WHERE
+        visitors.last_visit_time >= '$fromDate'
+        AND visitors.last_visit_time <= '$tillDate 23:59:59'
+        ORDER BY visitors.last_visit_time desc
+        LIMIT ".($current_page-1)*$per_page.",".$per_page;
         
         $data = $WP_Insights_DB_Utils_Instance->db_query($sql);
         /**

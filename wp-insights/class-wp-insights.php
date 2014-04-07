@@ -296,7 +296,7 @@ class WP_Insights {
 			//error_log("Inside matches ON");
 			if(!has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
 				//error_log("Inside matches ON and has NO Action");
-				if(!is_admin()) {
+				if(WP_Insights_Utils::should_wpi_record()) {
 					$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
 					$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
 					$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
@@ -769,13 +769,13 @@ class WP_Insights {
 	
 	public function get_mouse_event_data() {
 		error_log("Inside get_mouse_event_data");
-		$lrid = isset($_GET['lrid'])?$_GET['lrid']:null;
+		$pid = isset($_GET['pid'])?$_GET['pid']:null;
 		$datatype = isset($_GET['dt'])?$_GET['dt']:null;
 		$fromDate = isset($_GET['fd'])?$_GET['fd']:null;
 		$tillDate = isset($_GET['td'])?$_GET['td']:null;
 		$currentPageNumber = isset($_GET['cpn'])?$_GET['cpn']:null;
 		$recordsPerPage = isset($_GET['rpp'])?$_GET['rpp']:null;
-		$WP_Insights_Event_Data_Instance = new WP_Insights_Event_Data($lrid,$datatype,$fromDate,$tillDate,$currentPageNumber,$recordsPerPage);
+		$WP_Insights_Event_Data_Instance = new WP_Insights_Event_Data($pid,$datatype,$fromDate,$tillDate,$currentPageNumber,$recordsPerPage);
 		echo $WP_Insights_Event_Data_Instance->getMouseEventData();
 		die();
 	}
@@ -859,8 +859,7 @@ class WP_Insights {
 					var addressBarURL = top.location.href;
 					var isFullyLoaded = false;
 					
-					if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay") < 0 
-						&& addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-heat.php") < 0) {
+					if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views") < 0) {
 			  			var wpi_jquery_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
 			  			var jQuery_UI_1_10_3_url = "//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js";
 	
@@ -925,7 +924,8 @@ class WP_Insights {
 										      recTime: 3000,
 										      trackingUrl: "<?php echo $smt_tracking_url?>",
 										      postInterval: <?php echo self::$default_recording_interval;?>,
-											  recordingId: <?php echo $this->WP_Insights_Recorder_Instance->get_recording_id();?>
+											  recordingId: <?php echo $this->WP_Insights_Recorder_Instance->get_recording_id();?>,
+											  pageId: <?php echo $this->WP_Insights_Recorder_Instance->get_page_id();?>
 										    });
 	
 				  			  			}
@@ -946,7 +946,7 @@ class WP_Insights {
 															SELECT COUNT( * ) AS client_connections
 															FROM $recordsTable
 															WHERE UNIX_TIMESTAMP( CURRENT_TIMESTAMP( ) ) < ( UNIX_TIMESTAMP( sess_date ) + sess_time + ".(self::$default_recording_interval * 4)." )
-															GROUP BY client_id	) AS c";
+															GROUP BY visitor_id	) AS c";
 							$concurrent_recording_details = self::$WP_Insights_DB_Utils_Instance->db_query($concurrent_recording_query);
 							$concurrent_recordings = $concurrent_recording_details[0]['clients'];
 							error_log($concurrent_recordings);
@@ -966,8 +966,7 @@ class WP_Insights {
 									var addressBarURL = top.location.href;
 									var isFullyLoaded = false;
 									
-									if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay") < 0 
-										&& addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-heat.php") < 0) {
+									if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay") < 0) {
 				
 										        jQuery.ajax({
 													  url: "<?php echo $wpi_js_url.'?v='.self::VERSION?>",
@@ -1016,7 +1015,8 @@ class WP_Insights {
 															      recTime: 3000,
 															      trackingUrl: "<?php echo $smt_tracking_url;?>",
 															      postInterval: <?php echo self::$default_recording_interval;?>,
-															      recordingId: <?php echo $this->WP_Insights_Recorder_Instance->get_recording_id();?>
+															      recordingId: <?php echo $this->WP_Insights_Recorder_Instance->get_recording_id();?>,
+															      pageId: <?php echo $this->WP_Insights_Recorder_Instance->get_page_id();?>
 															    });
 						
 									  			  			}

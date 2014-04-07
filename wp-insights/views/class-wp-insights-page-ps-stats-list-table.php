@@ -54,7 +54,7 @@ require_once(plugin_dir_path(dirname(__FILE__)).'class-wp-insights-utils.php');
  */
 class WP_Insights_Page_PS_Stats_List_Table extends WPI_WP_List_Table {
     
-    protected $recording_id = null;
+    protected $page_id = null;
     
     protected $WP_Insights_Filters_Instance = null;
     
@@ -62,7 +62,7 @@ class WP_Insights_Page_PS_Stats_List_Table extends WPI_WP_List_Table {
      * REQUIRED. Set up a constructor that references the parent constructor. We 
      * use the parent reference to set some default configs.
      ***************************************************************************/
-    function __construct($recording_id){
+    function __construct($page_id){
                 
         //Set parent defaults
         parent::__construct( array(
@@ -72,7 +72,7 @@ class WP_Insights_Page_PS_Stats_List_Table extends WPI_WP_List_Table {
             'screen'    => 'admin'             //Just to avoid a php notice
             ) );
         
-        $this->recording_id = $recording_id;
+        $this->page_id = $page_id;
         
         $this->WP_Insights_Filters_Instance = new WP_Insights_Filters();
         
@@ -237,11 +237,13 @@ class WP_Insights_Page_PS_Stats_List_Table extends WPI_WP_List_Table {
         
         $WP_Insights_DB_Utils_Instance->setWpdb($wpdb);
         
+        $pagesTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_PAGES;
+        
         $pageSectionsTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_PAGE_SECTIONS;
         
         $recordingsTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
 
-        $total_items = $wpdb->get_var("select count(*) from $pageSectionsTable as ps where record_id='$this->recording_id' group by ps.section_id ");
+        //$total_items = $wpdb->get_var("select count(*) from $pageSectionsTable as ps where record_id='$this->recording_id' group by ps.section_id ");
         
         /**
          * Instead of querying a database, we're going to fetch the example data
@@ -264,14 +266,12 @@ class WP_Insights_Page_PS_Stats_List_Table extends WPI_WP_List_Table {
 		SEC_TO_TIME(ROUND(AVG(ps.focus_time))) avg_focus_time,
 		SUM(ps.lost_focus_count) as lost_focus_count
 		from $pageSectionsTable as ps 
-		inner join $recordingsTable as r on r.id = ps.record_id
-		inner join $recordingsTable as r1 on r1.cleansed_url = r.cleansed_url
-		where r1.id = '$this->recording_id'
+		INNER JOIN $recordingsTable as r ON ps.record_id = r.id
+		where ps.page_id = '$this->page_id'
 		AND r.sess_date >= '$fromDate'
         AND r.sess_date <= '$tillDate 23:59:59'
 		group by ps.section_id
-		ORDER BY ps.section_order asc
-		LIMIT ".($current_page-1)*$per_page.",".$per_page;
+		ORDER BY ps.section_order asc";
                 
         
         $data = $WP_Insights_DB_Utils_Instance->db_query($sql);
@@ -282,6 +282,7 @@ class WP_Insights_Page_PS_Stats_List_Table extends WPI_WP_List_Table {
          * it can be used by the rest of the class.
          */
         $this->items = $data;
+        $total_items = sizeof($this->items);
         
         
         /**

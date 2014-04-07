@@ -26,6 +26,8 @@ var drawingCanvas;
 var oldPt;
 var oldMidPt;
 
+var lastMovementCP = "";
+
 var paused = false;
 
 function initializePlayer() {
@@ -263,7 +265,7 @@ function constructViewportsArray() {
 			//console.log(value.cp);					
 		}
 	}
-	console.log(scrollArray);
+	console.log(viewportArray);
 }
 
 function normalizeEvents() {
@@ -337,10 +339,11 @@ function animate() {
 			oldMidPt.x = midPt.x;
 			oldMidPt.y = midPt.y;
 			createjs.Tween.get(cursor).to({x:x,y:y}, movementTime).wait(waitTime).call(animate);
+			lastMovementCP = event.cp;
 			var event = jQuery.Event("hover");
 			event.pageX = x;
 			event.pageY = y;
-			jQuery(element).trigger(event);			
+			jQuery(element).trigger(event);
 			
 		} else if(event.type === "scroll") {
 			var duration = event.duration;
@@ -363,7 +366,11 @@ function animate() {
 			setTimeout(animate,delay);
 		} else if(event.type === "click") {
 			var click = new createjs.Bitmap(clickImage);
-			var element = jQuery( document ).find(event.cp);
+			var clickElementCP = event.cp;
+			if(lastMovementCP !== "") {
+				clickElementCP = lastMovementCP;
+			}
+			var element = jQuery( document ).find(clickElementCP);
 			var x = event.pX;
 			var y = event.pY;
 			if(element.length > 0) {

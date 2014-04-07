@@ -2,6 +2,15 @@
 
 class WP_Insights_Utils {
 	
+	public static function should_wpi_record() {
+		$current_url = WP_Insights_Utils::getCurrentPageURL();
+		if(!is_admin() && strpos($current_url,"plugins/wp-insights/views") == false && strpos($current_url,"wp-cron.php") == false && strpos($current_url,"wp-login.php") == false) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	/** askapache_get_process_count()
 	 * Returns the number of running processes
 	 *

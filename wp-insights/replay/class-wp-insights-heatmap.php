@@ -8,7 +8,7 @@ require_once(plugin_dir_path(dirname(__FILE__)).'views/class-wp-insights-filters
 
 class WP_Insights_Heatmap {
 	
-	protected $lrid = null;
+	protected $pid = null;
 	
 	protected $hmtype = null;
 	
@@ -24,7 +24,7 @@ class WP_Insights_Heatmap {
 	
 	protected $recordsTable = null;
 	
-	protected $cacheTable = null;
+	protected $pagesTable = null;
 	
 	protected $heatmapJsPath = null;
 	
@@ -42,10 +42,10 @@ class WP_Insights_Heatmap {
 	
 	protected $WP_Insights_Filters_Instance = null;
 	
-	public function __construct($lrid, $hmtype, $scrx, $scry, $version) {
+	public function __construct($pid, $hmtype, $scrx, $scry, $version) {
 		global $wpdb;
 		$this->WP_Insights_Filters_Instance = new WP_Insights_Filters();
-		$this->lrid = $lrid;
+		$this->pid = $pid;
 		$this->hmtype = $hmtype;
 		$this->scrx = $scrx;
 		$this->scry = $scry;
@@ -54,7 +54,7 @@ class WP_Insights_Heatmap {
 		$this->wp_insights_db_utils = WP_Insights_DB_Utils::get_instance();
 		$this->wp_insights_db_utils->setWpdb($wpdb);
 		$this->recordsTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
-		$this->cacheTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE;
+		$this->pagesTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_PAGES;
 		$this->heatmapJsPath = plugins_url('js/dev/heatmap.js?v='.$this->version, dirname(__FILE__));
 		//$this->loadCacheFile();
 		$this->loadLiveFile();
@@ -104,9 +104,9 @@ class WP_Insights_Heatmap {
 	}
 	
 	protected function loadLiveFile() {
-		$sql = "SELECT r1.cleansed_url as cleansed_url FROM $this->recordsTable r1 where r1.id=$this->lrid LIMIT 0,1";
+		$sql = "SELECT p.url as url FROM $this->pagesTable p where p.id=$this->pid LIMIT 0,1";
 		$result = $this->wp_insights_db_utils->db_query($sql);
-		$transfer = @WP_Insights_Utils::get_remote_webpage($result[0]['cleansed_url']);
+		$transfer = @WP_Insights_Utils::get_remote_webpage($result[0]['url']);
 		error_log(print_r($transfer,true));
 		error_log(isset($transfer['errmsg']));
 		error_log(strlen($transfer['errmsg']));
@@ -391,7 +391,7 @@ class WP_Insights_Heatmap {
 		$cdata = 'var heatmapOptions = {
 						dataURI: "'.$wp_admin_url.'",
 						action: "wpimouseeventdata",
-						lrid: '.$this->lrid.',
+						pid: '.$this->pid.',
 						dt: "'.$this->hmtype.'",
 						fd: "'.$this->WP_Insights_Filters_Instance->getFromDate().'",
 						td: "'.$this->WP_Insights_Filters_Instance->getTillDate().'",
@@ -457,7 +457,7 @@ class WP_Insights_Heatmap {
 					function getData() {
 						jQuery.getJSON(heatmapOptions.dataURI, {
 												action: heatmapOptions.action,
-												lrid: heatmapOptions.lrid,
+												pid: heatmapOptions.pid,
 												dt: heatmapOptions.dt,
 												fd: heatmapOptions.fd,
 												td: heatmapOptions.td,
@@ -499,7 +499,7 @@ class WP_Insights_Heatmap {
 		$cdata = 'var heatmapOptions = {
 						dataURI: "'.$wp_admin_url.'",
 						action: "wpimouseeventdata",
-						lrid: '.$this->lrid.',
+						pid: '.$this->pid.',
 						dt: "'.$this->hmtype.'",
 						fd: "'.$this->WP_Insights_Filters_Instance->getFromDate().'",
 						td: "'.$this->WP_Insights_Filters_Instance->getTillDate().'",
@@ -566,7 +566,7 @@ class WP_Insights_Heatmap {
 					function getData() {
 						jQuery.getJSON(heatmapOptions.dataURI, {
 												action: heatmapOptions.action,
-												lrid: heatmapOptions.lrid,
+												pid: heatmapOptions.pid,
 												dt: heatmapOptions.dt,
 												fd: heatmapOptions.fd,
 												td: heatmapOptions.td,

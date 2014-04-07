@@ -55,13 +55,13 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
     
     protected $assets_url = null;
     protected $view_url = null;
-    protected $client_id = null;
+    protected $visitor_id = null;
     
     /** ************************************************************************
      * REQUIRED. Set up a constructor that references the parent constructor. We 
      * use the parent reference to set some default configs.
      ***************************************************************************/
-    function __construct($client_id){
+    function __construct($visitor_id){
         global $status, $page;
                 
         //Set parent defaults
@@ -71,7 +71,7 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
             'ajax'      => false        //does this table support ajax?
         ) );
         
-        $this->client_id = $client_id;
+        $this->visitor_id = $visitor_id;
         $this->assets_url = plugins_url('/../assets/', __FILE__);
         $this->views_url = plugins_url('/../views/', __FILE__);
         
@@ -182,7 +182,7 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
     function column_url($item){
 
     	return sprintf('<a href="%1$s" target="_blank">%1$s</a>',
-    			$item['raw_url']
+    			$item['url']
    		);
     	 
     }
@@ -471,6 +471,8 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
         
         $WP_Insights_DB_Utils_Instance->setWpdb($wpdb);
         
+        $pagesTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_PAGES;
+        
         $recordsTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
         
         $browsersTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_BROWSERS;
@@ -479,9 +481,7 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
         
         $cacheTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE;
         
-        $client_id = $this->client_id;
-        
-        $total_items = $wpdb->get_var("select count(*) from $recordsTable where client_id='$client_id' ");
+        $total_items = $wpdb->get_var("select count(1) from $recordsTable where visitor_id='$this->visitor_id' ");
         
         /**
          * Instead of querying a database, we're going to fetch the example data
@@ -511,26 +511,16 @@ class WP_Insights_Client_Recording_List_Table extends WPI_WP_List_Table {
         $sql = "SELECT 
         records.id,
         records.file,
-        records.raw_url,
-        records.cleansed_url,
-        records.os_id,
-        records.browser_id,
-        records.browser_ver,
-        records.user_agent,
-        records.ip,
+        pages.url,
         records.sess_date,
         UNIX_TIMESTAMP(records.sess_date) as unix_sess_date,
         records.sess_time,
         SEC_TO_TIME(ROUND(records.sess_time)) as browser_open_time,
         records.lost_focus_count,
-        records.focus_time,
-        SEC_TO_TIME(ROUND(records.focus_time)) as focused_browsing_time,
-        browsers.name as browser_name,
-        oses.name as os_name
+        SEC_TO_TIME(ROUND(records.focus_time)) as focused_browsing_time
         FROM $recordsTable as records
-        LEFT OUTER JOIN $browsersTable as browsers ON records.browser_id = browsers.id
-        LEFT OUTER JOIN $osTable as oses ON records.os_id = oses.id
-        where records.client_id = '$this->client_id'
+        INNER JOIN $pagesTable as pages ON records.page_id = pages.id
+        where records.visitor_id = '$this->visitor_id'
         ORDER BY records.id desc
         LIMIT ".($current_page-1)*$per_page.",".$per_page;
                 

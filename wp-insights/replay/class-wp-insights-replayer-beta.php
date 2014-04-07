@@ -60,22 +60,34 @@ class WP_Insights_Replayer_Beta {
 	
 	protected function getDetailsByRecordingId(){
 		$recordsTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
-		$cacheTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE;
-		$this->record = $this->wp_insights_db_utils->db_select(
-				$recordsTable,
-				$recordsTable.".*",
-				$recordsTable.".id = '".$this->recording_id."'");
+		$pagesTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_PAGES;
+		
+		$sql = "SELECT 
+		records.file,
+		records.hovered,
+		records.clicked,
+		records.lost_focus,
+		records.scrolls,
+		records.viewports,
+		pages.url as url
+		from $recordsTable as records
+		INNER JOIN $pagesTable as pages ON records.page_id = pages.id
+		where records.id = ".$this->recording_id;
+		
+		$records = $this->wp_insights_db_utils->db_query($sql);
+		 
+		$this->record = $records[0];
 	
 		//$this->record = $record;
 			
-		$clientId       = $this->record['client_id'];
-		$timestamp      = WP_Insights_Utils::mask_client($clientId).'\n'.date("h:i A", strtotime($this->record['sess_date']));
+		//$visitorId       = $this->record['visitor_id'];
+		//$timestamp      = WP_Insights_Utils::mask_client($clientId).'\n'.date("h:i A", strtotime($this->record['sess_date']));
 		$this->cachedFilePath = $this->record['file'];
-		$url            = $this->record['raw_url'];
-		$this->viewPortWidth  = (int) $this->record['vp_width'];
-		$this->viewPortHeight = (int) $this->record['vp_height'];
-		$hovered        = $this->record['hovered'];
-		$clicked        = $this->record['clicked'];
+		//$url            = $this->record['raw_url'];
+		//$this->viewPortWidth  = (int) $this->record['vp_width'];
+		//$this->viewPortHeight = (int) $this->record['vp_height'];
+		//$hovered        = $this->record['hovered'];
+		//$clicked        = $this->record['clicked'];
 	
 		// build JavaScript object
 		//$this->JSON[] = '{"xcoords": ['.$coordsX.'], "ycoords": ['.$coordsY.'], "clicks": ['.$clicks.'], "timestamp": "'.$timestamp.'", "wprev": '.$record['vp_width'].', "hprev": '.$record['vp_height'].'}';
@@ -195,7 +207,7 @@ class WP_Insights_Replayer_Beta {
 	protected function insertScriptElements() {
 		// a BASE element is needed to link correctly CSS, scripts, etc.
 		$base = $this->doc->createElement('base');
-		$base->setAttribute('href', WP_Insights_Utils::url_get_base($this->record['raw_url']));
+		$base->setAttribute('href', WP_Insights_Utils::url_get_base($this->record['url']));
 		$ini_comm = $this->doc->createComment(" begin wpi tracking code ");
 		$end_comm = $this->doc->createComment(" end wpi tracking code ");
 		$api_comm = $this->doc->createComment(" load wpi drawing API ");

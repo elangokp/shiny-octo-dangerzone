@@ -16,7 +16,7 @@
 require_once('class-wp-insights-filters.php');
 //require_once('../class-wp-insights.php' );
 //$WP_Insights_instance = WP_Insights::get_instance();
-$lrid = $_GET['lrid'];
+$pid = $_GET['pid'];
 $hmtype = $_GET['hmtype'];
 $scrx = $_GET['scrx'];
 $scry = $_GET['scry'];
@@ -115,7 +115,7 @@ $WP_Insights_Filters_Instance->display();
 </form>
 <!-- <div id="heatmap-status" style="margin: 0 auto;float:right;width:30%">Please be patient. Heatmap is being generated</div>-->
 </div>
-<iframe id="iframeHeatmap" style="border:1px solid black" src="wpi-heatmap.php?lrid=<?php echo $lrid ?>&hmtype=<?php echo $hmtype?>&scrx=<?php echo $scrx?>&scry=<?php echo $scry?>" seamless width="100%"></iframe>
+<iframe id="iframeHeatmap" style="border:1px solid black" src="wpi-heatmap.php?pid=<?php echo $pid ?>&hmtype=<?php echo $hmtype?>&scrx=<?php echo $scrx?>&scry=<?php echo $scry?>" seamless width="100%"></iframe>
 <div id="heatmapLoadingMessage" style="display:none;"> 
     <p>Hey there Smarty... Heatmap is being generated... Please be patient for a moment.</p> 
     <p><img src="../assets/progressBar.gif"/></p>

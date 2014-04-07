@@ -25,7 +25,8 @@
      */
     cookieDays: 365,
     postInterval: 10,
-    recordingId: 0
+    recordingId: 0,
+    pageId: 0
   };
     
   /** 
@@ -444,6 +445,7 @@
       
      
       var requestData  = "rid="        + wpiOpt.recordingId;
+      	  requestData += "&pid="        + wpiOpt.pageId;
 	      requestData += "&time="      + wpiRec.getTime();
 	      //requestData += "&pagew="     + wpiRec.page.width;
 	      //requestData += "&pageh="     + wpiRec.page.height;

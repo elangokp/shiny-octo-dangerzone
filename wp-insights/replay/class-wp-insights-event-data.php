@@ -5,7 +5,7 @@ require_once(plugin_dir_path(dirname(__FILE__)).'class-wp-insights-utils.php');
 
 class WP_Insights_Event_Data {
 	
-	protected $lrid = null;
+	protected $pid = null;
 	
 	protected $dataType = null;
 	
@@ -21,15 +21,15 @@ class WP_Insights_Event_Data {
 	
 	protected $recordsTable = null;
 	
-	protected $cacheTable = null;
+	protected $pagesTable = null;
 	
 	protected $records = null;
 	
 	protected $eventJsonResponse = null;
 	
-	public function __construct($lrid, $dataType, $fromDate=null, $tillDate=null, $currentPageNumber = 1, $recordsPerPage = 100) {
+	public function __construct($pid, $dataType, $fromDate=null, $tillDate=null, $currentPageNumber = 1, $recordsPerPage = 100) {
 		global $wpdb;
-		$this->lrid = $lrid;
+		$this->pid = $pid;
 		$this->dataType = $dataType;
 		if($fromDate!=null) {
 			$this->fromDate = $fromDate." 00:00:00";
@@ -45,7 +45,7 @@ class WP_Insights_Event_Data {
 		$this->wp_insights_db_utils = WP_Insights_DB_Utils::get_instance();
 		$this->wp_insights_db_utils->setWpdb($wpdb);
 		$this->recordsTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
-		$this->cacheTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_CACHE;
+		$this->pagesTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_PAGES;
 	}
 	
 	public function getMouseEventData() {
@@ -62,36 +62,36 @@ class WP_Insights_Event_Data {
 	
 	protected function loadMouseEventData() {
 		$sql = "select
-		R1.id as id,
-		R1.is_exit as is_exit,
-		R1.is_session_exit as is_session_exit, ";
+		R.id as id,
+		R.is_exit as is_exit,
+		R.is_session_exit as is_session_exit, ";
 
 		if($this->dataType == 'mvh' || $this->dataType == 'exith' || $this->dataType == 'mph') {
-			$sql = $sql."R1.hovered as mousepositions";
+			$sql = $sql."R.hovered as mousepositions";
 		} else if($this->dataType == 'clickh') {
-			$sql = $sql."R1.clicked as mousepositions";
+			$sql = $sql."R.clicked as mousepositions";
 		} else if($this->dataType == 'lfh') {
-			$sql = $sql."R1.lost_focus as mousepositions";
+			$sql = $sql."R.lost_focus as mousepositions";
 		}
 				
 		$sql = $sql." from $this->recordsTable as R
-		RIGHT OUTER JOIN $this->recordsTable as R1
-		ON R.cleansed_url = R1.cleansed_url
-		where R.id = $this->lrid";
+		INNER JOIN $this->pagesTable as pages
+		ON R.page_id = pages.id
+		where pages.id = $this->pid";
 		
 		if($this->fromDate != null & $this->tillDate !=null) {
-			$sql = $sql." AND R1.sess_date >= '$this->fromDate'
-			AND R1.sess_date <= '$this->tillDate'";
+			$sql = $sql." AND R.sess_date >= '$this->fromDate'
+			AND R.sess_date <= '$this->tillDate'";
 		}
 		
 		if($this->dataType == 'exith') {
-			$sql = $sql." AND R1.is_session_exit = 1";
+			$sql = $sql." AND R.is_session_exit = 1";
 		}
 		$fromRecordNumber = $this->fromRecordNumber;
 		$recordsPerPage = $this->recordsPerPage;
 		error_log($fromRecordNumber);
 		error_log($recordsPerPage);
-		$sql = $sql." ORDER BY R1.id";
+		$sql = $sql." ORDER BY R.id";
 		$sql = $sql." LIMIT $fromRecordNumber , $recordsPerPage";
 		
 		/*if($this->fromRecordNumber != null & $this->tillRecordNumber !=null) {

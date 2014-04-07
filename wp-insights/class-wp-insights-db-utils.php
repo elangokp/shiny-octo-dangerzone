@@ -269,6 +269,7 @@ class WP_Insights_DB_Utils {
         browser_ver  FLOAT(2,1)    unsigned  NOT NULL,
         user_agent   VARCHAR(255)            NOT NULL,
         ip           VARCHAR(15)             NOT NULL,
+        last_visit_time    TIMESTAMP     default   CURRENT_TIMESTAMP,
 		PRIMARY KEY  (id) ) DEFAULT CHARSET utf8";
 		
 		dbDelta( $visitors_table_sql );
@@ -317,6 +318,7 @@ class WP_Insights_DB_Utils {
 		$pagesections_table_sql="CREATE TABLE $pagesections_table (
 		id           BIGINT        unsigned  NOT NULL auto_increment,
 		record_id    BIGINT        unsigned  NOT NULL,
+		page_id      BIGINT        unsigned  NOT NULL,
 		section_order TINYINT       unsigned  NOT NULL,
 		section_id   VARCHAR(50)             NOT NULL,
 		section_name VARCHAR(50)             NOT NULL,
