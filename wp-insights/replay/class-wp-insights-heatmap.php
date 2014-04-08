@@ -395,7 +395,7 @@ class WP_Insights_Heatmap {
 						dt: "'.$this->hmtype.'",
 						fd: "'.$this->WP_Insights_Filters_Instance->getFromDate().'",
 						td: "'.$this->WP_Insights_Filters_Instance->getTillDate().'",
-						recordsPerPage: 100,
+						recordsPerPage: 500,
 						heatmapCompleted: false
 						};
 							
@@ -503,7 +503,7 @@ class WP_Insights_Heatmap {
 						dt: "'.$this->hmtype.'",
 						fd: "'.$this->WP_Insights_Filters_Instance->getFromDate().'",
 						td: "'.$this->WP_Insights_Filters_Instance->getTillDate().'",
-						recordsPerPage: 100,
+						recordsPerPage: 500,
 						heatmapCompleted: false
 						};
 						

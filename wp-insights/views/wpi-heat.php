@@ -117,7 +117,7 @@ $WP_Insights_Filters_Instance->display();
 </div>
 <iframe id="iframeHeatmap" style="border:1px solid black" src="wpi-heatmap.php?pid=<?php echo $pid ?>&hmtype=<?php echo $hmtype?>&scrx=<?php echo $scrx?>&scry=<?php echo $scry?>" seamless width="100%"></iframe>
 <div id="heatmapLoadingMessage" style="display:none;"> 
-    <p>Hey there Smarty... Heatmap is being generated... Please be patient for a moment.</p> 
+    <p>Hey there Smarty... Heatmap is being generated... This may take a few minutes. Please be patient.</p> 
     <p><img src="../assets/progressBar.gif"/></p>
 </div> 
 </body>

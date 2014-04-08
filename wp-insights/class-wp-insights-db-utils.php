@@ -10,6 +10,9 @@ class WP_Insights_DB_Utils {
 	const TBL_PLUGIN_PREFIX = 'wp_ins_';
 	
 	/** Table for storing wp insights visitors. */
+	const TBL_AUX_STATS = 'aux_stats';
+	
+	/** Table for storing wp insights visitors. */
 	const TBL_VISITORS = 'visitors';
 	
 	/** Table for storing wp insights pages. */
@@ -258,6 +261,17 @@ class WP_Insights_DB_Utils {
 	}
 	
 	public function wpinsights_db_install() {
+		
+		/* create aux stats table ---------------------------------------------------- */
+		$aux_stats_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_AUX_STATS;
+		$aux_stats_table_sql = "CREATE TABLE $aux_stats_table (
+		id           BIGINT        unsigned  NOT NULL auto_increment,
+		stat_type    VARCHAR(255)            NOT NULL,
+		stat_value_int  BIGINT     unsigned  NOT NULL,
+		PRIMARY KEY  (id),
+		UNIQUE KEY  (stat_type)) DEFAULT CHARSET utf8";
+		
+		dbDelta( $aux_stats_table_sql );
 		
 		/* create visitors table ---------------------------------------------------- */
 		
