@@ -2,10 +2,16 @@
 
 class WP_Insights_Utils {
 	
+	const NOT_RECORDABLE_BACKEND_URL = 'not_recordable_backend_url';
+	
+	const EXCEEDS_MAX_CONCURRENT_RECORDINGS = 'exceeds_max_concurrent_recordings';
+	
+	const CAN_RECORD = 'can_record';
+	
 	public static function should_wpi_record() {
 		$current_url = WP_Insights_Utils::getCurrentPageURL();
-		if(!is_admin() && strpos($current_url,"plugins/wp-insights/views") == false && strpos($current_url,"wp-cron.php") == false && strpos($current_url,"wp-login.php") == false) {
-			return true;
+		if(is_admin() || strpos($current_url,"plugins/wp-insights/views") !== false || strpos($current_url,"wp-cron.php") !== false || strpos($current_url,"wp-login.php") !== false) {
+			return self::NOT_RECORDABLE_BACKEND_URL;
 		} else {
 			return false;
 		}

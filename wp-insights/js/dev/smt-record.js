@@ -62,6 +62,7 @@
     viewPorts:         [],
     lastScrollsLength: 0,
     lastViewPortsLenght: 0,
+    isExitTriggered: false,
     
     /**
      * Cookies management object.
@@ -434,13 +435,18 @@
         		  && wpiRec.elem.lostFocus.length === 0 
         		  && wpiRec.scrolls.length === wpiRec.lastScrollsLength 
         		  && wpiRec.viewPorts.length === wpiRec.lastViewPortsLength) {
-        	  return false;
+        	  return;
           }
       }
       
       $action = "wpiappend";
       if(type === "exit") {
     	  $action = "wpiexit";
+    	  if(wpiRec.isExitTriggered) {
+    		return;  
+    	  } else {
+    		  wpiRec.isExitTriggered = true;
+    	  }    	  
       }      
       
      
@@ -496,6 +502,7 @@
 			  type: "POST",
 			  url:  gatewayUrl+"?action="+$action+"&_="+(new Date()).getTime(),
 			  cache: false,
+			  async:false,
 			  data: requestData
 		});
 	}

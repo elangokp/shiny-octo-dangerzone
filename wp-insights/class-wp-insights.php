@@ -88,7 +88,7 @@ class WP_Insights {
 	
 	protected static $default_max_concurrent_recordings_option_value = 5;
 	
-	protected static $default_recording_interval = 10; //in seconds
+	protected static $default_recording_interval = 30; //in seconds
 
 	/**
 	 * Initialize the plugin by setting localization, filters, and administration functions.
@@ -947,6 +947,14 @@ class WP_Insights {
 															FROM $recordsTable
 															WHERE UNIX_TIMESTAMP( CURRENT_TIMESTAMP( ) ) < ( UNIX_TIMESTAMP( sess_date ) + sess_time + ".(self::$default_recording_interval * 4)." )
 															GROUP BY visitor_id	) AS c";
+							"SELECT COUNT( 1 ) AS clients, SUM( client_connections ) AS total_connections									FROM(SELECT  count(1) as client_connections
+							FROM wp_wp_ins_records r
+							INNER JOIN (
+							SELECT id
+							FROM wp_wp_ins_records
+							WHERE DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 21600 SECOND) < sess_date
+							) as c on c.id = r.id and UNIX_TIMESTAMP( CURRENT_TIMESTAMP( ) ) < ( UNIX_TIMESTAMP( r.sess_date ) + r.sess_time + ( 3000 *4 ) )
+							group by client_id) as b"
 							$concurrent_recording_details = self::$WP_Insights_DB_Utils_Instance->db_query($concurrent_recording_query);
 							$concurrent_recordings = $concurrent_recording_details[0]['clients'];
 							error_log($concurrent_recordings);
