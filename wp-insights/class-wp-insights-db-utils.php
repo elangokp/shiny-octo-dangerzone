@@ -12,6 +12,9 @@ class WP_Insights_DB_Utils {
 	/** Table for storing wp insights visitors. */
 	const TBL_AUX_STATS = 'aux_stats';
 	
+	/** aux_stats table stat type */
+	const AUX_STAT_TYPE_CONCURRENT_RECORDING_LIMIT = 'missed_by_concurrent_recording_limit';
+	
 	/** Table for storing wp insights visitors. */
 	const TBL_VISITORS = 'visitors';
 	
@@ -260,6 +263,12 @@ class WP_Insights_DB_Utils {
 		$this->getWpdb()->query("DROP TABLE IF EXISTS ".$table);
 	}
 	
+	public function increment_missed_recordings() {
+		$aux_stats_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_AUX_STATS;
+		$increment_query = "UPDATE $aux_stats_table SET stat_value_int = stat_value_int+1 WHERE stat_type = '".self::AUX_STAT_TYPE_CONCURRENT_RECORDING_LIMIT."'";
+		$this->db_query($increment_query);
+	}
+	
 	public function wpinsights_db_install() {
 		
 		/* create aux stats table ---------------------------------------------------- */
@@ -272,6 +281,17 @@ class WP_Insights_DB_Utils {
 		UNIQUE KEY  (stat_type)) DEFAULT CHARSET utf8";
 		
 		dbDelta( $aux_stats_table_sql );
+		
+		$init_aux_stats = array(
+								"stat_type" => self::AUX_STAT_TYPE_CONCURRENT_RECORDING_LIMIT,
+								"stat_value_int" => 0,
+						 );
+		$init_aux_stats_format = array(
+								"%s",
+								"%d"
+								);
+		
+		$this->db_insert($this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_AUX_STATS, $init_aux_stats, $init_aux_stats_format);
 		
 		/* create visitors table ---------------------------------------------------- */
 		

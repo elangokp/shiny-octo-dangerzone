@@ -439,12 +439,14 @@
           }
       }
       
-      $action = "wpiappend";
+      var action = "wpiappend";
+      var isAsync = true;
       if(type === "exit") {
-    	  $action = "wpiexit";
+    	  action = "wpiexit";
     	  if(wpiRec.isExitTriggered) {
     		return;  
     	  } else {
+    		  isAsync = false;
     		  wpiRec.isExitTriggered = true;
     	  }    	  
       }      
@@ -468,7 +470,7 @@
 	      requestData += "&scrollPercentage=" + wpiRec.scrollPercentage;
 	      requestData += "&pageSections=" + encodeURIComponent(JSON.stringify(wpiRec.pageSections));
 	      requestData += "&currentPageSection=" + wpiRec.currentPageSection;
-          requestData += "&action="    + $action;
+          requestData += "&action="    + action;
           requestData += "&remote="    + wpiOpt.storageServer;
           
        if(type === "cache") {
@@ -482,14 +484,14 @@
       wpiRec.lastViewPortsLength = wpiRec.viewPorts.length;
       
       //wpiRec.log("Inside append mouse data");
-      console.log("Inside "+$action+" append mouse data");
+      console.log("Inside "+action+" append mouse data");
       // send request
       var gatewayUrl = wpiOpt.trackingUrl;
       if ('XDomainRequest' in window && window.XDomainRequest !== null) {
   	    // Use Microsoft XDR
     	wpiRec.log('XDomainRequest');
   	    var xdr = new XDomainRequest();
-  	    xdr.open("post", gatewayUrl+"?action="+$action+"&isXDR=true&_="+(new Date()).getTime());
+  	    xdr.open("post", gatewayUrl+"?action="+action+"&isXDR=true&_="+(new Date()).getTime());
   	    xdr.onload = function () {};
   	    xdr.onprogress = function(){};
   	    xdr.ontimeout = function(){};
@@ -497,21 +499,15 @@
   	    setTimeout(function(){
   	        xdr.send(requestData);
   	    }, 0);
-	} else {
+	  } else {
 		wpi_jquery.ajax({
 			  type: "POST",
-			  url:  gatewayUrl+"?action="+$action+"&_="+(new Date()).getTime(),
+			  url:  gatewayUrl+"?action="+action+"&_="+(new Date()).getTime(),
 			  cache: false,
-			  async:false,
+			  async: isAsync,
 			  data: requestData
 		});
-	}
-      /*
-      wpi_jquery.ajax({
-		  type: "POST",
-		  url:  gatewayUrl,
-		  data: requestData
-	});*/
+	  }
       // clean
       wpiRec.clearMouseData();
     },

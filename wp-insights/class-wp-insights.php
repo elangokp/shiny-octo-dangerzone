@@ -294,25 +294,66 @@ class WP_Insights {
 		//error_log("recording_status is ".$recording_status);
 		if(strcasecmp(trim($recording_status), 'ON') == 0) {
 			//error_log("Inside matches ON");
-			if(!has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
-				//error_log("Inside matches ON and has NO Action");
-				if(WP_Insights_Utils::should_wpi_record()) {
-					$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
-					$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
-					$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
-					$this->WP_Insights_Recorder_Instance->setBrowscapCacheDir(self::$browscap_cache_dir);
-					$this->WP_Insights_Recorder_Instance->init_recording();
-				}
-				add_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) );
-				//error_log(has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) ));
+			$should_record_status = WP_Insights_Utils::should_wpi_record(self::$WP_Insights_DB_Utils_Instance, get_option(self::$max_concurrent_recordings_option_name, self::$default_max_concurrent_recordings_option_value));
+			
+			if($should_record_status == WP_Insights_Utils::CAN_RECORD_RETURNING_VISITOR 
+					|| $should_record_status == WP_Insights_Utils::CAN_RECORD_NON_DEV
+					|| $should_record_status == WP_Insights_Utils::CAN_RECORD_DEV) {
+				
+				$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
+				$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
+				$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
+				$this->WP_Insights_Recorder_Instance->setBrowscapCacheDir(self::$browscap_cache_dir);
+				$this->WP_Insights_Recorder_Instance->init_recording();
 			}
+			
+			if($should_record_status == WP_Insights_Utils::CAN_RECORD_RETURNING_VISITOR
+				|| $should_record_status == WP_Insights_Utils::CAN_RECORD_NON_DEV) {
+				
+				if(has_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ) )) {
+					$priority = has_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ) );
+					remove_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ), $priority);
+				}
+				
+				if(!has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
+					add_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) );
+				}
+			} else if($should_record_status == WP_Insights_Utils::CAN_RECORD_DEV) {
+				if(has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
+					$priority = has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) );
+					remove_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ), $priority);
+				}
+				
+				if(!has_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ) )) {
+					add_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ) );
+				}
+			} else if($should_record_status == WP_Insights_Utils::NOT_RECORDABLE_BACKEND_URL) {
+				if(has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
+					$priority = has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) );
+					remove_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ), $priority);
+				}
+				
+				if(has_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ) )) {
+					$priority = has_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ) );
+					remove_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ), $priority);
+				}
+			} else if($should_record_status == WP_Insights_Utils::EXCEEDS_MAX_CONCURRENT_RECORDINGS) {
+				self::$WP_Insights_DB_Utils_Instance->increment_missed_recordings();  
+				if(has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
+					$priority = has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) );
+					remove_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ), $priority);
+				}
+			}
+			
 		} else {
-			//error_log("Inside doesnt match ON");
 			if(has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
-				//error_log("Inside matches ON and has Action");
 				$priority = has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) );
 				remove_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ), $priority);
-				//error_log(has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) ));
+			}
+			
+			if(has_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ) )) {
+				$priority = has_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ) );
+				remove_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ), $priority);
 			}
 		}
 	}
@@ -836,139 +877,16 @@ class WP_Insights {
 		    die();		
 	}
 	
-	
 	public function add_wpinsights_scripts() {
-		//error_log("Inside add_wpinsights_scripts");
 		$wpi_js_url = plugins_url('js/wpi-js.min.js', __FILE__);
 		$json3_js_url = plugins_url('js/dev/json3.min.js', __FILE__);
 		$smt_aux_js_url = plugins_url('js/dev/smt-aux.js', __FILE__);
 		$smt_record_js_url = plugins_url('js/dev/smt-record.js', __FILE__);
 		$smt_tracking_url = admin_url( 'admin-ajax.php' );
 		$jquery_ui_scrollable_js = plugins_url('js/dev/jquery-ui-scrollable.js', __FILE__);
-		//wp_register_script('smt-aux', $smt_aux_js_url);
-		//wp_register_script('smt-record', $smt_record_js_url);
-		//wp_enqueue_script('smt-aux');
-		//wp_enqueue_script('smt-record');
-		error_log(print_r($_GET,true));
 		
-		if(!empty($_GET['wpidev']) && $_GET['wpidev'] === "true") {?>
-
+		?>
 		<!-- Powered by WP Insights version <?php echo self::VERSION?>-->
-		  <script id='wpi-trigger-script' type="text/javascript">
-					//<![CDATA[
-					var addressBarURL = top.location.href;
-					var isFullyLoaded = false;
-					
-					if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views") < 0) {
-			  			var wpi_jquery_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
-			  			var jQuery_UI_1_10_3_url = "//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js";
-	
-			  			jQuery.getScript( "<?php echo $json3_js_url?>");
-	
-			  			jQuery.getScript(wpi_jquery_url, function() { 
-			  				wpi_jquery = $.noConflict(true);
-			  				wpi_jquery.fn.getcssPath = function () {
-							    if (this.length != 1) throw 'Requires one element.';
-	
-							    var path, node = this;
-							    while (node.length) {
-							        var realNode = node[0], name = realNode.localName || realNode.nodeName;
-							        if (!name) break;
-	
-							        name = name.toLowerCase();
-							        if (realNode.id) {
-							            // As soon as an id is found, there's no need to specify more.
-							            return name + '#' + realNode.id + (path ? '>' + path : '');
-							        } else if (realNode.className) {
-							            name += '.' + realNode.className.split(/\s+/).join('.');
-							            name = name.replace(/\.+$/,"");
-							        }
-	
-							        var parent = node.parent(), siblings = parent.children(name);
-							        if (siblings.length > 1) name += ':eq(' + siblings.index(node) + ')';
-							        path = name + (path ? '>' + path : '');
-	
-							        node = parent;
-							    }
-	
-							    return path;
-							};
-	
-							wpi_jquery.fn.scrollStopped = function(delay,callback) {           
-								wpi_jquery(this).scroll(function(){
-						            var self = this, $this = wpi_jquery(self);
-						            if ($this.data('scrollTimeout')) {
-						              clearTimeout($this.data('scrollTimeout'));
-						            }
-						            $this.data('scrollTimeout', setTimeout(callback,delay,self));
-						        });
-						    };
-						    
-	
-						    /*wpi_jquery(window).scroll(function(event){
-								   var st = jQuery(this).scrollTop();
-								   if (st > lastScrollTop){
-									   scrollDirection = "down";
-								   } else {
-									   scrollDirection = "up";
-								   }
-								   lastScrollTop = st;
-								   console.log("From Direction Detection : " + scrollDirection);
-								});*/
-				  			
-				  			jQuery.getScript( "<?php echo $smt_aux_js_url.'?v='.self::VERSION?>", function() 
-				  			  {
-				  				jQuery.getScript( "<?php echo $smt_record_js_url.'?v='.self::VERSION?>", function() 
-				  		  			  {
-					  					wpi.record({
-										      recTime: 3000,
-										      trackingUrl: "<?php echo $smt_tracking_url?>",
-										      postInterval: <?php echo self::$default_recording_interval;?>,
-											  recordingId: <?php echo $this->WP_Insights_Recorder_Instance->get_recording_id();?>,
-											  pageId: <?php echo $this->WP_Insights_Recorder_Instance->get_page_id();?>
-										    });
-	
-				  			  			}
-				  		  			);
-	
-					  			}
-				  			);
-			  			});
-	
-					}	  			
-					//]]>
-			</script>
-		<?php }else { 
-						if(!isset($_COOKIE['wpi-visitor-id'])) {
-							$recordsTable = self::$WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
-							$concurrent_recording_query = "SELECT COUNT( * ) AS clients, SUM( client_connections ) AS total_connections
-															FROM (
-															SELECT COUNT( * ) AS client_connections
-															FROM $recordsTable
-															WHERE UNIX_TIMESTAMP( CURRENT_TIMESTAMP( ) ) < ( UNIX_TIMESTAMP( sess_date ) + sess_time + ".(self::$default_recording_interval * 4)." )
-															GROUP BY visitor_id	) AS c";
-							"SELECT COUNT( 1 ) AS clients, SUM( client_connections ) AS total_connections									FROM(SELECT  count(1) as client_connections
-							FROM wp_wp_ins_records r
-							INNER JOIN (
-							SELECT id
-							FROM wp_wp_ins_records
-							WHERE DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 21600 SECOND) < sess_date
-							) as c on c.id = r.id and UNIX_TIMESTAMP( CURRENT_TIMESTAMP( ) ) < ( UNIX_TIMESTAMP( r.sess_date ) + r.sess_time + ( 3000 *4 ) )
-							group by client_id) as b"
-							$concurrent_recording_details = self::$WP_Insights_DB_Utils_Instance->db_query($concurrent_recording_query);
-							$concurrent_recordings = $concurrent_recording_details[0]['clients'];
-							error_log($concurrent_recordings);
-							error_log(get_option(self::$max_concurrent_recordings_option_name,self::$default_max_concurrent_recordings_option_value));
-							error_log("Concurrent : " . ($concurrent_recordings < get_option(self::$max_concurrent_recordings_option_name,self::$default_max_concurrent_recordings_option_value)));
-						}
-						
-						//error_log(WP_Insights_Utils::askapache_get_process_count());
-						
-						$max_concurrent_recordings = get_option(self::$max_concurrent_recordings_option_name,self::$default_max_concurrent_recordings_option_value);
-												
-						if(isset($_COOKIE['wpi-visitor-id']) || $max_concurrent_recordings === 0 || ($concurrent_recordings < $max_concurrent_recordings)) 
-						{?>
-						<!-- Powered by WP Insights version <?php echo self::VERSION?>-->
 						  <script id='wpi-trigger-script' type="text/javascript">
 									//<![CDATA[
 									var addressBarURL = top.location.href;
@@ -1020,7 +938,6 @@ class WP_Insights {
 														        });
 														    };
 										  					wpi.record({
-															      recTime: 3000,
 															      trackingUrl: "<?php echo $smt_tracking_url;?>",
 															      postInterval: <?php echo self::$default_recording_interval;?>,
 															      recordingId: <?php echo $this->WP_Insights_Recorder_Instance->get_recording_id();?>,
@@ -1033,8 +950,89 @@ class WP_Insights {
 									}	  			
 									//]]>
 							</script>
-		<?php }
-		}
+		<?php
+
+	}
+	
+	public function add_wpinsights_dev_scripts() {
+		//error_log("Inside add_wpinsights_scripts");
+		$wpi_js_url = plugins_url('js/wpi-js.min.js', __FILE__);
+		$json3_js_url = plugins_url('js/dev/json3.min.js', __FILE__);
+		$smt_aux_js_url = plugins_url('js/dev/smt-aux.js', __FILE__);
+		$smt_record_js_url = plugins_url('js/dev/smt-record.js', __FILE__);
+		$smt_tracking_url = admin_url( 'admin-ajax.php' );
+		$jquery_ui_scrollable_js = plugins_url('js/dev/jquery-ui-scrollable.js', __FILE__);
+		
+		?>
+
+		<!-- Powered by WP Insights version <?php echo self::VERSION?>-->
+		  <script id='wpi-trigger-script' type="text/javascript">
+					//<![CDATA[
+					var addressBarURL = top.location.href;
+					var isFullyLoaded = false;
+					
+					if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views") < 0) {
+			  			var wpi_jquery_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
+			  			var jQuery_UI_1_10_3_url = "//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js";
+	
+			  			jQuery.getScript( "<?php echo $json3_js_url?>");
+	
+			  			jQuery.getScript(wpi_jquery_url, function() { 
+			  				wpi_jquery = $.noConflict(true);
+			  				wpi_jquery.fn.getcssPath = function () {
+							    if (this.length != 1) throw 'Requires one element.';
+	
+							    var path, node = this;
+							    while (node.length) {
+							        var realNode = node[0], name = realNode.localName || realNode.nodeName;
+							        if (!name) break;
+	
+							        name = name.toLowerCase();
+							        if (realNode.id) {
+							            // As soon as an id is found, there's no need to specify more.
+							            return name + '#' + realNode.id + (path ? '>' + path : '');
+							        } else if (realNode.className) {
+							            name += '.' + realNode.className.split(/\s+/).join('.');
+							            name = name.replace(/\.+$/,"");
+							        }
+	
+							        var parent = node.parent(), siblings = parent.children(name);
+							        if (siblings.length > 1) name += ':eq(' + siblings.index(node) + ')';
+							        path = name + (path ? '>' + path : '');
+	
+							        node = parent;
+							    }
+	
+							    return path;
+							};
+	
+							wpi_jquery.fn.scrollStopped = function(delay,callback) {           
+								wpi_jquery(this).scroll(function(){
+						            var self = this, $this = wpi_jquery(self);
+						            if ($this.data('scrollTimeout')) {
+						              clearTimeout($this.data('scrollTimeout'));
+						            }
+						            $this.data('scrollTimeout', setTimeout(callback,delay,self));
+						        });
+						    };
+
+				  				jQuery.getScript( "<?php echo $smt_record_js_url.'?v='.self::VERSION?>", function() 
+				  		  			  {
+					  					wpi.record({
+										      trackingUrl: "<?php echo $smt_tracking_url?>",
+										      postInterval: <?php echo self::$default_recording_interval;?>,
+											  recordingId: <?php echo $this->WP_Insights_Recorder_Instance->get_recording_id();?>,
+											  pageId: <?php echo $this->WP_Insights_Recorder_Instance->get_page_id();?>
+										    });
+	
+				  			  			}
+				  		  			);
+			  			});
+	
+					}	  			
+					//]]>
+			</script>
+		<?php 
 	}
 	
 	public function add_wpinsights_admin_scripts(){

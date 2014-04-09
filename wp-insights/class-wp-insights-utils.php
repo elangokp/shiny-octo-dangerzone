@@ -6,15 +6,52 @@ class WP_Insights_Utils {
 	
 	const EXCEEDS_MAX_CONCURRENT_RECORDINGS = 'exceeds_max_concurrent_recordings';
 	
-	const CAN_RECORD = 'can_record';
+	const CAN_RECORD_DEV = 'can_record_dev';
 	
-	public static function should_wpi_record() {
+	const CAN_RECORD_RETURNING_VISITOR = 'can_record_returning_visitor';
+	
+	const CAN_RECORD_NON_DEV = 'can_record_non_dev';
+	
+	public static function should_wpi_record($WP_Insights_DB_Utils_Instance,$max_concurrent_recordings) {
 		$current_url = WP_Insights_Utils::getCurrentPageURL();
 		if(is_admin() || strpos($current_url,"plugins/wp-insights/views") !== false || strpos($current_url,"wp-cron.php") !== false || strpos($current_url,"wp-login.php") !== false) {
 			return self::NOT_RECORDABLE_BACKEND_URL;
-		} else {
-			return false;
+		} else if(!empty($_GET['wpidev']) && $_GET['wpidev'] === "true") {
+			return self::CAN_RECORD_DEV;
+		} else if(isset($_COOKIE['wpi-visitor-id'])){
+			return self::CAN_RECORD_RETURNING_VISITOR;
+		} else if(get_concurrent_recordings($WP_Insights_DB_Utils_Instance) >= $max_concurrent_recordings) {
+			return self::EXCEEDS_MAX_CONCURRENT_RECORDINGS;
+		} else  {
+			return self::CAN_RECORD_NON_DEV;
 		}
+	}
+	
+	protected static function get_concurrent_recordings($WP_Insights_DB_Utils_Instance) {
+		
+		$recordsTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
+		$concurrent_recording_query ="SELECT COUNT( 1 ) AS clients,
+											SUM( client_connections ) AS total_connections
+											FROM
+											(SELECT COUNT(1) as client_connections
+											FROM $recordsTable r
+											INNER JOIN (
+											SELECT id
+											FROM $recordsTable
+											WHERE DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 HOUR) < sess_date
+											) as c
+											ON c.id = r.id and DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL r.sess_time+".(WP_Insights::$default_recording_interval*4)." SECOND) < r.sess_date
+											GROUP BY visitor_id) AS b";
+		$concurrent_recording_details = $WP_Insights_DB_Utils_Instance->db_query($concurrent_recording_query);
+		
+		if(isset($concurrent_recording_details[0]['clients'])) {
+			$concurrent_recordings = $concurrent_recording_details[0]['clients'];
+		} else {
+			$concurrent_recordings = 0;
+		}
+		
+		return $concurrent_recordings;
+		
 	}
 	
 	/** askapache_get_process_count()
