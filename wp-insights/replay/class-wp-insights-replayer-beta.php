@@ -50,7 +50,7 @@ class WP_Insights_Replayer_Beta {
 		$this->cache_dir = $WP_Insights_instance->get_cache_dir();
 		$this->wp_insights_db_utils = WP_Insights_DB_Utils::get_instance();
 		$this->wp_insights_db_utils->setWpdb($wpdb);
-		$this->js_replayer_path = plugins_url('js/dev/replayer.js?v='.WP_Insights::VERSION, dirname(__FILE__));
+		$this->js_replayer_path = plugins_url('js/dev/wpi-replayer.js?v='.WP_Insights::VERSION, dirname(__FILE__));
 		$this->js_create_path = "http://code.createjs.com/createjs-2013.12.12.min.js";
 		$this->image_cursor_path = plugins_url('assets/cursor.png?v='.WP_Insights::VERSION, dirname(__FILE__));
 		$this->image_click_path = plugins_url('assets/click.png?v='.WP_Insights::VERSION, dirname(__FILE__));

@@ -307,7 +307,16 @@ class WP_Insights {
 				$this->WP_Insights_Recorder_Instance->init_recording();
 			}
 			
-			if($should_record_status == WP_Insights_Utils::CAN_RECORD_RETURNING_VISITOR
+			if($should_record_status == WP_Insights_Utils::CAN_RECORD_DEV) {
+				if(has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
+					$priority = has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) );
+					remove_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ), $priority);
+				}
+				
+				if(!has_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ) )) {
+					add_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ) );
+				}
+			} else if($should_record_status == WP_Insights_Utils::CAN_RECORD_RETURNING_VISITOR
 				|| $should_record_status == WP_Insights_Utils::CAN_RECORD_NON_DEV) {
 				
 				if(has_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ) )) {
@@ -317,15 +326,6 @@ class WP_Insights {
 				
 				if(!has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
 					add_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) );
-				}
-			} else if($should_record_status == WP_Insights_Utils::CAN_RECORD_DEV) {
-				if(has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
-					$priority = has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) );
-					remove_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ), $priority);
-				}
-				
-				if(!has_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ) )) {
-					add_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ) );
 				}
 			} else if($should_record_status == WP_Insights_Utils::NOT_RECORDABLE_BACKEND_URL) {
 				if(has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
@@ -879,18 +879,12 @@ class WP_Insights {
 	
 	public function add_wpinsights_scripts() {
 		$wpi_js_url = plugins_url('js/wpi-js.min.js', __FILE__);
-		$json3_js_url = plugins_url('js/dev/json3.min.js', __FILE__);
-		$smt_aux_js_url = plugins_url('js/dev/smt-aux.js', __FILE__);
-		$smt_record_js_url = plugins_url('js/dev/smt-record.js', __FILE__);
-		$smt_tracking_url = admin_url( 'admin-ajax.php' );
-		$jquery_ui_scrollable_js = plugins_url('js/dev/jquery-ui-scrollable.js', __FILE__);
-		
+		$wpi_tracking_url = admin_url( 'admin-ajax.php' );		
 		?>
 		<!-- Powered by WP Insights version <?php echo self::VERSION?>-->
 						  <script id='wpi-trigger-script' type="text/javascript">
 									//<![CDATA[
 									var addressBarURL = top.location.href;
-									var isFullyLoaded = false;
 									
 									if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views/wpi-replay") < 0) {
 				
@@ -938,7 +932,7 @@ class WP_Insights {
 														        });
 														    };
 										  					wpi.record({
-															      trackingUrl: "<?php echo $smt_tracking_url;?>",
+															      trackingUrl: "<?php echo $wpi_tracking_url;?>",
 															      postInterval: <?php echo self::$default_recording_interval;?>,
 															      recordingId: <?php echo $this->WP_Insights_Recorder_Instance->get_recording_id();?>,
 															      pageId: <?php echo $this->WP_Insights_Recorder_Instance->get_page_id();?>
@@ -956,12 +950,9 @@ class WP_Insights {
 	
 	public function add_wpinsights_dev_scripts() {
 		//error_log("Inside add_wpinsights_scripts");
-		$wpi_js_url = plugins_url('js/wpi-js.min.js', __FILE__);
 		$json3_js_url = plugins_url('js/dev/json3.min.js', __FILE__);
-		$smt_aux_js_url = plugins_url('js/dev/smt-aux.js', __FILE__);
-		$smt_record_js_url = plugins_url('js/dev/smt-record.js', __FILE__);
-		$smt_tracking_url = admin_url( 'admin-ajax.php' );
-		$jquery_ui_scrollable_js = plugins_url('js/dev/jquery-ui-scrollable.js', __FILE__);
+		$wpi_recorder_js_url = plugins_url('js/dev/wpi-recorder.js', __FILE__);
+		$wpi_tracking_url = admin_url( 'admin-ajax.php' );
 		
 		?>
 
@@ -969,11 +960,9 @@ class WP_Insights {
 		  <script id='wpi-trigger-script' type="text/javascript">
 					//<![CDATA[
 					var addressBarURL = top.location.href;
-					var isFullyLoaded = false;
 					
 					if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views") < 0) {
 			  			var wpi_jquery_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
-			  			var jQuery_UI_1_10_3_url = "//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js";
 	
 			  			jQuery.getScript( "<?php echo $json3_js_url?>");
 	
@@ -1016,10 +1005,10 @@ class WP_Insights {
 						        });
 						    };
 
-				  				jQuery.getScript( "<?php echo $smt_record_js_url.'?v='.self::VERSION?>", function() 
+				  				jQuery.getScript( "<?php echo $wpi_recorder_js_url.'?v='.self::VERSION?>", function() 
 				  		  			  {
 					  					wpi.record({
-										      trackingUrl: "<?php echo $smt_tracking_url?>",
+										      trackingUrl: "<?php echo $wpi_tracking_url?>",
 										      postInterval: <?php echo self::$default_recording_interval;?>,
 											  recordingId: <?php echo $this->WP_Insights_Recorder_Instance->get_recording_id();?>,
 											  pageId: <?php echo $this->WP_Insights_Recorder_Instance->get_page_id();?>

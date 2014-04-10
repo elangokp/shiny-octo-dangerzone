@@ -35,13 +35,9 @@ class WP_Insights_Utils {
 											FROM
 											(SELECT COUNT(1) as client_connections
 											FROM $recordsTable r
-											INNER JOIN (
-											SELECT id
-											FROM $recordsTable
 											WHERE DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 HOUR) < sess_date
-											) as c
-											ON c.id = r.id and DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL r.sess_time+".(WP_Insights::$default_recording_interval*4)." SECOND) < r.sess_date
-											GROUP BY visitor_id) AS b";
+											AND DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL r.sess_time+".(WP_Insights::$default_recording_interval*4)." SECOND) < r.sess_date
+											GROUP BY visitor_id) AS live_connections";
 		$concurrent_recording_details = $WP_Insights_DB_Utils_Instance->db_query($concurrent_recording_query);
 		
 		if(isset($concurrent_recording_details[0]['clients'])) {
