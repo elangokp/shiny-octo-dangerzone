@@ -1,5 +1,7 @@
 <?php
 
+require_once('class-wp-insights-db-utils.php');
+
 class WP_Insights_Utils {
 	
 	const NOT_RECORDABLE_BACKEND_URL = 'not_recordable_backend_url';
@@ -12,11 +14,16 @@ class WP_Insights_Utils {
 	
 	const CAN_RECORD_NON_DEV = 'can_record_non_dev';
 	
-	public static function should_wpi_record($WP_Insights_DB_Utils_Instance,$max_concurrent_recordings) {
-		$current_url = WP_Insights_Utils::getCurrentPageURL();
-		if(is_admin() || strpos($current_url,"plugins/wp-insights/views") !== false || strpos($current_url,"wp-cron.php") !== false || strpos($current_url,"wp-login.php") !== false) {
+	public static function should_wpi_record($current_url = "") {
+		error_log("Before : ".$current_url);
+		if($current_url == "") {
+			$current_url = WP_Insights_Utils::getCurrentPageURL();
+		}	
+		error_log("After : ".$current_url);
+		$max_concurrent_recordings = get_option(WP_Insights::$max_concurrent_recordings_option_name, WP_Insights::$default_max_concurrent_recordings_option_value);
+		if((!defined('DOING_AJAX') && is_admin()) || strpos($current_url,"plugins/wp-insights/views") !== false || strpos($current_url,"wp-cron.php") !== false || strpos($current_url,"wp-login.php") !== false) {
 			return self::NOT_RECORDABLE_BACKEND_URL;
-		} else if(!empty($_GET['wpidev']) && $_GET['wpidev'] === "true") {
+		} else if((!empty($_GET['wpidev']) && $_GET['wpidev'] === "true") || strpos($current_url,"wpidev=true") !== false) {
 			return self::CAN_RECORD_DEV;
 		} else if(isset($_COOKIE['wpi-visitor-id'])){
 			return self::CAN_RECORD_RETURNING_VISITOR;
@@ -27,8 +34,9 @@ class WP_Insights_Utils {
 		}
 	}
 	
-	protected static function get_concurrent_recordings($WP_Insights_DB_Utils_Instance) {
+	protected static function get_concurrent_recordings() {
 		
+		$WP_Insights_DB_Utils_Instance = WP_Insights_DB_Utils::get_instance();
 		$recordsTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
 		$concurrent_recording_query ="SELECT COUNT( 1 ) AS clients,
 											SUM( client_connections ) AS total_connections
@@ -36,7 +44,7 @@ class WP_Insights_Utils {
 											(SELECT COUNT(1) as client_connections
 											FROM $recordsTable r
 											WHERE DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 HOUR) < sess_date
-											AND DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL r.sess_time+".(WP_Insights::$default_recording_interval*4)." SECOND) < r.sess_date
+											AND DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL r.sess_time+".(WP_Insights::$default_recording_interval*2.5)." SECOND) < r.sess_date
 											GROUP BY visitor_id) AS live_connections";
 		$concurrent_recording_details = $WP_Insights_DB_Utils_Instance->db_query($concurrent_recording_query);
 		

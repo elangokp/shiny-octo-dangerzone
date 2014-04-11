@@ -80,15 +80,15 @@ class WP_Insights {
 	
 	protected static $browscap_cache_dir = null;
 	
-	protected static $recording_option_name = "wpi_recording_status";
+	public static $recording_option_name = "wpi_recording_status";
 	
-	protected static $default_recording_option_value = "ON";
+	public static $default_recording_option_value = "ON";
 	
-	protected static $max_concurrent_recordings_option_name = "wpi_max_concurrent_recordings";
+	public static $max_concurrent_recordings_option_name = "wpi_max_concurrent_recordings";
 	
-	protected static $default_max_concurrent_recordings_option_value = 5;
+	public static $default_max_concurrent_recordings_option_value = 5;
 	
-	protected static $default_recording_interval = 30; //in seconds
+	public static $default_recording_interval = 30; //in seconds
 
 	/**
 	 * Initialize the plugin by setting localization, filters, and administration functions.
@@ -137,7 +137,11 @@ class WP_Insights {
 		
 		
 		add_action('wp_head', array($this, 'add_IE9_Compatibility_Meta_Tag'));
-		add_action('plugins_loaded', array($this, 'setRecorderStatus'));
+		
+		if (!defined('DOING_AJAX')) {
+			add_action('plugins_loaded', array($this, 'setRecorderStatus'));
+		}
+		
 		//add_action('admin_notices', array($this, 'wp_insights_admin_notices'));
 		//add_filter( 'TODO', array( $this, 'filter_method_name' ) );
 		
@@ -294,9 +298,10 @@ class WP_Insights {
 		//error_log("recording_status is ".$recording_status);
 		if(strcasecmp(trim($recording_status), 'ON') == 0) {
 			//error_log("Inside matches ON");
-			$should_record_status = WP_Insights_Utils::should_wpi_record(self::$WP_Insights_DB_Utils_Instance, get_option(self::$max_concurrent_recordings_option_name, self::$default_max_concurrent_recordings_option_value));
+			$should_record_status = WP_Insights_Utils::should_wpi_record();
+			error_log($should_record_status);
 			
-			if($should_record_status == WP_Insights_Utils::CAN_RECORD_RETURNING_VISITOR 
+			/*if($should_record_status == WP_Insights_Utils::CAN_RECORD_RETURNING_VISITOR 
 					|| $should_record_status == WP_Insights_Utils::CAN_RECORD_NON_DEV
 					|| $should_record_status == WP_Insights_Utils::CAN_RECORD_DEV) {
 				
@@ -305,7 +310,7 @@ class WP_Insights {
 				$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
 				$this->WP_Insights_Recorder_Instance->setBrowscapCacheDir(self::$browscap_cache_dir);
 				$this->WP_Insights_Recorder_Instance->init_recording();
-			}
+			}*/
 			
 			if($should_record_status == WP_Insights_Utils::CAN_RECORD_DEV) {
 				if(has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
@@ -360,12 +365,11 @@ class WP_Insights {
 	
 	protected function getRecordingStatusDisplay() {
 		//error_log("Inside matches getRecordingStatusDisplay");
+		$recording_status = get_option(self::$recording_option_name, self::$default_recording_option_value);
 		$recording_status_display = null;
-		if(has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
-			//error_log("Inside has Action");
+		if(strcasecmp(trim($recording_status), 'ON') == 0) {
 			$recording_status_display = "<span class='recording-on'>Recording</span>";
 		} else {
-			//error_log("Inside doesnt have Action");
 			$recording_status_display = "<span class='recording-off'>Not Recording</span>";
 		}
 		$recording_status_display .= '<a href="admin.php?page=wp-insights-settings-sub-menu" class="add-new-h2">Change Status</a>';
@@ -679,25 +683,29 @@ class WP_Insights {
 		if(isset($_POST['change_recorder_status'])){
 			if($_POST['change_recorder_status'] == 'start') {
 				update_option(self::$recording_option_name, "ON" );
+				$is_recording = true;
 				//self::$WP_Insights_DB_Utils_Instance->db_set_option("recording_status","ON");
 			} else if($_POST['change_recorder_status'] == 'stop') {
 				update_option(self::$recording_option_name, "OFF" );
+				$is_recording = false;
 				//self::$WP_Insights_DB_Utils_Instance->db_set_option("recording_status","OFF");
 			}
 			$this->setRecorderStatus();
+		} else {
+			$recording_status = get_option(self::$recording_option_name, self::$default_recording_option_value);
+			if(strcasecmp(trim($recording_status), 'ON') == 0) {
+				$is_recording = true;
+			} else {
+				$is_recording = false;
+			}
 		}
 		
 		if(isset($_POST['max_concurrent_recordings'])){
 			update_option(self::$max_concurrent_recordings_option_name, $_POST['max_concurrent_recordings']);
 		}
+		
 		$recording_status_display = $this->getRecordingStatusDisplay();
-		
-		if(has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
-			$is_recording = true;
-		} else {
-			$is_recording = false;
-		}
-		
+				
 		$max_concurrent_recordings = get_option(self::$max_concurrent_recordings_option_name, self::$default_max_concurrent_recordings_option_value);
 		
 		error_log($max_concurrent_recordings);
@@ -933,9 +941,7 @@ class WP_Insights {
 														    };
 										  					wpi.record({
 															      trackingUrl: "<?php echo $wpi_tracking_url;?>",
-															      postInterval: <?php echo self::$default_recording_interval;?>,
-															      recordingId: <?php echo $this->WP_Insights_Recorder_Instance->get_recording_id();?>,
-															      pageId: <?php echo $this->WP_Insights_Recorder_Instance->get_page_id();?>
+															      postInterval: <?php echo self::$default_recording_interval;?>
 															    });
 						
 									  			  			}
@@ -1009,9 +1015,7 @@ class WP_Insights {
 				  		  			  {
 					  					wpi.record({
 										      trackingUrl: "<?php echo $wpi_tracking_url?>",
-										      postInterval: <?php echo self::$default_recording_interval;?>,
-											  recordingId: <?php echo $this->WP_Insights_Recorder_Instance->get_recording_id();?>,
-											  pageId: <?php echo $this->WP_Insights_Recorder_Instance->get_page_id();?>
+										      postInterval: <?php echo self::$default_recording_interval;?>
 										    });
 	
 				  			  			}

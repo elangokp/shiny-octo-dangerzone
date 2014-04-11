@@ -108,7 +108,8 @@ class WP_Insights_Recorder {
 	}
 	
 	protected function insert_page() {
-		$current_url = WP_Insights_Utils::getCurrentPageURL();
+		//$current_url = WP_Insights_Utils::getCurrentPageURL();
+		$current_url = $_POST['url'];
 		$pages_table = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_PAGES;
 		$page_check_query = "SELECT id as page_id from $pages_table WHERE url = '".$current_url."' LIMIT 1";
 		$page_id_resultset = $this->wp_insights_db_utils->db_query($page_check_query);
@@ -488,6 +489,38 @@ GROUP BY client_id
 			exit;
 		}
 		
+		if(isset($_POST['rid']) && isset($_POST['pid'])) {
+			error_log("rid and pid is set");
+			$rid = $_POST['rid'];
+			$pid = $_POST['pid'];
+		} else {
+			echo '{"rid":-1,"pid":-1}';
+			exit; 
+		}
+		
+		error_log("rid is : ".$rid);
+		error_log("pid is : ".$pid);
+		
+		if($rid == "0") {
+			$should_record_status = WP_Insights_Utils::should_wpi_record($_POST['url']);
+			error_log("should_record_status is : ".$should_record_status);
+			if($should_record_status == WP_Insights_Utils::CAN_RECORD_RETURNING_VISITOR
+				|| $should_record_status == WP_Insights_Utils::CAN_RECORD_NON_DEV
+				|| $should_record_status == WP_Insights_Utils::CAN_RECORD_DEV) {
+				
+				$this->init_recording();
+				echo '{"rid":'.$this->recording_id.',"pid":'.$this->page_id.'}';
+			} else {
+				echo '{"rid":-1,"pid":-1}';
+				exit;
+			}
+		} else if($rid == "-1") {
+			exit;
+		} else {
+			$this->recording_id = $rid;
+			$this->page_id = $pid;
+		}
+		
 		$values  = "sess_time = '".                         (float) $_POST['time']    ."',";
 		$values .= "focus_time = '".                        (float) $_POST['focusedTime']   ."',";
 		$values .= "lost_focus_count = '".                  (int)   $_POST['lostFocusCount']   ."',";
@@ -530,7 +563,7 @@ GROUP BY client_id
 			$values .= ",viewports = '".$viewPorts_json."'";
 		}
 
-		$this->wp_insights_db_utils->db_update($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS, $values, "id='".$_POST['rid']."'");
+		$this->wp_insights_db_utils->db_update($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS, $values, "id='".$this->recording_id."'");
 		
 		if(isset($_POST['pageSections']) && strlen($_POST['pageSections'])>2) {
 			$pageSections_json = urldecode(stripslashes($_POST['pageSections']));
@@ -594,15 +627,15 @@ GROUP BY client_id
 					.$exitTimesCaseStmt
 					.$focusedEntryTimesCaseStmt
 					.$focusedExitTimesCaseStmt;
-					$pageSectionUpdateQuery .= "WHERE record_id = ".$_POST['rid'];
+					$pageSectionUpdateQuery .= "WHERE record_id = ".$this->recording_id;
 					$this->wp_insights_db_utils->db_query($pageSectionUpdateQuery);
 				} else {
 					//error_log("Inside insert");
 					$pageSectionInsertQuery = "INSERT into $pagesections_table (record_id, page_id, section_order, section_id, section_name, sess_time, focus_time, current_page_section, lost_focus_count, entryTimes, exitTimes, focusedEntryTimes, focusedExitTimes) VALUES ";
 					$pageSectionValues = " ";
 					foreach($pageSections as $pageSection){
-						$pageSectionValues .= "(".$_POST['rid'].",";
-						$pageSectionValues .= $_POST['pid'].",";
+						$pageSectionValues .= "(".$this->recording_id.",";
+						$pageSectionValues .= $this->page_id.",";
 						$pageSectionValues .= $pageSection['order'].",";
 						$pageSectionValues .= "'".$pageSection['sectionId']."',";
 						$pageSectionValues .= "'".$pageSection['sectionName']."',";

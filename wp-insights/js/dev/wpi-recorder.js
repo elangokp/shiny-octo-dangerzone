@@ -24,9 +24,7 @@
      * @type int     
      */
     cookieDays: 365,
-    postInterval: 10,
-    recordingId: 0,
-    pageId: 0
+    postInterval: 30
   };
     
   /** 
@@ -34,6 +32,8 @@
    * This Object is private. Methods are cited but not documented.
    */
   var wpiRec = {
+    recordingId: 0,
+    pageId: 0,
     i: 0,                                  // step counter
     mouse:     { x:0, y:0 },               // mouse position
     page:      { width:0, height:0 },      // data normalization
@@ -43,7 +43,7 @@
     url:       null,                       // document URL
     rec:       null,                       // recording identifier
     userId:    null,                       // user identifier
-    append:    null,                       // append data identifier
+    sendMouseDataInterval:    null,        // append data identifier
     paused:    false,                      // check active window
     clicked:   false,                      // no mouse click yet
     timestamp: null,                       // current date's timestamp
@@ -424,21 +424,25 @@
      * This appends the mouse data to the current tracking session.
      * If user Id is not set, mouse data are queued.     
      */   
-    appendMouseData: function(type) 
+    sendMouseData: function(type) 
     {
       //if (!wpiRec.rec || wpiRec.paused) { return false; }
       // prepare data
-      if (window.location.search.indexOf('nowpipause=yes') < 0) {
-    	  if((type !== "cache") 
-        		  && wpiRec.elem.hovered.length === 0 
-        		  && wpiRec.elem.clicked.length === 0
-        		  && wpiRec.elem.lostFocus.length === 0 
-        		  && wpiRec.scrolls.length === wpiRec.lastScrollsLength 
-        		  && wpiRec.viewPorts.length === wpiRec.lastViewPortsLength) {
-        	  return;
-          }
+      if(wpiRec.recordingId <= 0 && type !== "init") {
+    	  clearInterval(wpiRec.sendMouseDataInterval);
+    	  return;
       }
       
+	  if((type !== "init") 
+    		  && wpiRec.elem.hovered.length === 0 
+    		  && wpiRec.elem.clicked.length === 0
+    		  && wpiRec.elem.lostFocus.length === 0 
+    		  && wpiRec.scrolls.length === wpiRec.lastScrollsLength 
+    		  && wpiRec.viewPorts.length === wpiRec.lastViewPortsLength
+    		  && window.location.search.indexOf('nowpipause=yes') < 0) {
+    	  return;
+      }
+	  
       var action = "wpiappend";
       var isAsync = true;
       if(type === "exit") {
@@ -452,31 +456,24 @@
       }      
       
      
-      var requestData  = "rid="        + wpiOpt.recordingId;
-      	  requestData += "&pid="        + wpiOpt.pageId;
+      var requestData  = "rid="        + wpiRec.recordingId;
+      	  requestData += "&pid="        + wpiRec.pageId;
 	      requestData += "&time="      + wpiRec.getTime();
-	      //requestData += "&pagew="     + wpiRec.page.width;
-	      //requestData += "&pageh="     + wpiRec.page.height;
-	      //requestData += "&xcoords="   + wpiRec.coords.x;
-	      //requestData += "&ycoords="   + wpiRec.coords.y;
-	      //requestData += "&clicks="    + wpiRec.coords.p;
+	      requestData += "&focusedTime=" + wpiRec.getFocusTime();
 	      requestData += "&elhovered=" + encodeURIComponent(JSON.stringify(wpiRec.elem.hovered));
 	      requestData += "&elclicked=" + encodeURIComponent(JSON.stringify(wpiRec.elem.clicked));
 	      requestData += "&ellostfocus=" + encodeURIComponent(JSON.stringify(wpiRec.elem.lostFocus));
 	      requestData += "&scrolls=" + encodeURIComponent(JSON.stringify(wpiRec.scrolls));
 	      requestData += "&vp="        + encodeURIComponent(JSON.stringify(wpiRec.viewPorts));
-	      requestData += "&lostFocusCount=" + wpiRec.lostFocusCount;
-	      requestData += "&focusedTime=" + wpiRec.getFocusTime();
-	      requestData += "&scrollPercentage=" + wpiRec.scrollPercentage;
+	      requestData += "&lostFocusCount=" + wpiRec.lostFocusCount;	      
+	      //requestData += "&scrollPercentage=" + wpiRec.scrollPercentage;
 	      requestData += "&pageSections=" + encodeURIComponent(JSON.stringify(wpiRec.pageSections));
 	      requestData += "&currentPageSection=" + wpiRec.currentPageSection;
           requestData += "&action="    + action;
           requestData += "&remote="    + wpiOpt.storageServer;
           
-       if(type === "cache") {
-		   		/*requestData += "&url="       + wpiRec.url;
-		   		requestData += "&urltitle="  + document.title;
-		   		requestData += "&cookies="   + document.cookie;*/
+       if(type === "init") {
+    	   		requestData += "&url="      + wpiRec.url;
 		   		requestData += "&html="      + wpiRec.getDocumentHtml();
        }
           
@@ -496,21 +493,48 @@
   	    xdr.onprogress = function(){};
   	    xdr.ontimeout = function(){};
   	    xdr.onerror = function(){};
+  	    if(type === "init") {
+  	    	xdr.onsuccess = function() {
+  	  	    	wpiRec.setRecordingDetails(xdr.responseText);
+  	  	    }
+  	    }  
+  	    
   	    setTimeout(function(){
   	        xdr.send(requestData);
   	    }, 0);
 	  } else {
-		wpi_jquery.ajax({
-			  type: "POST",
-			  url:  gatewayUrl+"?action="+action+"&_="+(new Date()).getTime(),
-			  cache: false,
-			  async: isAsync,
-			  data: requestData
-		});
+		if(type === "init") {
+			wpi_jquery.ajax({
+				  type: "POST",
+				  url:  gatewayUrl+"?action="+action+"&_="+(new Date()).getTime(),
+				  cache: false,
+				  async: isAsync,
+				  data: requestData,
+				  success: function(responseJSON) {
+		  	  	    	wpiRec.setRecordingDetails(responseJSON);
+		  	  	    }
+			});
+		} else {
+			wpi_jquery.ajax({
+				  type: "POST",
+				  url:  gatewayUrl+"?action="+action+"&_="+(new Date()).getTime(),
+				  cache: false,
+				  async: isAsync,
+				  data: requestData
+			});		
+		}
+		
 	  }
       // clean
       wpiRec.clearMouseData();
     },
+    
+    setRecordingDetails: function(responseJSON) {
+    	var responseObject = wpi_jquery.parseJSON(responseJSON);
+    	wpiRec.recordingId = responseObject.rid;
+    	wpiRec.pageId = responseObject.pid;    	
+    },
+
     
     /** 
      * Clears mouse data from queue.        
@@ -697,99 +721,96 @@
      * Assigns events and performs other initialization routines.
      */
     init: function() 
-    {      
-      if(wpiOpt.recordingId>0) {
-	    	  wpiRec.timestamp = wpiRec.lastBlurTimeStamp = wpiRec.lastFocusTimeStamp  = (new Date()).getTime();
-	  	    wpiRec.computeAvailableSpace();
-	  	    wpiRec.captureViewPorts();
-	          // get this location BEFORE making the AJAX request
-	          wpiRec.url = escape(window.location.href);
-	          var enableHandler = true;
-	  	    setInterval(function(){
-	  	        enableHandler = true;
-	  	    }, 50);
-	        // reuse these functions for mobile clients
-	        var onMove = function(e) {
-	          if (e.touches) { e = e.touches[0] || e.targetTouches[0]; }
-	          if(enableHandler) {
-	          	wpiRec.findElement(e); // elements hovered
-	          	enableHandler = false;
-	          }        
-	        };
-	        var onPress = function(e) {
-	          if (e.touches) { e = e.touches[0] || e.targetTouches[0]; }      
-	          wpiRec.findElement(e); // elements clicked
-	        };
-	        /*aux.addEvent(document, "mousedown",  onPress);
-	        aux.addEvent(document, "mousemove",  onMove);
-	        aux.addEvent(document, "mouseup",    wpiRec.releaseClick);      
-	        aux.addEvent(document, "touchstart", onPress);
-	        aux.addEvent(document, "touchmove",  onMove);
-	        aux.addEvent(document, "touchend",   wpiRec.releaseClick);
-	        aux.addEvent(window,   "resize",     wpiRec.captureViewPorts);*/
-	        
-	        wpi_jquery(window).on("click", onPress);
-	        wpi_jquery(window).on("mousemove", onMove);
-	        wpi_jquery(window).on("touchstart", onPress);
-	        wpi_jquery(window).on("touchmove", onMove);
-	        //wpi_jquery(window).on("touchend", onPress);
-	        wpi_jquery(window).on("resize", wpiRec.captureViewPorts);
-	
-	        wpiRec.initPageSections();
-	        wpiRec.currentScrollTop = wpi_jquery(window).scrollTop();
-	  	  wpiRec.currentScrollLeft = wpi_jquery(window).scrollLeft();
-	        wpi_jquery(window).load(function() {
-	      	  wpiRec.adjustPageSections();
-	        });
-	        
-	        wpi_jquery(window).focus(function() {
-	      		var thisFocusTimeStamp = new Date();
-	      		wpiRec.inFocus = true;
-	      		wpiRec.log("On Focus Timestamp: " + +thisFocusTimeStamp);
-	      		wpiRec.log("Previous Blur Time: " + wpiRec.blurTime);
-	      		//To avoid the effect of double fires on focus event in chrome
-	      		var thisFocusDifference = thisFocusTimeStamp - wpiRec.lastFocusTimeStamp;
-	      		wpiRec.log("thisFocusDifference: " + thisFocusDifference);
-	      		if(thisFocusDifference > 100) {
-	      			wpiRec.log("Will Add to blur time");
-	      			wpiRec.log("This time window was blurred for: " + (new Date() - wpiRec.lastBlurTimeStamp));
-	      			wpiRec.blurTime += (new Date() - wpiRec.lastBlurTimeStamp);
-	      		}    
-	      		wpiRec.log("After Blur Time: " + wpiRec.blurTime);
-	      	    wpiRec.lastFocusTimeStamp = new Date();
-	      	});
-	
-	        wpi_jquery(window).blur(function() {    		
-	      		wpiRec.lastBlurTimeStamp = +new Date();
-	      		wpiRec.inFocus = false;
-	      		wpiRec.lostFocusCount += 1;
-	      		wpiRec.elem.lostFocus.push(wpiRec.elem.hovered[wpiRec.elem.hovered.length - 1]);
-	      		var currentPageSectionIndex = wpiRec.find_in_array(wpiRec.pageSections,"sectionName",wpiRec.currentPageSection);
-	      		if(currentPageSectionIndex != false) {
-	      			wpiRec.pageSections[currentPageSectionIndex].lostFocusCount += 1;
-	      		}	
-	      		
-	      		wpiRec.log("On Blur Timestamp: " + wpiRec.lastBlurTimeStamp);
-	      	});
-	        
-	        
-	  	  wpi_jquery(window).scroll(function() {
-	  		  wpiRec.recordScrolls("scrollStart");		
-	  		});
-	  	  
-	  	  wpi_jquery(window).scrollStopped(500,function(){
-	  		  wpiRec.recordScrolls("scrollStop",500/1000);
-	  		  if(wpiRec.pageSections.length>0) {
-	  			  wpiRec.updatePageSections();
-	  		  } 
-	  		});
-	      wpi_jquery(window).on("beforeunload", function() { wpiRec.appendMouseData('exit'); });
-	      wpi_jquery(window).on("unload", function() { wpiRec.appendMouseData('exit'); })
-    	  setTimeout(function() { wpiRec.appendMouseData('cache'); }, 10);
-          // once the session started, append mouse data
-	      wpiRec.log(wpiOpt.postInterval);
-          wpiRec.append = setInterval(wpiRec.appendMouseData, wpiOpt.postInterval*1000);
-      }
+    {
+    	  wpiRec.timestamp = wpiRec.lastBlurTimeStamp = wpiRec.lastFocusTimeStamp  = (new Date()).getTime();
+  	      wpiRec.computeAvailableSpace();
+  	      wpiRec.captureViewPorts();
+          // get this location BEFORE making the AJAX request
+          wpiRec.url = escape(window.location.href);
+          var enableHandler = true;
+  	    setInterval(function(){
+  	        enableHandler = true;
+  	    }, 50);
+        // reuse these functions for mobile clients
+        var onMove = function(e) {
+          if (e.touches) { e = e.touches[0] || e.targetTouches[0]; }
+          if(enableHandler) {
+          	wpiRec.findElement(e); // elements hovered
+          	enableHandler = false;
+          }        
+        };
+        var onPress = function(e) {
+          if (e.touches) { e = e.touches[0] || e.targetTouches[0]; }      
+          wpiRec.findElement(e); // elements clicked
+        };
+        /*aux.addEvent(document, "mousedown",  onPress);
+        aux.addEvent(document, "mousemove",  onMove);
+        aux.addEvent(document, "mouseup",    wpiRec.releaseClick);      
+        aux.addEvent(document, "touchstart", onPress);
+        aux.addEvent(document, "touchmove",  onMove);
+        aux.addEvent(document, "touchend",   wpiRec.releaseClick);
+        aux.addEvent(window,   "resize",     wpiRec.captureViewPorts);*/
+        
+        wpi_jquery(window).on("click", onPress);
+        wpi_jquery(window).on("mousemove", onMove);
+        wpi_jquery(window).on("touchstart", onPress);
+        wpi_jquery(window).on("touchmove", onMove);
+        //wpi_jquery(window).on("touchend", onPress);
+        wpi_jquery(window).on("resize", wpiRec.captureViewPorts);
+
+        wpiRec.initPageSections();
+        wpiRec.currentScrollTop = wpi_jquery(window).scrollTop();
+  	  wpiRec.currentScrollLeft = wpi_jquery(window).scrollLeft();
+        wpi_jquery(window).load(function() {
+      	  wpiRec.adjustPageSections();
+        });
+        
+        wpi_jquery(window).focus(function() {
+      		var thisFocusTimeStamp = new Date();
+      		wpiRec.inFocus = true;
+      		wpiRec.log("On Focus Timestamp: " + +thisFocusTimeStamp);
+      		wpiRec.log("Previous Blur Time: " + wpiRec.blurTime);
+      		//To avoid the effect of double fires on focus event in chrome
+      		var thisFocusDifference = thisFocusTimeStamp - wpiRec.lastFocusTimeStamp;
+      		wpiRec.log("thisFocusDifference: " + thisFocusDifference);
+      		if(thisFocusDifference > 100) {
+      			wpiRec.log("Will Add to blur time");
+      			wpiRec.log("This time window was blurred for: " + (new Date() - wpiRec.lastBlurTimeStamp));
+      			wpiRec.blurTime += (new Date() - wpiRec.lastBlurTimeStamp);
+      		}    
+      		wpiRec.log("After Blur Time: " + wpiRec.blurTime);
+      	    wpiRec.lastFocusTimeStamp = new Date();
+      	});
+
+        wpi_jquery(window).blur(function() {    		
+      		wpiRec.lastBlurTimeStamp = +new Date();
+      		wpiRec.inFocus = false;
+      		wpiRec.lostFocusCount += 1;
+      		wpiRec.elem.lostFocus.push(wpiRec.elem.hovered[wpiRec.elem.hovered.length - 1]);
+      		var currentPageSectionIndex = wpiRec.find_in_array(wpiRec.pageSections,"sectionName",wpiRec.currentPageSection);
+      		if(currentPageSectionIndex != false) {
+      			wpiRec.pageSections[currentPageSectionIndex].lostFocusCount += 1;
+      		}	
+      		
+      		wpiRec.log("On Blur Timestamp: " + wpiRec.lastBlurTimeStamp);
+      	});
+        
+        
+  	  wpi_jquery(window).scroll(function() {
+  		  wpiRec.recordScrolls("scrollStart");		
+  		});
+  	  
+  	  wpi_jquery(window).scrollStopped(500,function(){
+  		  wpiRec.recordScrolls("scrollStop",500/1000);
+  		  if(wpiRec.pageSections.length>0) {
+  			  wpiRec.updatePageSections();
+  		  } 
+  		});
+      wpi_jquery(window).on("beforeunload", function() { wpiRec.sendMouseData('exit'); });
+      wpi_jquery(window).on("unload", function() { wpiRec.sendMouseData('exit'); })
+	  setTimeout(function() { wpiRec.sendMouseData('init'); }, 10);
+      // once the session started, append mouse data
+      wpiRec.sendMouseDataInterval = setInterval(wpiRec.sendMouseData, wpiOpt.postInterval*1000);
       
     }
   };
