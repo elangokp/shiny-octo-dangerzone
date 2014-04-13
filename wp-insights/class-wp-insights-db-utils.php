@@ -297,7 +297,7 @@ class WP_Insights_DB_Utils {
 		
 		$visitors_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_VISITORS;
 		$visitors_table_sql = "CREATE TABLE $visitors_table (
-		id           BIGINT        unsigned  NOT NULL auto_increment,
+		id           BIGINT        unsigned  NOT NULL,
 		os_id        TINYINT       unsigned  NOT NULL,
         browser_id   TINYINT       unsigned  NOT NULL,
         browser_ver  FLOAT(2,1)    unsigned  NOT NULL,
@@ -325,7 +325,7 @@ class WP_Insights_DB_Utils {
 	
 		$records_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_RECORDS;
         $records_table_sql  = "CREATE TABLE $records_table (
-        id           BIGINT        unsigned  NOT NULL auto_increment,
+        id           BIGINT        unsigned  NOT NULL,
         visitor_id   BIGINT        unsigned  NOT NULL,
         page_id      BIGINT        unsigned  NOT NULL,
         file     	 VARCHAR(255)            NOT NULL,               
@@ -581,6 +581,9 @@ class WP_Insights_DB_Utils {
 	
 	public function wpinsights_db_uninstall() {
 		error_log("Inside wpinsights_db_uninstall");
+		$this->db_drop($this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_AUX_STATS);
+		$this->db_drop($this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_VISITORS);
+		$this->db_drop($this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_PAGES);
 		$this->db_drop($this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_RECORDS);
 		$this->db_drop($this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_CACHE);
 		$this->db_drop($this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_OS);

@@ -121,16 +121,10 @@ class WP_Insights {
 
 		// Define custom functionality. Read more about actions and filters: http://codex.wordpress.org/Plugin_API#Hooks.2C_Actions_and_Filters
 		//add_action('wp_footer', array( $this, 'add_wpinsights_scripts' ) );
-		add_action('wp_ajax_nopriv_wpistore', array( $this, 'store_user_data' ) );
-		add_action('wp_ajax_nopriv_wpicachepage', array( $this, 'cache_user_page' ) );
-		add_action('wp_ajax_nopriv_wpiappend', array( $this, 'append_user_data' ) );
-		add_action('wp_ajax_nopriv_wpiexit', array( $this, 'exit_user_data' ) );
+		add_action('wp_ajax_nopriv_wpisave', array( $this, 'save_user_data' ) );
 		add_action('wp_ajax_nopriv_wpimouseeventdata', array( $this, 'get_mouse_event_data' ) );
 		
-		add_action('wp_ajax_wpistore', array( $this, 'store_user_data' ) );
-		add_action('wp_ajax_wpicachepage', array( $this, 'cache_user_page' ) );
-		add_action('wp_ajax_wpiappend', array( $this, 'append_user_data' ) );
-		add_action('wp_ajax_wpiexit', array( $this, 'exit_user_data' ) );
+		add_action('wp_ajax_wpisave', array( $this, 'save_user_data' ) );
 		add_action('wp_ajax_wpimouseeventdata', array( $this, 'get_mouse_event_data' ) );
 		add_action('wp_ajax_wpipagesections', array( $this, 'get_wpi_page_sections' ) );
 		add_action('wp_ajax_wpipsrecordingstats', array( $this, 'get_wpi_page_section_recording_stats' ) );
@@ -781,41 +775,16 @@ class WP_Insights {
 		return '<img id="wpipagesection-'.$id.'" data-psid="'.$id.'" data-psname="'.$name.'" class="wpipagesection" width=1px height=1px src="'.plugins_url("/assets/spacer.gif",  __FILE__).'"/>';
 	}
 	
-	public function store_user_data() {
-		error_log("Inside store_user_data");
+	public function save_user_data() {
+		error_log("Inside save_user_data");
 		$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
 		$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
 		$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
 		$this->WP_Insights_Recorder_Instance->setBrowscapCacheDir(self::$browscap_cache_dir);
-		echo $this->WP_Insights_Recorder_Instance->store();
+		$this->WP_Insights_Recorder_Instance->save();
 		die();
 	}
-	
-	public function cache_user_page() {
-		error_log("Inside cache_user_page");
-		$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
-		$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
-		$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
-		$this->WP_Insights_Recorder_Instance->setBrowscapCacheDir(self::$browscap_cache_dir);
-		$this->WP_Insights_Recorder_Instance->cache();
-		die();
-	}
-	
-	public function append_user_data() {
-		error_log("Inside append_user_data");
-		$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
-		$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
-		$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
-		$this->WP_Insights_Recorder_Instance->setBrowscapCacheDir(self::$browscap_cache_dir);
-		$this->WP_Insights_Recorder_Instance->append();
-		die();
-	}
-	
-	public function exit_user_data() {
-		error_log("Exit call triggered");
-		$this->append_user_data();
-	}
-	
+
 	public function get_mouse_event_data() {
 		error_log("Inside get_mouse_event_data");
 		$pid = isset($_GET['pid'])?$_GET['pid']:null;

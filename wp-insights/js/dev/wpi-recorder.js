@@ -23,7 +23,7 @@
      * Cookies lifetime (in days) to reset both first time users and agreed-to-track visitors.
      * @type int     
      */
-    cookieDays: 365,
+    cookieDays: 730,
     postInterval: 30
   };
     
@@ -32,8 +32,9 @@
    * This Object is private. Methods are cited but not documented.
    */
   var wpiRec = {
+	visitorId: 0,
     recordingId: 0,
-    pageId: 0,
+    ftu: false,
     i: 0,                                  // step counter
     mouse:     { x:0, y:0 },               // mouse position
     page:      { width:0, height:0 },      // data normalization
@@ -132,6 +133,34 @@
           this.setCookie(name, null, -1);
         }
       }
+    },
+    
+    getVisitorId: function()
+    {
+    	var visitorId = wpiRec.cookies.getCookie('wpi-visitor-id');
+    	console.log(visitorId);
+    	if(visitorId == undefined || visitorId == false) {
+    		wpiRec.ftu = true; 
+    		u = [];
+            for (i = 0; i < 4; i += 1) {
+                u[i] = Math.floor((Math.random() * 10));
+            }
+            var rand = u.join("");
+            visitorId = wpiRec.timestamp+rand;
+            wpiRec.cookies.setCookie('wpi-visitor-id',visitorId,wpiOpt.cookieDays);
+    	}
+    	return visitorId;
+    },
+    
+    generateRecordingId: function()
+    {
+		u = [];
+        for (i = 0; i < 4; i += 1) {
+            u[i] = Math.floor((Math.random() * 10));
+        }
+        var rand = u.join("");
+        recordingId = wpiRec.timestamp+rand;
+    	return recordingId;
     },
     
     /**
@@ -272,108 +301,6 @@
 		});
 		//alert("currentPageSection is " +wpiRec.currentPageSection+ " lastPageSection is " + wpiRec.lastPageSection);
     },
-    
-    
-    /** 
-     * Sends data in background via an XHR object (asynchronous request).
-     * This function starts the tracking session.
-     */   
-    /*initMouseData: function() 
-    {
-      wpiRec.computeAvailableSpace();
-      wpiRec.log("Inside init mouse data");
-      wpiRec.log("Window Height : " + wpi_jquery(window).height());
-      wpiRec.log("Window Width : " + wpi_jquery(window).width());
-      wpiRec.log("Doc Height : " + wpi_jquery(document).height());
-      wpiRec.log("Doc Width : " + wpi_jquery(document).width());
-      
-      // prepare data
-      var requestData  = "url="        + wpiRec.url;
-      requestData += "&urltitle="  + document.title;
-      requestData += "&cookies="   + document.cookie;
-      requestData += "&screenw="   + screen.width;
-      requestData += "&screenh="   + screen.height;
-      requestData += "&pagew="     + wpiRec.page.width;
-      requestData += "&pageh="     + wpiRec.page.height;
-      requestData += "&vp="        + encodeURIComponent(JSON.stringify(wpiRec.viewPorts));
-      requestData += "&time="      + wpiRec.getTime();
-      requestData += "&fps="       + wpiOpt.fps;
-      //requestData += "&xcoords="   + wpiRec.coords.x;
-      //requestData += "&ycoords="   + wpiRec.coords.y;
-      //requestData += "&clicks="    + wpiRec.coords.p;
-      //requestData += "&elhovered=" + encodeURIComponent(JSON.stringify(wpiRec.elem.hovered));
-      //requestData += "&elclicked=" + encodeURIComponent(JSON.stringify(wpiRec.elem.clicked));
-      //requestData += "&ellostfocus=" + encodeURIComponent(JSON.stringify(wpiRec.elem.lostFocus));
-      requestData += "&lostFocusCount=" + wpiRec.lostFocusCount;
-      requestData += "&focusedTime=" + wpiRec.getFocusTime();
-      requestData += "&scrollPercentage=" + wpiRec.scrollPercentage;
-      requestData += "&action="    + "wpistore";
-      requestData += "&remote="    + wpiOpt.storageServer;
-      
-      var gatewayUrl = wpiOpt.trackingUrl;
-      
-      wpi_jquery.ajax({
-  		  type: "GET",
-  		  url:  gatewayUrl,
-  		  data: requestData,
-  		  success: function(data) {
-  			  wpiRec.setUserId(data);
-  		  }
-		});
-      
-      // clean
-      //wpiRec.clearMouseData();
-    },*/
-    /**
-     * Sets the user ID.
-     * @return void
-     * @param {string} response  XHR response text
-     */
-    /*setUserId: function(response) 
-    {
-      wpiRec.userId = parseInt(response);
-      if (wpiRec.userId > 0) {
-    	  //setTimeout(wpiRec.cacheUserPage, 10);
-    	  setTimeout(function() { wpiRec.appendMouseData('cache'); }, 10);
-          // once the session started, append mouse data
-          wpiRec.append = setInterval(wpiRec.appendMouseData, wpiOpt.postInterval*1000);
-      }      
-    },*/
-    
-    /** Send a request to server to cache the page. */
-    /*cacheUserPage: function()
-	{
-    	var requestData  = "uid="    + wpiRec.userId;
-		requestData += "&action="    + "wpicachepage";
-		//requestData += "&url="       + wpiRec.url;
-		//requestData += "&urltitle="  + document.title;
-		//requestData += "&cookies="   + document.cookie;
-		requestData += "&html="      + wpiRec.getDocumentHtml();
-		requestData += "&remote="    + wpiOpt.storageServer;
-		
-	    // send request
-	    var gatewayUrl = wpiOpt.trackingUrl;
-	    
-	    if ('XDomainRequest' in window && window.XDomainRequest !== null) {
-    	    // Use Microsoft XDR
-    	    var xdr = new XDomainRequest();
-    	    xdr.open("post", gatewayUrl+"?action=wpicachepage&isXDR=true&_="+(new Date()).getTime());
-    	    xdr.onload = function () {};
-    	    xdr.onprogress = function(){};
-    	    xdr.ontimeout = function(){};
-    	    xdr.onerror = function(){};
-    	    setTimeout(function(){
-    	        xdr.send(requestData);
-    	    }, 0);
-    	} else {
-    		wpi_jquery.ajax({
-      		  type: "POST",
-      		  url:  gatewayUrl+"?action=wpicachepage&_="+(new Date()).getTime(),
-      		  cache: false,
-      		  data: requestData
-    		});
-    	}
-	},*/
 	
 	getDocumentHtml: function() {
         for (var dt = window.document.doctype, de = window.document.documentElement, dt = (dt && null != dt ? "<!DOCTYPE " + dt.name + ("" != dt.publicId ? ' PUBLIC "' + dt.publicId + '" "' + dt.systemId + '"' : "") + ">\n" : "<!DOCTYPE html>\n") + "<html", attrId = 0; attrId < de.attributes.length; attrId++) 
@@ -426,12 +353,12 @@
      */   
     sendMouseData: function(type) 
     {
-      //if (!wpiRec.rec || wpiRec.paused) { return false; }
-      // prepare data
-      if(wpiRec.recordingId <= 0 && type !== "init") {
-    	  clearInterval(wpiRec.sendMouseDataInterval);
-    	  return;
+      if(type === undefined) {
+    	  type = "update";
       }
+      
+      var action = "wpisave";
+      var isAsync = true;
       
 	  if((type !== "init") 
     		  && wpiRec.elem.hovered.length === 0 
@@ -443,10 +370,8 @@
     	  return;
       }
 	  
-      var action = "wpiappend";
-      var isAsync = true;
+      
       if(type === "exit") {
-    	  action = "wpiexit";
     	  if(wpiRec.isExitTriggered) {
     		return;  
     	  } else {
@@ -457,7 +382,6 @@
       
      
       var requestData  = "rid="        + wpiRec.recordingId;
-      	  requestData += "&pid="        + wpiRec.pageId;
 	      requestData += "&time="      + wpiRec.getTime();
 	      requestData += "&focusedTime=" + wpiRec.getFocusTime();
 	      requestData += "&elhovered=" + encodeURIComponent(JSON.stringify(wpiRec.elem.hovered));
@@ -465,14 +389,15 @@
 	      requestData += "&ellostfocus=" + encodeURIComponent(JSON.stringify(wpiRec.elem.lostFocus));
 	      requestData += "&scrolls=" + encodeURIComponent(JSON.stringify(wpiRec.scrolls));
 	      requestData += "&vp="        + encodeURIComponent(JSON.stringify(wpiRec.viewPorts));
-	      requestData += "&lostFocusCount=" + wpiRec.lostFocusCount;	      
-	      //requestData += "&scrollPercentage=" + wpiRec.scrollPercentage;
+	      requestData += "&lostFocusCount=" + wpiRec.lostFocusCount;
 	      requestData += "&pageSections=" + encodeURIComponent(JSON.stringify(wpiRec.pageSections));
 	      requestData += "&currentPageSection=" + wpiRec.currentPageSection;
           requestData += "&action="    + action;
-          requestData += "&remote="    + wpiOpt.storageServer;
+          requestData += "&type="    + type;
           
        if(type === "init") {
+    	   		requestData += "&vid="        + wpiRec.visitorId;
+    	   		requestData += "&ftu="        + wpiRec.ftu;
     	   		requestData += "&url="      + wpiRec.url;
 		   		requestData += "&html="      + wpiRec.getDocumentHtml();
        }
@@ -481,7 +406,7 @@
       wpiRec.lastViewPortsLength = wpiRec.viewPorts.length;
       
       //wpiRec.log("Inside append mouse data");
-      console.log("Inside "+action+" append mouse data");
+      console.log("Inside "+action+" send mouse data and type = "+type);
       // send request
       var gatewayUrl = wpiOpt.trackingUrl;
       if ('XDomainRequest' in window && window.XDomainRequest !== null) {
@@ -493,46 +418,22 @@
   	    xdr.onprogress = function(){};
   	    xdr.ontimeout = function(){};
   	    xdr.onerror = function(){};
-  	    if(type === "init") {
-  	    	xdr.onsuccess = function() {
-  	  	    	wpiRec.setRecordingDetails(xdr.responseText);
-  	  	    }
-  	    }  
   	    
   	    setTimeout(function(){
   	        xdr.send(requestData);
   	    }, 0);
 	  } else {
-		if(type === "init") {
-			wpi_jquery.ajax({
-				  type: "POST",
-				  url:  gatewayUrl+"?action="+action+"&_="+(new Date()).getTime(),
-				  cache: false,
-				  async: isAsync,
-				  data: requestData,
-				  success: function(responseJSON) {
-		  	  	    	wpiRec.setRecordingDetails(responseJSON);
-		  	  	    }
-			});
-		} else {
-			wpi_jquery.ajax({
-				  type: "POST",
-				  url:  gatewayUrl+"?action="+action+"&_="+(new Date()).getTime(),
-				  cache: false,
-				  async: isAsync,
-				  data: requestData
-			});		
-		}
+		wpi_jquery.ajax({
+			  type: "POST",
+			  url:  gatewayUrl+"?action="+action+"&_="+(new Date()).getTime(),
+			  cache: false,
+			  async: isAsync,
+			  data: requestData
+		});		
 		
 	  }
       // clean
       wpiRec.clearMouseData();
-    },
-    
-    setRecordingDetails: function(responseJSON) {
-    	var responseObject = wpi_jquery.parseJSON(responseJSON);
-    	wpiRec.recordingId = responseObject.rid;
-    	wpiRec.pageId = responseObject.pid;    	
     },
 
     
@@ -541,9 +442,6 @@
      */
     clearMouseData: function()
     {
-      wpiRec.coords.x = [];
-      wpiRec.coords.y = [];
-      wpiRec.coords.p = [];
       wpiRec.elem.hovered = [];
       wpiRec.elem.clicked = [];
       wpiRec.elem.lostFocus = [];
@@ -723,6 +621,10 @@
     init: function() 
     {
     	  wpiRec.timestamp = wpiRec.lastBlurTimeStamp = wpiRec.lastFocusTimeStamp  = (new Date()).getTime();
+    	  console.log(wpiRec.timestamp);
+    	  wpiRec.visitorId = wpiRec.getVisitorId();
+    	  console.log("In Init Visitor ID : " + wpiRec.visitorId);
+    	  wpiRec.recordingId = wpiRec.generateRecordingId();
   	      wpiRec.computeAvailableSpace();
   	      wpiRec.captureViewPorts();
           // get this location BEFORE making the AJAX request
