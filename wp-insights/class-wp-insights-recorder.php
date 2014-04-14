@@ -68,26 +68,10 @@ class WP_Insights_Recorder {
 	protected function insert_visitor() {
 		$visitors_table = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_VISITORS;
 		$recordsTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
-		error_log("VID is : ".$_POST['vid']);
+		//error_log("VID is : ".$_POST['vid']);
 		$this->visitor_id = $_POST['vid'];
-		error_log("ftu is : ".$_POST['ftu']);
-		if (isset($_POST['ftu']) && $_POST['ftu'] == "false") {			
-			$exitUpdateQuery = "UPDATE $recordsTable
-			SET $recordsTable.is_exit = 0,
-			$recordsTable.is_session_exit = CASE UNIX_TIMESTAMP(current_timestamp()) < (UNIX_TIMESTAMP(sess_date) + sess_time + 86400)
-			WHEN true THEN 0
-			WHEN false THEN 1 END
-			WHERE $recordsTable.visitor_id =".$this->visitor_id."
-			ORDER BY $recordsTable.id DESC
-			LIMIT 1";
-			
-			$updateVisitorQuery = "UPDATE $visitors_table
-			SET $visitors_table.last_visit_time = CURRENT_TIMESTAMP()
-			WHERE $visitors_table.id =".$this->visitor_id;
-			
-			$this->wp_insights_db_utils->db_query($exitUpdateQuery);
-			$this->wp_insights_db_utils->db_query($updateVisitorQuery);
-		} else {
+		//error_log("ftu is : ".$_POST['ftu']);
+		if (isset($_POST['ftu']) && $_POST['ftu'] == "true") {		
 			$browserAndOSId = $this->getBrowserAndOSDetails();
 			$visitor_details = array(
 					"id" => $this->visitor_id,
@@ -103,9 +87,25 @@ class WP_Insights_Recorder {
 					'%d',
 					'%f',
 					'%s',
-					'%d'
+					'%s'
 			);
 			$this->wp_insights_db_utils->db_insert($visitors_table, $visitor_details, $visitor_details_format);
+		} else {
+			$exitUpdateQuery = "UPDATE $recordsTable
+			SET $recordsTable.is_exit = 0,
+			$recordsTable.is_session_exit = CASE UNIX_TIMESTAMP(current_timestamp()) < (UNIX_TIMESTAMP(sess_date) + sess_time + 86400)
+			WHEN true THEN 0
+			WHEN false THEN 1 END
+			WHERE $recordsTable.visitor_id =".$this->visitor_id."
+			ORDER BY $recordsTable.id DESC
+			LIMIT 1";
+				
+			$updateVisitorQuery = "UPDATE $visitors_table
+			SET $visitors_table.last_visit_time = CURRENT_TIMESTAMP()
+			WHERE $visitors_table.id =".$this->visitor_id;
+				
+			$this->wp_insights_db_utils->db_query($exitUpdateQuery);
+			$this->wp_insights_db_utils->db_query($updateVisitorQuery);			
 		}
 	}
 	
@@ -134,7 +134,7 @@ class WP_Insights_Recorder {
 		$this->insert_page();
 		$recordsTable = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
 		$relativefilepath = $this->cache();
-		error_log("RID is : ".$_POST['rid']);
+		//error_log("RID is : ".$_POST['rid']);
 		/* create database entry ---------------------------------------------------- */
 		$recorddetails = array(
 				"id" => $_POST['rid'],
@@ -349,28 +349,47 @@ class WP_Insights_Recorder {
 
 	public function save() {
 		
+		error_log("save execution start : ".microtime());
+		ignore_user_abort(true);
+
+		
+		//process what needs to be returned to browser
+		echo "1";
+		
+		//tell the browser not to expect any more content and close the connection
+		header("Content-Length: 1");
+		header("Connection: close");
+		flush();
+		
+		error_log("Flushed now : ".microtime());
+		
 		if(array_key_exists('isXDR',$_REQUEST) && $_REQUEST['isXDR'] == true) {
 			parse_str(file_get_contents('php://input'), $_POST);
 		}
 		
 		if (empty($_POST)) {
-			exit;
+			parse_str(file_get_contents('php://input'), $_POST);
+			if (empty($_POST)) {
+				return;
+			}			
 		}
 		
 		if(isset($_POST['type'])) {
 			$type = $_POST['type'];
 		} else {
-			exit;
-		}
-		
-		if($type == "init") {
-			$this->init_recording();
-			exit;
+			return;
 		}
 		
 		error_log($type);
+		
+		if($type == "init") {
+			$this->init_recording();
+			return;
+		}
+		
+		
 		$this->recording_id = $_POST['rid'];
-		error_log($this->recording_id);
+		//error_log($this->recording_id);
 		
 		$values = "sess_time = '".                         (float) $_POST['time']    ."',";
 		$values .= "focus_time = '".                        (float) $_POST['focusedTime']   ."',";
@@ -406,8 +425,6 @@ class WP_Insights_Recorder {
 			$viewPorts_json = urldecode(stripslashes($_POST['vp']));
 			$values .= ",viewports = '".$viewPorts_json."'";
 		}
-		
-		error_log($values);
 
 		$this->wp_insights_db_utils->db_update($this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS, $values, "id='".$this->recording_id."'");
 		

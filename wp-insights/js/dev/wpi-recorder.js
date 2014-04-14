@@ -1,20 +1,16 @@
 (function(){
   /** 
    * WP Insights default recording options.
-   * This Object can be overriden when calling the smt2.record method.
+   * This Object can be overriden when calling the wpi.record method.
    */
   var wpiOpt = {
     /**
-     * URL to local (smt)2 website, i.e., the site URL to track (with the smt*.js files).
-     * The record script will try to find automatically the URL, but if you used other name (i.e: http://my.server/test) 
-     * you must type it explicitly here.      
-     * Valid path names that will be recognized automatically are those having the string "smt2",
-     * e.g: "http://domain.name/smt2/", "/my/smt2dir/", "/server/t/tracksmt2/" ... and so on.
+     * URL to local wpi website, i.e., the site URL to track
      * @type string
      */
     trackingUrl: "",
     /**
-     * URL to remote (smt)2 server, i.e., the site URL where the logs will be stored, and (of course) the CMS is installed.
+     * URL to remote wpi server, i.e., the site URL where the logs will be stored, and (of course) the CMS is installed.
      * If this value is empty, data will be posted to trackingServer URL.
      * @type string
      */
@@ -164,11 +160,10 @@
     },
     
     /**
-     * Overrides (smt) tracking options object with custom-provided options object
+     * Overrides (wpi) tracking options object with custom-provided options object
      * @return void
-     * @param {object} smtOptionsObj
+     * @param {object} wpiOptionsObj
      * @param {object} customOptionsObj
-     * @see <code>smtOpt</code> object either in <code>smtRecord</code> or <code>smtReplay</code> classes
      */
     overrideTrackingOptions: function(smtOptionsObj, customOptionsObj)
     {
@@ -231,7 +226,7 @@
  	                     startTime: wpiRec.getTime(),
  	                     endTop: null,
  	                     endLeft: null,
-					     endTime: null,
+					     endTime: null
  	                 };
     		wpiRec.scrolls.push(scroll);
     		wpiRec.log(wpiRec.scrolls);
@@ -404,9 +399,11 @@
           
       wpiRec.lastScrollsLength = wpiRec.scrolls.length;
       wpiRec.lastViewPortsLength = wpiRec.viewPorts.length;
+      // clean
+      wpiRec.clearMouseData();
       
       //wpiRec.log("Inside append mouse data");
-      console.log("Inside "+action+" send mouse data and type = "+type);
+      wpiRec.log("Inside "+action+" send mouse data and type = "+type);
       // send request
       var gatewayUrl = wpiOpt.trackingUrl;
       if ('XDomainRequest' in window && window.XDomainRequest !== null) {
@@ -432,8 +429,6 @@
 		});		
 		
 	  }
-      // clean
-      wpiRec.clearMouseData();
     },
 
     
@@ -717,7 +712,7 @@
     }
   };
   
-  // do not overwrite the smt2 namespace
+  // do not overwrite the wpi namespace
   if (typeof window.wpi !== 'undefined') { throw("wpi namespace conflict"); }
   // else expose record method
   window.wpi = {

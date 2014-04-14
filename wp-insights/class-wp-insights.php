@@ -32,7 +32,7 @@ class WP_Insights {
 	 *
 	 * @const   string
 	 */
-	const VERSION = '0.9.3Beta';
+	const VERSION = '0.9.4Beta';
 
 	/**
 	 * Unique identifier for your plugin.
@@ -130,7 +130,7 @@ class WP_Insights {
 		add_action('wp_ajax_wpipsrecordingstats', array( $this, 'get_wpi_page_section_recording_stats' ) );
 		
 		
-		add_action('wp_head', array($this, 'add_IE9_Compatibility_Meta_Tag'));
+		//add_action('wp_head', array($this, 'add_IE9_Compatibility_Meta_Tag'));
 		
 		if (!defined('DOING_AJAX')) {
 			add_action('plugins_loaded', array($this, 'setRecorderStatus'));
@@ -776,12 +776,14 @@ class WP_Insights {
 	}
 	
 	public function save_user_data() {
+		error_log("save_user_data execution start : ".microtime());
 		error_log("Inside save_user_data");
 		$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
 		$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
 		$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
 		$this->WP_Insights_Recorder_Instance->setBrowscapCacheDir(self::$browscap_cache_dir);
 		$this->WP_Insights_Recorder_Instance->save();
+		error_log("save_user_data execution end : ".microtime());
 		die();
 	}
 
@@ -909,8 +911,8 @@ class WP_Insights {
 														        });
 														    };
 										  					wpi.record({
-															      trackingUrl: "<?php echo $wpi_tracking_url;?>",
-															      postInterval: <?php echo self::$default_recording_interval;?>
+															      "trackingUrl": "<?php echo $wpi_tracking_url;?>",
+															      "postInterval": <?php echo self::$default_recording_interval;?>
 															    });
 						
 									  			  			}
@@ -980,15 +982,17 @@ class WP_Insights {
 						        });
 						    };
 
-				  				jQuery.getScript( "<?php echo $wpi_recorder_js_url.'?v='.self::VERSION?>", function() 
+						    jQuery.getScript( "<?php echo $wpi_recorder_js_url.'?v='.self::VERSION?>", function() 
 				  		  			  {
 					  					wpi.record({
-										      trackingUrl: "<?php echo $wpi_tracking_url?>",
-										      postInterval: <?php echo self::$default_recording_interval;?>
+										      "trackingUrl": "<?php echo $wpi_tracking_url?>",
+										      "postInterval": <?php echo self::$default_recording_interval;?>
 										    });
 	
 				  			  			}
-				  		  			);
+				  		  			);			    
+
+				  				
 			  			});
 	
 					}	  			

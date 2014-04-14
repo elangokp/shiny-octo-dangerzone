@@ -15,11 +15,11 @@ class WP_Insights_Utils {
 	const CAN_RECORD_NON_DEV = 'can_record_non_dev';
 	
 	public static function should_wpi_record($current_url = "") {
-		error_log("Before : ".$current_url);
+		//error_log("Before : ".$current_url);
 		if($current_url == "") {
 			$current_url = WP_Insights_Utils::getCurrentPageURL();
 		}	
-		error_log("After : ".$current_url);
+		//error_log("After : ".$current_url);
 		$max_concurrent_recordings = get_option(WP_Insights::$max_concurrent_recordings_option_name, WP_Insights::$default_max_concurrent_recordings_option_value);
 		if((!defined('DOING_AJAX') && is_admin()) || strpos($current_url,"plugins/wp-insights/views") !== false || strpos($current_url,"wp-cron.php") !== false || strpos($current_url,"wp-login.php") !== false) {
 			return self::NOT_RECORDABLE_BACKEND_URL;
@@ -27,7 +27,7 @@ class WP_Insights_Utils {
 			return self::CAN_RECORD_DEV;
 		} else if(isset($_COOKIE['wpi-visitor-id'])){
 			return self::CAN_RECORD_RETURNING_VISITOR;
-		} else if(get_concurrent_recordings($WP_Insights_DB_Utils_Instance) >= $max_concurrent_recordings) {
+		} else if(WP_Insights_Utils::get_concurrent_recordings() >= $max_concurrent_recordings) {
 			return self::EXCEEDS_MAX_CONCURRENT_RECORDINGS;
 		} else  {
 			return self::CAN_RECORD_NON_DEV;

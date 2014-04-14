@@ -73,7 +73,7 @@ header('Expires: 0'); // Proxies.
 
     $(function(){
     	$("#iframePlayer").load(function() {
-    		replayer = window.frames[0].window;
+    		replayer = window.frames[0].window.wpiReplayer;
         	replayer.initializePlayer();
         	$("#playButton").click(function() {
         		$("#playButton").attr('disabled',true);
