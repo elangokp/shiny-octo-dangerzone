@@ -352,13 +352,14 @@ class WP_Insights_Recorder {
 		error_log("save execution start : ".microtime());
 		ignore_user_abort(true);
 
+		//tell the browser not to expect any more content and close the connection
+		header("Content-Length: 1");
+		header("Connection: close");
 		
 		//process what needs to be returned to browser
 		echo "1";
 		
-		//tell the browser not to expect any more content and close the connection
-		header("Content-Length: 1");
-		header("Connection: close");
+		ob_flush();
 		flush();
 		
 		error_log("Flushed now : ".microtime());

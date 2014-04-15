@@ -424,12 +424,40 @@
 			  type: "POST",
 			  url:  gatewayUrl+"?action="+action+"&_="+(new Date()).getTime(),
 			  cache: false,
-			  async: isAsync,
+			  async: true,
 			  data: requestData
 		});		
 		
 	  }
+      
+		if(type === "exit") {
+			var waitBeforeRequest = wpiRec.getParameterByName('waitBeforeRequest');
+		      
+			if(waitBeforeRequest == null || waitBeforeRequest === "") {
+				  waitBeforeRequest = 0;
+			} else {
+				waitBeforeRequest = parseInt(waitBeforeRequest,10);
+			}
+			
+			
+			wpiRec.sleep(waitBeforeRequest);
+		}
+	  
+      
     },
+    
+    sleep: function(milliseconds) 
+	{
+	  var e = new Date().getTime() + (milliseconds);
+	  while (new Date().getTime() <= e) {}
+	},
+	
+	getParameterByName: function(name) {
+	    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+	    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+	        results = regex.exec(location.search);
+	    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+	},
 
     
     /** 
