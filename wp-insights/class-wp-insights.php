@@ -929,6 +929,7 @@ class WP_Insights {
 		//error_log("Inside add_wpinsights_scripts");
 		$json3_js_url = plugins_url('js/dev/json3.min.js', __FILE__);
 		$wpi_recorder_js_url = plugins_url('js/dev/wpi-recorder.js', __FILE__);
+		$lz_string_js_url = plugins_url('js/dev/lz-string-1.3.3.js', __FILE__);
 		$wpi_tracking_url = admin_url( 'admin-ajax.php' );
 		
 		?>
@@ -942,6 +943,7 @@ class WP_Insights {
 			  			var wpi_jquery_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
 	
 			  			jQuery.getScript( "<?php echo $json3_js_url?>");
+			  			jQuery.getScript( "<?php echo $lz_string_js_url?>");
 	
 			  			jQuery.getScript(wpi_jquery_url, function() { 
 			  				wpi_jquery = $.noConflict(true);

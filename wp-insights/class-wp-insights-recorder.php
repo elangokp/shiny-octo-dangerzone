@@ -1,6 +1,7 @@
 <?php
 
 require_once('class-wp-insights-utils.php');
+require_once('utils/LZString.php');
 require_once('class-wp-insights-db-utils.php');
 require_once('class-browser.php');
 require_once('utils/Browscap.php');
@@ -396,6 +397,11 @@ class WP_Insights_Recorder {
 		$values .= "focus_time = '".                        (float) $_POST['focusedTime']   ."',";
 		$values .= "lost_focus_count = '".                  (int)   $_POST['lostFocusCount']   ."',";
 		$values .= "exit_page_section = '".                         $_POST['currentPageSection']   ."'";
+		
+		$comp_hovered_json = $_POST['elhoveredcomp'];
+		error_log($comp_hovered_json);		
+		$decomp_hovered_json = LZString::decompressFromBase64($comp_hovered_json);
+		error_log($decomp_hovered_json);
 		
 		if(isset($_POST['elhovered']) && strlen($_POST['elhovered'])>2) {
 			//error_log("Append Inside not empty hovered");

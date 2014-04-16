@@ -375,11 +375,22 @@
     	  }    	  
       }      
       
+      var hoveredJSON = encodeURIComponent(JSON.stringify(wpiRec.elem.hovered));
+      console.log(hoveredJSON);
+      console.log(hoveredJSON.length);
+      var compressedHovered = LZString.compressToBase64(hoveredJSON);
+      console.log(compressedHovered);
+      console.log(compressedHovered.length);
+      var decompressedHovered = LZString.decompressFromBase64(compressedHovered);
+      console.log(decompressedHovered);
+      console.log(decompressedHovered.length);
+      
      
       var requestData  = "rid="        + wpiRec.recordingId;
 	      requestData += "&time="      + wpiRec.getTime();
 	      requestData += "&focusedTime=" + wpiRec.getFocusTime();
-	      requestData += "&elhovered=" + encodeURIComponent(JSON.stringify(wpiRec.elem.hovered));
+	      requestData += "&elhoveredcomp=" + compressedHovered;
+	      requestData += "&elhovered=" + hoveredJSON;
 	      requestData += "&elclicked=" + encodeURIComponent(JSON.stringify(wpiRec.elem.clicked));
 	      requestData += "&ellostfocus=" + encodeURIComponent(JSON.stringify(wpiRec.elem.lostFocus));
 	      requestData += "&scrolls=" + encodeURIComponent(JSON.stringify(wpiRec.scrolls));
