@@ -33,12 +33,14 @@ class LZString {
     
     public static function fromCharCode() {
         $args = func_get_args();
+        //error_log(print_r($args,true));
 //        var_dump($args[0].': '.array_reduce(func_get_args(),function($a,$b){$a.=self::utf8_chr($b);return $a;}));
         return array_reduce(func_get_args(),function($a,$b){$a.=self::utf8_chr($b);return $a;});
     }
     
     public static function utf8_chr($u) {
         return mb_convert_encoding('&#' . intval($u) . ';', 'UTF-8', 'HTML-ENTITIES');
+        //return htmlspecialchars_decode(utf8_decode(htmlentities(intval($u), ENT_COMPAT, 'utf-8', false)));
     }
     
     public static function charCodeAt($str, $num) { 
@@ -344,9 +346,7 @@ class LZString {
         $enc3 = NULL;
         $enc4 = NULL;
         $input = preg_replace('/[^A-Za-z0-9\+\/\=]/', '', $input);
-        error_log($input);
         
-        error_log(mb_strlen($input));
         $i=0;
         while($i < mb_strlen($input)) {
             
@@ -379,7 +379,6 @@ class LZString {
             }
             $ol+=3;
         }
-        error_log($output);
         return self::decompress($output);
     }
 }

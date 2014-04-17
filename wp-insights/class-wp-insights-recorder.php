@@ -162,43 +162,64 @@ class WP_Insights_Recorder {
 				'%d'
 		);	
 		
+		$columnssql = "INSERT into $recordsTable 
+		(id,visitor_id,page_id,file,sess_time,focus_time,lost_focus_count,exit_page_section,is_exit,is_session_exit";
+		
+		$valuessql = " VALUES ("
+				.$_POST['rid']
+				.",".$this->visitor_id
+				.",".$this->page_id
+				.",'".$relativefilepath."'"
+				.",".$_POST['time']
+				.",".$_POST['focusedTime']
+				.",".$_POST['lostFocusCount']
+				.",'".urldecode(stripslashes($_POST['currentPageSection']))."'"
+				.",1"
+				.",1";
+		
 		if(isset($_POST['elhovered']) && strlen($_POST['elhovered'])>2) {
 			//error_log("Append Inside not empty hovered");
-			$hovered_json = urldecode(stripslashes($_POST['elhovered']));
-			$recorddetails["hovered"] = esc_sql($hovered_json);
-			$recorddetailsformat[] = '%s';
+			$hovered_json = stripslashes($_POST['elhovered']);
+			$columnssql .= ",hovered";
+			$valuessql .= ",'".esc_sql($hovered_json)."'";
 		}
 		
 		if(isset($_POST['elclicked']) && strlen($_POST['elclicked'])>2) {
 			//error_log("Append Inside not empty clicked");
-			$clicked_json = urldecode(stripslashes($_POST['elclicked']));
-			$recorddetails["hovered"] = esc_sql($clicked_json);
-			$recorddetailsformat[] = '%s';
+			$clicked_json = stripslashes($_POST['elclicked']);
+			$columnssql .= ",clicked";
+			$valuessql .= ",'".esc_sql($clicked_json)."'";
 			
 		}
 		
 		if(isset($_POST['ellostfocus']) && strlen($_POST['ellostfocus'])>2) {
 			//error_log("Append Inside not empty lost focus");
-			$lostFocus_json = urldecode(stripslashes($_POST['ellostfocus']));
-			$recorddetails["lost_focus"] = esc_sql($lostFocus_json);
-			$recorddetailsformat[] = '%s';
+			$lostFocus_json = stripslashes($_POST['ellostfocus']);
+			$columnssql .= ",lost_focus";
+			$valuessql .= ",'".esc_sql($lostFocus_json)."'";
 		}
 		
 		if(isset($_POST['scrolls']) && strlen($_POST['scrolls'])>2) {
 			//error_log("Append Inside not empty scrolls");
-			$scrolls_json = urldecode(stripslashes($_POST['scrolls']));
-			$recorddetails["scrolls"] = esc_sql($scrolls_json);
-			$recorddetailsformat[] = '%s';
+			$scrolls_json = stripslashes($_POST['scrolls']);
+			$columnssql .= ",scrolls";
+			$valuessql .= ",'".esc_sql($scrolls_json)."'";
 		}
 		
 		if(isset($_POST['vp']) && strlen($_POST['vp'])>2) {
 			//error_log("Append Inside not empty view ports");
-			$viewPorts_json = urldecode(stripslashes($_POST['vp']));
-			$recorddetails["viewports"] = esc_sql($viewPorts_json);
-			$recorddetailsformat[] = '%s';
+			$viewPorts_json = stripslashes($_POST['vp']);
+			$columnssql .= ",viewports";
+			$valuessql .= ",'".esc_sql($viewPorts_json)."'";
 		}
 		
-		$this->wp_insights_db_utils->db_insert($recordsTable, $recorddetails, $recorddetailsformat);
+		$columnssql .= ")";
+		$valuessql .= ")";
+		
+		$sql = $columnssql.$valuessql;
+		
+		//$this->wp_insights_db_utils->db_insert($recordsTable, $recorddetails, $recorddetailsformat);
+		$this->wp_insights_db_utils->db_query($sql);
 		
 		if(isset($_POST['pageSections']) && strlen($_POST['pageSections'])>2) {
 			$pageSections_json = urldecode(stripslashes($_POST['pageSections']));
@@ -398,38 +419,38 @@ class WP_Insights_Recorder {
 		$values .= "lost_focus_count = '".                  (int)   $_POST['lostFocusCount']   ."',";
 		$values .= "exit_page_section = '".                         $_POST['currentPageSection']   ."'";
 		
-		$comp_hovered_json = $_POST['elhoveredcomp'];
+		/*$comp_hovered_json = $_POST['elhoveredcomp'];
 		error_log($comp_hovered_json);		
 		$decomp_hovered_json = LZString::decompressFromBase64($comp_hovered_json);
-		error_log($decomp_hovered_json);
+		error_log($decomp_hovered_json);*/
 		
 		if(isset($_POST['elhovered']) && strlen($_POST['elhovered'])>2) {
 			//error_log("Append Inside not empty hovered");
-			$hovered_json = urldecode(stripslashes($_POST['elhovered']));
+			$hovered_json = stripslashes($_POST['elhovered']);
 			$values .= ",hovered   = CONCAT(COALESCE(hovered,  ''), '|~|". esc_sql($hovered_json) ."')";
 		}
 		
 		if(isset($_POST['elclicked']) && strlen($_POST['elclicked'])>2) {
 			//error_log("Append Inside not empty clicked");
-			$clicked_json = urldecode(stripslashes($_POST['elclicked']));
+			$clicked_json = stripslashes($_POST['elclicked']);
 			$values .= ",clicked   = CONCAT(COALESCE(clicked,  ''), '|~|". esc_sql($clicked_json) ."')";
 		}
 		
 		if(isset($_POST['ellostfocus']) && strlen($_POST['ellostfocus'])>2) {
 			//error_log("Append Inside not empty lost focus");
-			$lostFocus_json = urldecode(stripslashes($_POST['ellostfocus']));
+			$lostFocus_json = stripslashes($_POST['ellostfocus']);
 			$values .= ",lost_focus   = CONCAT(COALESCE(lost_focus,  ''), '|~|". esc_sql($lostFocus_json) ."')";
 		}
 		
 		if(isset($_POST['scrolls']) && strlen($_POST['scrolls'])>2) {
 			//error_log("Append Inside not empty scrolls");
-			$scrolls_json = urldecode(stripslashes($_POST['scrolls']));
+			$scrolls_json = stripslashes($_POST['scrolls']);
 			$values .= ",scrolls = '".$scrolls_json."'";
 		}
 		
 		if(isset($_POST['vp']) && strlen($_POST['vp'])>2) {
 			//error_log("Append Inside not empty view ports");
-			$viewPorts_json = urldecode(stripslashes($_POST['vp']));
+			$viewPorts_json = stripslashes($_POST['vp']);
 			$values .= ",viewports = '".$viewPorts_json."'";
 		}
 

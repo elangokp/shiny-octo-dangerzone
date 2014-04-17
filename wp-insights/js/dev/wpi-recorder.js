@@ -201,11 +201,10 @@
     
     captureViewPorts: function()
     {
-    	var viewPort = {
-    			w: wpi_jquery(window).width(),
-    			h: wpi_jquery(window).height(),
-    			t: wpiRec.getTime()
-    	}
+    	var viewPort = [];
+    	viewPort.push(wpi_jquery(window).width()); // Window Width - index 0
+    	viewPort.push(wpi_jquery(window).height()); // Window Height - index 1
+    	viewPort.push(wpiRec.getTime()); // viewport change time - index 2
     	wpiRec.viewPorts.push(viewPort);
     },
     
@@ -220,14 +219,13 @@
     		wpiRec.scrollStopped = false;
     		wpiRec.log("scrollTop : " + wpiRec.currentScrollTop);
     		wpiRec.log("scrollLeft : " + wpiRec.currentScrollLeft);
-    		var scroll = {
- 	                     startTop: wpiRec.currentScrollTop,
- 	                     startLeft: wpiRec.currentScrollLeft,
- 	                     startTime: wpiRec.getTime(),
- 	                     endTop: null,
- 	                     endLeft: null,
-					     endTime: null
- 	                 };
+    		var scroll = [];
+    		scroll.push(wpiRec.currentScrollTop); //StartTop - index 0
+    		scroll.push(wpiRec.currentScrollLeft); //StartLeft - index 1
+    		scroll.push(wpiRec.getTime()); //StartTime - index 2
+    		scroll.push(null); //endTop - index 3
+    		scroll.push(null); //endLeft - index 4
+    		scroll.push(null); //endTime - index 5
     		wpiRec.scrolls.push(scroll);
     		wpiRec.log(wpiRec.scrolls);
     	} else if(eventType === "scrollStop" && !wpiRec.scrollStopped) {
@@ -239,9 +237,9 @@
     		wpiRec.log("scrollLeft : " + wpiRec.currentScrollLeft);
     		if(wpiRec.scrolls.length > 0){
     			wpiRec.log("scrolls length greater than 0");
-    			wpiRec.scrolls[wpiRec.scrolls.length-1].endTop = wpiRec.currentScrollTop;
-        		wpiRec.scrolls[wpiRec.scrolls.length-1].endLeft = wpiRec.currentScrollLeft;
-        		wpiRec.scrolls[wpiRec.scrolls.length-1].endTime = wpiRec.getTime()-scrollStopDelay;
+    			wpiRec.scrolls[wpiRec.scrolls.length-1][3] = wpiRec.currentScrollTop;
+        		wpiRec.scrolls[wpiRec.scrolls.length-1][4] = wpiRec.currentScrollLeft;
+        		wpiRec.scrolls[wpiRec.scrolls.length-1][5] = wpiRec.getTime()-scrollStopDelay;
     		} 
     		wpiRec.log(wpiRec.scrolls);
     		wpiRec.scrollStopped = true;
@@ -375,7 +373,7 @@
     	  }    	  
       }      
       
-      var hoveredJSON = encodeURIComponent(JSON.stringify(wpiRec.elem.hovered));
+      /*var hoveredJSON = JSON.stringify(wpiRec.elem.hovered);
       console.log(hoveredJSON);
       console.log(hoveredJSON.length);
       var compressedHovered = LZString.compressToBase64(hoveredJSON);
@@ -383,21 +381,22 @@
       console.log(compressedHovered.length);
       var decompressedHovered = LZString.decompressFromBase64(compressedHovered);
       console.log(decompressedHovered);
-      console.log(decompressedHovered.length);
+      console.log(decompressedHovered.length);*/
       
      
       var requestData  = "rid="        + wpiRec.recordingId;
 	      requestData += "&time="      + wpiRec.getTime();
 	      requestData += "&focusedTime=" + wpiRec.getFocusTime();
-	      requestData += "&elhoveredcomp=" + compressedHovered;
-	      requestData += "&elhovered=" + hoveredJSON;
-	      requestData += "&elclicked=" + encodeURIComponent(JSON.stringify(wpiRec.elem.clicked));
-	      requestData += "&ellostfocus=" + encodeURIComponent(JSON.stringify(wpiRec.elem.lostFocus));
-	      requestData += "&scrolls=" + encodeURIComponent(JSON.stringify(wpiRec.scrolls));
-	      requestData += "&vp="        + encodeURIComponent(JSON.stringify(wpiRec.viewPorts));
+	      //requestData += "&elhoveredcomp=" + compressedHovered;
+	      //requestData += "&elhovered=" + encodeURIComponent(JSON.stringify(wpiRec.elem.hovered));
+	      requestData += "&elhovered=" + JSON.stringify(wpiRec.elem.hovered);
+	      requestData += "&elclicked=" + JSON.stringify(wpiRec.elem.clicked);
+	      requestData += "&ellostfocus=" + JSON.stringify(wpiRec.elem.lostFocus);
+	      requestData += "&scrolls=" + JSON.stringify(wpiRec.scrolls);
+	      requestData += "&vp="        + JSON.stringify(wpiRec.viewPorts);
 	      requestData += "&lostFocusCount=" + wpiRec.lostFocusCount;
 	      requestData += "&pageSections=" + encodeURIComponent(JSON.stringify(wpiRec.pageSections));
-	      requestData += "&currentPageSection=" + wpiRec.currentPageSection;
+	      requestData += "&currentPageSection=" + encodeURIComponent(wpiRec.currentPageSection);
           requestData += "&action="    + action;
           requestData += "&type="    + type;
           
@@ -628,7 +627,7 @@
     	//wpiRec.log(elementX);
     	var elementY = Math.round(wpi_jquery(target).offset().top);
     	//wpiRec.log(elementY);
-        var mousePosition = {
+        /*var mousePosition = {
             cp: wpi_jquery(target).getcssPath(),//csspath
             t: wpiRec.getTime(),
             ft: wpiRec.getFocusTime(),
@@ -640,7 +639,16 @@
             rY: pageY - elementY,//rY
             w: wpi_jquery(target).width(),//w
             h: wpi_jquery(target).height()//h
-        };
+        };*/
+    	var mousePosition = [];
+    	mousePosition.push(wpi_jquery(target).getcssPath()); //csspath - index 0
+    	mousePosition.push(wpiRec.getTime()); //time - index 1
+    	mousePosition.push(pageX); //pageX - index 2
+    	mousePosition.push(pageY); //pageY - index 3
+    	mousePosition.push(pageX - elementX); //rX - index 4
+    	mousePosition.push(pageY - elementY); //rY - index 5
+    	mousePosition.push(wpi_jquery(target).width()); //w - index 6
+    	mousePosition.push(wpi_jquery(target).height()); //h - index 7
         
         //wpiRec.log(wpi_jquery(target).getcssPath());
         //wpiRec.log(wpi_jquery(target).width());

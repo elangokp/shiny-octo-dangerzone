@@ -89,17 +89,17 @@
 					try {		
 						var point = {
 										type : "movement",
-										pX : hoveredData[i].pX,
-										pY : hoveredData[i].pY,
-										w : hoveredData[i].w,
-										h : hoveredData[i].h,
-										rX : hoveredData[i].rX,
-										rY : hoveredData[i].rY,
-										startTime : hoveredData[i].t*1000,
-										cp : hoveredData[i].cp
+										cp : hoveredData[i][0],
+										startTime : hoveredData[i][1]*1000,
+										pX : hoveredData[i][2],
+										pY : hoveredData[i][3],
+										rX : hoveredData[i][4],
+										rY : hoveredData[i][5],
+										w : hoveredData[i][6],
+										h : hoveredData[i][7]
 								};
 						if(i<(hoveredData.length-1)) {
-							point.d = (hoveredData[i+1].t - hoveredData[i].t)*1000;
+							point.d = (hoveredData[i+1][1] - hoveredData[i][1])*1000;
 						} else {
 							point.d = 0;
 						}
@@ -127,13 +127,13 @@
 					try {
 							var scroll = {
 							        type : "scroll",
-									top : scrollData[i].endTop,
-									left : scrollData[i].endLeft,
-									duration : (scrollData[i].endTime - scrollData[i].startTime)*1000,
-							        startTime : scrollData[i].startTime*1000
+									top : scrollData[i][3],
+									left : scrollData[i][4],
+									duration : (scrollData[i][5] - scrollData[i][2])*1000,
+							        startTime : scrollData[i][2]*1000
 							};
 							if(i<(scrollData.length-1)) {
-								scroll.wait = (scrollData[i+1].startTime - scrollData[i].endTime)*1000;
+								scroll.wait = (scrollData[i+1][2] - scrollData[i][5])*1000;
 							} else {
 								scroll.wait = 0;
 							}
@@ -160,20 +160,20 @@
 					wpiReplayer.initialClickWait = clickedData[0].t*1000;
 				}	
 				for (var i=0; i<clickedData.length; i++) {
-					try {	
+					try {
 						var point = {
 										type : "click",
-										pX : clickedData[i].pX,
-										pY : clickedData[i].pY,
-										w : clickedData[i].w,
-										h : clickedData[i].h,
-										rX : clickedData[i].rX,
-										rY : clickedData[i].rY,
-										startTime : clickedData[i].t*1000,
-										cp : clickedData[i].cp
+										cp : clickedData[i][0],
+										startTime : clickedData[i][1]*1000,
+										pX : clickedData[i][2],
+										pY : clickedData[i][3],
+										rX : clickedData[i][4],
+										rY : clickedData[i][5],
+										w : clickedData[i][6],
+										h : clickedData[i][7]
 								};
 						if(i<(clickedData.length-1)) {
-							point.d = (clickedData[i+1].t - clickedData[i].t)*1000;
+							point.d = (clickedData[i+1][1] - clickedData[i][1])*1000;
 						} else {
 							point.d = 0;
 						}
@@ -197,9 +197,9 @@
 					try {
 							var viewport = {
 							        type : "viewport",
-									w : viewportData[i].w,
-									h : viewportData[i].h,
-							        startTime : viewportData[i].t*1000
+									w : viewportData[i][0],
+									h : viewportData[i][1],
+							        startTime : viewportData[i][2]*1000
 							};
 							
 							wpiReplayer.viewportArray.push(viewport);			
@@ -277,7 +277,7 @@
 						wpiReplayer.oldMidPt.x = midPt.x;
 						wpiReplayer.oldMidPt.y = midPt.y;
 						createjs.Tween.get(wpiReplayer.cursor).to({x:x,y:y}, movementTime).wait(waitTime).call(wpiReplayer.animate);
-						wpiReplayer.lastMovementCP = event.cp;
+						//wpiReplayer.lastMovementCP = event.cp;
 						var event = jQuery.Event("hover");
 						event.pageX = x;
 						event.pageY = y;

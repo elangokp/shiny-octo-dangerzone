@@ -110,55 +110,58 @@ class WP_Insights_Replayer_Beta {
 	}
 	
 	protected function normalizeRecordedJson() {
-		$this->hovered="[";
+		$this->hovered="";
 		foreach(explode("|~|",$this->record['hovered']) as $j => $jsonArrayString){
 			error_log("   " . $j . " => " . $jsonArrayString);
-			if($this->hovered != "" && $jsonArrayString != "") {
-				$jsonArrayString = ltrim($jsonArrayString, "[");
-				$this->hovered = rtrim($this->hovered, "]");
-				if(strlen($this->hovered)>1){
-					$this->hovered = $this->hovered.",";
-				}
+			if($jsonArrayString != "") {
+				$jsonArrayString = substr($jsonArrayString, 1);
+				$this->hovered = substr($this->hovered, 0, -1);
+				$this->hovered = $this->hovered.",";
 				$this->hovered = $this->hovered.$jsonArrayString;
 			}
 		}
 		
-		if($this->hovered === "[") {
+		if($this->hovered === "") {
 			$this->hovered = "[]";
+		} else {
+			$this->hovered = ltrim($this->hovered,",");
+			$this->hovered = "[".$this->hovered;
 		}
 		
-		$this->clicked="[";
+		$this->clicked="";
 		foreach(explode("|~|",$this->record['clicked']) as $j => $jsonArrayString){
 			error_log("   " . $j . " => " . $jsonArrayString);
-			if($this->clicked != "" && $jsonArrayString != "") {
-				$jsonArrayString = ltrim($jsonArrayString, "[");
-				$this->clicked = rtrim($this->clicked, "]");
-				if(strlen($this->clicked)>1){
-					$this->clicked = $this->clicked.",";
-				}
+			if($jsonArrayString != "") {
+				$jsonArrayString = substr($jsonArrayString, 1);
+				$this->clicked = substr($this->clicked, 0, -1);
+				$this->clicked = $this->clicked.",";
 				$this->clicked = $this->clicked.$jsonArrayString;
 			}
 		}
 		
-		if($this->clicked === "[") {
+		if($this->clicked === "") {
 			$this->clicked = "[]";
+		} else {
+			$this->clicked = ltrim($this->clicked,",");
+			$this->clicked = "[".$this->clicked;
 		}
 		
-		$this->lostFocus="[";
+		$this->lostFocus="";
 		foreach(explode("|~|",$this->record['lost_focus']) as $j => $jsonArrayString){
 			error_log("   " . $j . " => " . $jsonArrayString);
-			if($this->lostFocus != "" && $jsonArrayString != "") {
-				$jsonArrayString = ltrim($jsonArrayString, "[");
-				$this->lostFocus = rtrim($this->lostFocus, "]");
-				if(strlen($this->lostFocus)>1){
-					$this->lostFocus = $this->lostFocus.",";
-				}
+			if($jsonArrayString != "") {
+				$jsonArrayString = substr($jsonArrayString, 1);
+				$this->lostFocus = substr($this->lostFocus, 0, -1);
+				$this->lostFocus = $this->lostFocus.",";
 				$this->lostFocus = $this->lostFocus.$jsonArrayString;
 			}
 		}
 		
-		if($this->lostFocus === "[") {
+		if($this->lostFocus === "") {
 			$this->lostFocus = "[]";
+		} else {
+			$this->lostFocus = ltrim($this->lostFocus,",");
+			$this->lostFocus = "[".$this->lostFocus;
 		}
 		
 		if($this->record['scrolls'] == null || $this->record['scrolls'] === "") {
@@ -176,8 +179,8 @@ class WP_Insights_Replayer_Beta {
 		$viewports_array = json_decode($this->viewports);
 		error_log(print_r($viewports_array,true));
 		if(sizeof($viewports_array)>0) {
-			$this->viewPortHeight = $viewports_array[0]->h;
-			$this->viewPortWidth = $viewports_array[0]->w;
+			$this->viewPortWidth = $viewports_array[0][0]; //selecting first viewport instance and Index 0 is window width
+			$this->viewPortHeight = $viewports_array[0][1]; //selecting first viewport instance and Index 1 is window height
 		}
 		
 	}
