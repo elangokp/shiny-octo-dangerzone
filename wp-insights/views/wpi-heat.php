@@ -104,7 +104,7 @@ if($hmtype == 'mvh') {
 ?>
 </h1>
 <form id="wpi-heat" method="get" style="margin: 0 auto;float:right;width:50%">
-<input type="hidden" name="lrid" value="<?php echo $lrid ?>" />
+<input type="hidden" name="pid" value="<?php echo $pid ?>" />
 <input type="hidden" name="hmtype" value="<?php echo $hmtype ?>" />
 <input type="hidden" name="scrx" value="<?php echo $scrx ?>" />
 <input type="hidden" name="scry" value="<?php echo $scry ?>" />

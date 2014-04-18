@@ -106,6 +106,14 @@ class WP_Insights_Event_Data {
 	
 	protected function constructOptimizedHeatmapString() {
 		
+		//csspath - index 0 - 'cp'
+		//time - index 1 - 't'
+		//pageX - index 2 - 'pX'
+		//pageY - index 3 - 'pY'
+		//rX - index 4
+		//rY - index 5
+		//w - index 6
+		//h - index 7
 		$heatmapPositions = array();
 		if($this->recordsPerPage > count($this->records)) {
 			$heatmapPositions['containsMoreRecords'] = false;
@@ -129,22 +137,23 @@ class WP_Insights_Event_Data {
 						}
 						$this->eventJsonResponse = $this->eventJsonResponse.$jsonArrayString;*/
 						$mousePositions  = json_decode($jsonArrayString, true);
+						error_log(print_r($mousePositions,true));
 						foreach($mousePositions as $mousePosition){
-							$mousePositionKey = $mousePosition['cp']."-".$mousePosition['w']."-".$mousePosition['h']."-".$mousePosition['rX']."-".$mousePosition['rY'];
+							$mousePositionKey = $mousePosition[0]."-".$mousePosition[6]."-".$mousePosition[7]."-".$mousePosition[4]."-".$mousePosition[5];
 							if(!isset($singleRecordingMousePositionKeys[$mousePositionKey])) {
 								$singleRecordingMousePositionKeys[$mousePositionKey] = 1;
-								if(!isset($heatmapPositions[$mousePosition['cp']])) {
-									$heatmapPositions[$mousePosition['cp']] = array(
-											"w" => array(),
-											"h" => array(),
+								if(!isset($heatmapPositions[$mousePosition[0]])) {
+									$heatmapPositions[$mousePosition[0]] = array(
 											"rX" => array(),
-											"rY" => array()
+											"rY" => array(),
+											"w" => array(),
+											"h" => array()											
 									);
 								}
-								$heatmapPositions[$mousePosition['cp']]['w'][] = $mousePosition['w'];
-								$heatmapPositions[$mousePosition['cp']]['h'][] = $mousePosition['h'];
-								$heatmapPositions[$mousePosition['cp']]['rX'][] = $mousePosition['rX'];
-								$heatmapPositions[$mousePosition['cp']]['rY'][] = $mousePosition['rY'];
+								$heatmapPositions[$mousePosition[0]]['rX'][] = $mousePosition[4];
+								$heatmapPositions[$mousePosition[0]]['rY'][] = $mousePosition[5];
+								$heatmapPositions[$mousePosition[0]]['w'][] = $mousePosition[6];
+								$heatmapPositions[$mousePosition[0]]['h'][] = $mousePosition[7];								
 							}
 						}
 					}
@@ -164,18 +173,18 @@ class WP_Insights_Event_Data {
 					if($lastJsonArrayString != "") {
 						$mousePositions  = json_decode($lastJsonArrayString, true);
 						$exitPoint = end($mousePositions);
-						if(!isset($heatmapPositions[$exitPoint['cp']])) {
-							$heatmapPositions[$exitPoint['cp']] = array(
-									"w" => array(),
-									"h" => array(),
+						if(!isset($heatmapPositions[$exitPoint[0]])) {
+							$heatmapPositions[$exitPoint[0]] = array(
 									"rX" => array(),
-									"rY" => array()
+									"rY" => array(),
+									"w" => array(),
+									"h" => array()									
 							);
 						}
-						$heatmapPositions[$exitPoint['cp']]['w'][] = $exitPoint['w'];
-						$heatmapPositions[$exitPoint['cp']]['h'][] = $exitPoint['h'];
-						$heatmapPositions[$exitPoint['cp']]['rX'][] = $exitPoint['rX'];
-						$heatmapPositions[$exitPoint['cp']]['rY'][] = $exitPoint['rY'];
+						$heatmapPositions[$exitPoint[0]]['rX'][] = $exitPoint[4];
+						$heatmapPositions[$exitPoint[0]]['rY'][] = $exitPoint[5];
+						$heatmapPositions[$exitPoint[0]]['w'][] = $exitPoint[6];
+						$heatmapPositions[$exitPoint[0]]['h'][] = $exitPoint[7];						
 					}
 				}
 	

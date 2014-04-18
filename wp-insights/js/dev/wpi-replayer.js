@@ -78,7 +78,7 @@
 
 
 			constructMovementArray: function() {
-				console.log(recordingData.hovered);
+				//console.log(recordingData.hovered);
 				var hoveredData = recordingData.hovered;
 				wpiReplayer.movementArray = [];
 				wpiReplayer.pointIndex = 0;
@@ -111,12 +111,12 @@
 					
 				}			
 				
-				console.log(wpiReplayer.movementArray);
+				//console.log(wpiReplayer.movementArray);
 			},
 
 
 			constructScrollArray: function() {
-				console.log(recordingData.scrolls);
+				//console.log(recordingData.scrolls);
 				var scrollData = recordingData.scrolls;
 				wpiReplayer.scrollArray = [];
 				wpiReplayer.scrollIndex = 0;
@@ -148,11 +148,11 @@
 						//console.log(value.cp);					
 					}
 				}
-				console.log(wpiReplayer.scrollArray);
+				//console.log(wpiReplayer.scrollArray);
 			},
 
 			constructClickArray: function() {
-				console.log(recordingData.clicked);
+				//console.log(recordingData.clicked);
 				var clickedData = recordingData.clicked;
 				wpiReplayer.clickArray = [];
 				wpiReplayer.clickIndex = 0;
@@ -184,11 +184,11 @@
 						//console.log(value.cp);					
 					}
 				}
-				console.log(wpiReplayer.clickArray);
+				//console.log(wpiReplayer.clickArray);
 			},
 
 			constructViewportsArray: function() {
-				console.log(recordingData.viewports);
+				//console.log(recordingData.viewports);
 				var viewportData = recordingData.viewports;
 				wpiReplayer.viewportArray = [];
 				wpiReplayer.viewportIndex = 0;
@@ -208,7 +208,7 @@
 						//console.log(value.cp);					
 					}
 				}
-				console.log(wpiReplayer.viewportArray);
+				//console.log(wpiReplayer.viewportArray);
 			},
 
 			normalizeEvents: function() {
@@ -229,7 +229,7 @@
 						wpiReplayer.allEventsArray[i].d = 0;
 					}	
 				}	
-				console.log(wpiReplayer.allEventsArray);
+				//console.log(wpiReplayer.allEventsArray);
 			},
 
 			animate: function() {
