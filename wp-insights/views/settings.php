@@ -30,6 +30,16 @@
 	            	</select>
             	</li>
             	<li>
+			        <label for="server_recording_interval">Server Recording Interval: </label>
+			        <select name="server_recording_interval">
+            			<option value="10" <?php echo $server_recording_interval === "10" ?"selected":""?> >10 Seconds</option>
+            			<option value="15" <?php echo $server_recording_interval === "15" ?"selected":""?> >15 Seconds</option>
+            			<option value="20" <?php echo $server_recording_interval === "20" ?"selected":""?> >20 Seconds</option>
+            			<option value="25" <?php echo $server_recording_interval === "25" ?"selected":""?> >25 Seconds</option>
+            			<option value="30" <?php echo $server_recording_interval === "30" ?"selected":""?> >30 Seconds</option>
+            		</select>
+            	</li>
+            	<li>
             		<label for="max_concurrent_recordings">Max Concurrent Recordings: </label>
             		<select name="max_concurrent_recordings">
             			<option value="0" <?php echo $max_concurrent_recordings === "0" ?"selected":""?> >0</option>
@@ -53,6 +63,16 @@
             			<option value="18" <?php echo $max_concurrent_recordings === "18" ?"selected":""?> >18</option>
             			<option value="19" <?php echo $max_concurrent_recordings === "19" ?"selected":""?> >19</option>
             			<option value="20" <?php echo $max_concurrent_recordings === "20" ?"selected":""?> >20</option>
+            			<option value="21" <?php echo $max_concurrent_recordings === "21" ?"selected":""?> >21</option>
+            			<option value="22" <?php echo $max_concurrent_recordings === "22" ?"selected":""?> >22</option>
+            			<option value="23" <?php echo $max_concurrent_recordings === "23" ?"selected":""?> >23</option>
+            			<option value="24" <?php echo $max_concurrent_recordings === "24" ?"selected":""?> >24</option>
+            			<option value="25" <?php echo $max_concurrent_recordings === "25" ?"selected":""?> >25</option>
+            			<option value="26" <?php echo $max_concurrent_recordings === "26" ?"selected":""?> >26</option>
+            			<option value="27" <?php echo $max_concurrent_recordings === "27" ?"selected":""?> >27</option>
+            			<option value="28" <?php echo $max_concurrent_recordings === "28" ?"selected":""?> >28</option>
+            			<option value="29" <?php echo $max_concurrent_recordings === "29" ?"selected":""?> >29</option>
+            			<option value="30" <?php echo $max_concurrent_recordings === "30" ?"selected":""?> >30</option>
             		</select>
             	</li>
             	

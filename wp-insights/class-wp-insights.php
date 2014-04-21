@@ -88,7 +88,9 @@ class WP_Insights {
 	
 	public static $default_max_concurrent_recordings_option_value = 5;
 	
-	public static $default_recording_interval = 30; //in seconds
+	public static $server_recording_interval_option_name = "wpi_server_recording_interval";
+	
+	public static $default_server_recording_interval_option_value = 30; //in seconds
 
 	/**
 	 * Initialize the plugin by setting localization, filters, and administration functions.
@@ -249,6 +251,10 @@ class WP_Insights {
 			update_option(self::$max_concurrent_recordings_option_name, self::$default_max_concurrent_recordings_option_value );
 		}
 		
+		if(get_option(self::$server_recording_interval_option_name) === false){
+			update_option(self::$server_recording_interval_option_name, self::$default_server_recording_interval_option_value );
+		}
+		
 		WP_Insights_Utils::createDirectory(self::$cache_dir);
 		WP_Insights_Utils::createDirectory(self::$browscap_cache_dir);
 	}
@@ -270,6 +276,7 @@ class WP_Insights {
 		//$WP_Insights_DB_Utils_Instance->setWpdb(self::get_instance()->wp_insights_wpdb);
 		delete_option(self::$recording_option_name);
 		delete_option(self::$max_concurrent_recordings_option_name);
+		delete_option(self::$server_recording_interval_option_name);
 		self::$WP_Insights_DB_Utils_Instance->wpinsights_db_uninstall();
 		WP_Insights_Utils::deleteDirectory(self::$cache_dir);
 	}
@@ -698,11 +705,15 @@ class WP_Insights {
 			update_option(self::$max_concurrent_recordings_option_name, $_POST['max_concurrent_recordings']);
 		}
 		
+		if(isset($_POST['server_recording_interval'])){
+			update_option(self::$server_recording_interval_option_name, $_POST['server_recording_interval']);
+		}
+		
 		$recording_status_display = $this->getRecordingStatusDisplay();
 				
 		$max_concurrent_recordings = get_option(self::$max_concurrent_recordings_option_name, self::$default_max_concurrent_recordings_option_value);
 		
-		error_log($max_concurrent_recordings);
+		$server_recording_interval = get_option(self::$server_recording_interval_option_name, self::$default_server_recording_interval_option_value);
 		
 		include_once( 'views/settings.php' );
 	}
@@ -912,7 +923,7 @@ class WP_Insights {
 														    };
 										  					wpi.record({
 															      "trackingUrl": "<?php echo $wpi_tracking_url;?>",
-															      "postInterval": <?php echo self::$default_recording_interval;?>
+															      "postInterval": <?php echo get_option(self::$server_recording_interval_option_name, self::$default_server_recording_interval_option_value);?>
 															    });
 						
 									  			  			}
@@ -943,7 +954,6 @@ class WP_Insights {
 			  			var wpi_jquery_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
 	
 			  			jQuery.getScript( "<?php echo $json3_js_url?>");
-			  			jQuery.getScript( "<?php echo $lz_string_js_url?>");
 	
 			  			jQuery.getScript(wpi_jquery_url, function() { 
 			  				wpi_jquery = $.noConflict(true);
@@ -988,7 +998,7 @@ class WP_Insights {
 				  		  			  {
 					  					wpi.record({
 										      "trackingUrl": "<?php echo $wpi_tracking_url?>",
-										      "postInterval": <?php echo self::$default_recording_interval;?>
+										      "postInterval": <?php echo get_option(self::$server_recording_interval_option_name, self::$default_server_recording_interval_option_value);?>
 										    });
 	
 				  			  			}

@@ -1,7 +1,6 @@
 <?php
 
 require_once('class-wp-insights-utils.php');
-require_once('utils/LZString.php');
 require_once('class-wp-insights-db-utils.php');
 require_once('class-browser.php');
 require_once('utils/Browscap.php');
@@ -111,7 +110,7 @@ class WP_Insights_Recorder {
 	}
 	
 	protected function insert_page() {
-		//$current_url = WP_Insights_Utils::getCurrentPageURL();
+		//$current_url = WP_Insights_Utils::getCurrentPageURL(); 
 		$current_url = urldecode(stripslashes($_POST['url']));
 		$pages_table = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_PAGES;
 		$page_check_query = "SELECT id as page_id from $pages_table WHERE url = '".$current_url."' LIMIT 1";
@@ -370,7 +369,7 @@ class WP_Insights_Recorder {
 	}
 
 	public function save() {
-		
+		/*
 		error_log("save execution start : ".microtime());
 		ignore_user_abort(true);
 
@@ -385,6 +384,7 @@ class WP_Insights_Recorder {
 		flush();
 		
 		error_log("Flushed now : ".microtime());
+		*/
 		
 		if(array_key_exists('isXDR',$_REQUEST) && $_REQUEST['isXDR'] == true) {
 			parse_str(file_get_contents('php://input'), $_POST);

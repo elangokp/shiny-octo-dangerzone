@@ -44,7 +44,9 @@ class WP_Insights_Utils {
 											(SELECT COUNT(1) as client_connections
 											FROM $recordsTable r
 											WHERE DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 HOUR) < sess_date
-											AND DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL r.sess_time+".(WP_Insights::$default_recording_interval*2.5)." SECOND) < r.sess_date
+											AND DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL r.sess_time+"
+											.(get_option(WP_Insights::$server_recording_interval_option_name, WP_Insights::$default_server_recording_interval_option_value)*2.5)
+											." SECOND) < r.sess_date
 											GROUP BY visitor_id) AS live_connections";
 		$concurrent_recording_details = $WP_Insights_DB_Utils_Instance->db_query($concurrent_recording_query);
 		
