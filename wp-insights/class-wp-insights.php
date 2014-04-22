@@ -102,55 +102,61 @@ class WP_Insights {
 		//error_log(print_r($_REQUEST, true));
 		//error_log("Inside wp-insights class construct");
 		// Load plugin text domain
-		add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
+		//add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
+		self::$WP_Insights_DB_Utils_Instance = WP_Insights_DB_Utils::get_instance();
+		
 		add_action( 'init', array( $this, 'register_session' ) );
 
-		// Add the options page and menu item.
-		add_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );
-
-		// Add an action link pointing to the options page. TODO: Rename "plugin-name.php" to the name your plugin
-		// $plugin_basename = plugin_basename( plugin_dir_path( __FILE__ ) . 'plugin-name.php' );
-		// add_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );
-
-		// Load admin style sheet and JavaScript.
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
-
-		// Load public-facing style sheet and JavaScript.
-		//add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
-		//add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-
-
-		// Define custom functionality. Read more about actions and filters: http://codex.wordpress.org/Plugin_API#Hooks.2C_Actions_and_Filters
-		//add_action('wp_footer', array( $this, 'add_wpinsights_scripts' ) );
-		add_action('wp_ajax_nopriv_wpisave', array( $this, 'save_user_data' ) );
-		add_action('wp_ajax_nopriv_wpimouseeventdata', array( $this, 'get_mouse_event_data' ) );
-		
-		add_action('wp_ajax_wpisave', array( $this, 'save_user_data' ) );
-		add_action('wp_ajax_wpimouseeventdata', array( $this, 'get_mouse_event_data' ) );
-		add_action('wp_ajax_wpipagesections', array( $this, 'get_wpi_page_sections' ) );
-		add_action('wp_ajax_wpipsrecordingstats', array( $this, 'get_wpi_page_section_recording_stats' ) );
-		
-		
-		//add_action('wp_head', array($this, 'add_IE9_Compatibility_Meta_Tag'));
-		
-		if (!defined('DOING_AJAX')) {
+		if(defined('DOING_AJAX')) {
+			add_action('wp_ajax_wpisave', array( $this, 'save_user_data' ) );
+			add_action('wp_ajax_wpimouseeventdata', array( $this, 'get_mouse_event_data' ) );
+			add_action('wp_ajax_wpipagesections', array( $this, 'get_wpi_page_sections' ) );
+			add_action('wp_ajax_wpipsrecordingstats', array( $this, 'get_wpi_page_section_recording_stats' ) );
+				
+			add_action('wp_ajax_nopriv_wpisave', array( $this, 'save_user_data' ) );
+			add_action('wp_ajax_nopriv_wpimouseeventdata', array( $this, 'get_mouse_event_data' ) );
+		} else {
 			add_action('plugins_loaded', array($this, 'setRecorderStatus'));
+			add_shortcode( 'wpi_page_section', array($this, 'add_page_section') );
+			if(is_admin()) {
+				// Add the options page and menu item.
+				add_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );
+				// Load admin style sheet and JavaScript.
+				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
+				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
+				add_action( 'add_meta_boxes', array( $this, 'add_wpi_meta_box' ) );
+				add_action( 'save_post', array( $this, 'save_wpi_meta' ) );
+				add_action( 'media_buttons', array( $this, 'add_wpi_shortcode_button' ) );
+				
+				add_filter('manage_posts_columns' , array( $this, 'add_sticky_column' ));
+			}
+			
 		}
-		
-		//add_action('admin_notices', array($this, 'wp_insights_admin_notices'));
-		//add_filter( 'TODO', array( $this, 'filter_method_name' ) );
-		
-		add_shortcode( 'wpi_page_section', array($this, 'add_page_section') );
-		add_action( 'add_meta_boxes', array( $this, 'add_wpi_meta_box' ) );
-		add_action( 'save_post', array( $this, 'save_wpi_meta' ) );
-		
-		//add_action( 'init', array( $this, 'add_wpi_tiny_mce_plugin' ) );
-		add_action( 'media_buttons', array( $this, 'add_wpi_shortcode_button' ) );
 		
 		self::$cache_dir = dirname(dirname(plugin_dir_path(__FILE__)))."/wpicache/";
 		self::$cache_dir = str_replace('\\', '/', self::$cache_dir);
 		self::$browscap_cache_dir = self::$cache_dir."browscapcache/";
+		
+		//add_action('wp_head', array($this, 'add_IE9_Compatibility_Meta_Tag'));
+		//add_action('admin_notices', array($this, 'wp_insights_admin_notices'));
+		//add_filter( 'TODO', array( $this, 'filter_method_name' ) );
+		
+		
+		//add_action( 'init', array( $this, 'add_wpi_tiny_mce_plugin' ) );
+		
+		// Add an action link pointing to the options page. TODO: Rename "plugin-name.php" to the name your plugin
+		// $plugin_basename = plugin_basename( plugin_dir_path( __FILE__ ) . 'plugin-name.php' );
+		// add_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );
+		
+		
+		
+		// Load public-facing style sheet and JavaScript.
+		//add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+		//add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+		
+		
+		// Define custom functionality. Read more about actions and filters: http://codex.wordpress.org/Plugin_API#Hooks.2C_Actions_and_Filters
+		//add_action('wp_footer', array( $this, 'add_wpinsights_scripts' ) );
 
 	}
 	
@@ -162,6 +168,11 @@ class WP_Insights {
 		if(!session_id()) {
 			session_start();
 		}
+	}
+	
+	function add_sticky_column($columns) {
+		return array_merge( $columns,
+				array('sticky' => __('Sticky')) );
 	}
 
 	
@@ -240,8 +251,6 @@ class WP_Insights {
 	 * @param    boolean    $network_wide    True if WPMU superadmin uses "Network Activate" action, false if WPMU is disabled or plugin is activated on an individual blog.
 	 */
 	public static function activate( $network_wide ) {
-		//$WP_Insights_DB_Utils_Instance = WP_Insights_DB_Utils::get_instance();
-		//$WP_Insights_DB_Utils_Instance->setWpdb(self::get_instance()->wp_insights_wpdb);
 		self::$WP_Insights_DB_Utils_Instance->wpinsights_db_install();
 		if(get_option(self::$recording_option_name) === false){
 			update_option(self::$recording_option_name, self::$default_recording_option_value );
@@ -272,25 +281,11 @@ class WP_Insights {
 	
 	public static function uninstall(){
 		//error_log("Inside Uninstall");
-		//$WP_Insights_DB_Utils_Instance = WP_Insights_DB_Utils::get_instance();
-		//$WP_Insights_DB_Utils_Instance->setWpdb(self::get_instance()->wp_insights_wpdb);
 		delete_option(self::$recording_option_name);
 		delete_option(self::$max_concurrent_recordings_option_name);
 		delete_option(self::$server_recording_interval_option_name);
 		self::$WP_Insights_DB_Utils_Instance->wpinsights_db_uninstall();
 		WP_Insights_Utils::deleteDirectory(self::$cache_dir);
-	}
-	
-	/* public function setWpdb($given_wpdb) {
-		error_log("Inside wp-insights class - given wpdb: ".$given_wpdb->prefix);
-		$this->wp_insights_wpdb = $given_wpdb;
-		error_log("Inside wp-insights class - wp_insights_wpdb: ".$this->wp_insights_wpdb->prefix);
-	} */
-	
-	public static function setWpInsightsDBUtils($given_wp_insights_db_utils_instance) {
-		//error_log("Inside wp-insights class - given wpdb: ".$given_wpdb->prefix);
-		self::$WP_Insights_DB_Utils_Instance = $given_wp_insights_db_utils_instance;
-		//error_log("Inside wp-insights class - wp_insights_wpdb: ".$this->wp_insights_wpdb->prefix);
 	}
 	
 	public function setRecorderStatus() {
@@ -300,18 +295,7 @@ class WP_Insights {
 		if(strcasecmp(trim($recording_status), 'ON') == 0) {
 			//error_log("Inside matches ON");
 			$should_record_status = WP_Insights_Utils::should_wpi_record();
-			error_log($should_record_status);
-			
-			/*if($should_record_status == WP_Insights_Utils::CAN_RECORD_RETURNING_VISITOR 
-					|| $should_record_status == WP_Insights_Utils::CAN_RECORD_NON_DEV
-					|| $should_record_status == WP_Insights_Utils::CAN_RECORD_DEV) {
-				
-				$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
-				$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
-				$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
-				$this->WP_Insights_Recorder_Instance->setBrowscapCacheDir(self::$browscap_cache_dir);
-				$this->WP_Insights_Recorder_Instance->init_recording();
-			}*/
+			//error_log($should_record_status);
 			
 			if($should_record_status == WP_Insights_Utils::CAN_RECORD_DEV) {
 				if(has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
@@ -685,13 +669,10 @@ class WP_Insights {
 			if($_POST['change_recorder_status'] == 'start') {
 				update_option(self::$recording_option_name, "ON" );
 				$is_recording = true;
-				//self::$WP_Insights_DB_Utils_Instance->db_set_option("recording_status","ON");
 			} else if($_POST['change_recorder_status'] == 'stop') {
 				update_option(self::$recording_option_name, "OFF" );
 				$is_recording = false;
-				//self::$WP_Insights_DB_Utils_Instance->db_set_option("recording_status","OFF");
 			}
-			$this->setRecorderStatus();
 		} else {
 			$recording_status = get_option(self::$recording_option_name, self::$default_recording_option_value);
 			if(strcasecmp(trim($recording_status), 'ON') == 0) {
@@ -790,7 +771,6 @@ class WP_Insights {
 		error_log("save_user_data execution start : ".microtime());
 		error_log("Inside save_user_data");
 		$this->WP_Insights_Recorder_Instance = WP_Insights_Recorder::get_instance();
-		$this->WP_Insights_Recorder_Instance->set_wp_insights_db_utils(self::$WP_Insights_DB_Utils_Instance);
 		$this->WP_Insights_Recorder_Instance->setCacheDir(self::$cache_dir);
 		$this->WP_Insights_Recorder_Instance->setBrowscapCacheDir(self::$browscap_cache_dir);
 		$this->WP_Insights_Recorder_Instance->save();

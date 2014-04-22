@@ -22,6 +22,7 @@ class WP_Insights_Recorder {
 	
 	private function __construct() {
 		//$this->cache_dir = dirname(__FILE__)."/cache/";
+		$this->wp_insights_db_utils = WP_Insights_DB_Utils::get_instance();
 	}
 
 	/**
@@ -47,10 +48,6 @@ class WP_Insights_Recorder {
 	
 	public function setBrowscapCacheDir($dirPath) {
 		$this->browscap_cache_dir = $dirPath;
-	}
-
-	public function set_wp_insights_db_utils($given_wp_insights_db_utils) {
-		$this->wp_insights_db_utils = $given_wp_insights_db_utils;
 	}
 	
 	public function get_visitor_id() {

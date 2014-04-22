@@ -43,12 +43,8 @@ if ( function_exists('register_uninstall_hook') ) {
 
 // TODO: replace WP_Insights with the name of the plugin defined in `class-plugin-name.php`
 global $wpdb;
-$WP_Insights_DB_Utils_Instance = WP_Insights_DB_Utils::get_instance();
-$WP_Insights_DB_Utils_Instance->setWpdb($wpdb);
-$WP_Insights_instance = WP_Insights::get_instance();
-WP_Insights::setWpInsightsDBUtils($WP_Insights_DB_Utils_Instance);
-//if (is_plugin_active(__FILE__)) {
-	//$WP_Insights_instance->setRecorderStatus();
-//}
+WP_Insights_DB_Utils::get_instance()->setWpdb($wpdb);
+WP_Insights::get_instance();
+
 //error_log("Inside main file: ".$wpdb->prefix);
 ?>
