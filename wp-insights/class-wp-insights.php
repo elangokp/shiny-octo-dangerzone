@@ -289,6 +289,23 @@ class WP_Insights {
 	}
 	
 	public function setRecorderStatus() {
+		if(!empty($_GET['wpimode']) && $_GET['wpimode'] === "selector") {
+			
+			if(!has_action( 'wp_footer', array( $this, 'add_wpinsights_selector_scripts' ) )) {
+				add_action( 'wp_footer', array( $this, 'add_wpinsights_selector_scripts' ) );
+			}
+			
+			if(has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) )) {
+				$priority = has_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ) );
+				remove_action( 'wp_footer', array( $this, 'add_wpinsights_scripts' ), $priority);
+			}
+				
+			if(has_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ) )) {
+				$priority = has_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ) );
+				remove_action( 'wp_footer', array( $this, 'add_wpinsights_dev_scripts' ), $priority);
+			}
+			return;
+		}
 		//$recording_status = @ self::$WP_Insights_DB_Utils_Instance->db_option("recording_status");
 		$recording_status = get_option(self::$recording_option_name, self::$default_recording_option_value);
 		//error_log("recording_status is ".$recording_status);
@@ -847,6 +864,87 @@ class WP_Insights {
 		    die();		
 	}
 	
+	public function add_wpinsights_selector_scripts() {
+		$json3_js_url = plugins_url('js/dev/json3.min.js', __FILE__);
+		$wpi_selector_js_url = plugins_url('js/dev/wpi-selector.js', __FILE__);
+		$stickyfloat_js_url = plugins_url('js/dev/stickyfloat.js', __FILE__);
+		$wpi_tracking_url = admin_url( 'admin-ajax.php' );
+		
+		?>
+
+		<!-- Powered by WP Insights version <?php echo self::VERSION?>-->
+		  <script id='wpi-trigger-script' type="text/javascript">
+					//<![CDATA[
+					var addressBarURL = top.location.href;
+					
+					if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views") < 0) {
+			  			var wpi_jquery_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
+	
+			  			jQuery.getScript( "<?php echo $json3_js_url?>");
+	
+			  			jQuery.getScript(wpi_jquery_url, function() { 
+			  				wpi_jquery = $.noConflict(true);
+			  				wpi_jquery.fn.getcssPath = function () {
+							    if (this.length != 1) throw 'Requires one element.';
+	
+							    var path, node = this;
+							    while (node.length) {
+							        var realNode = node[0], name = realNode.localName || realNode.nodeName;
+							        if (!name) break;
+	
+							        name = name.toLowerCase();
+							        if (realNode.id) {
+							            // As soon as an id is found, there's no need to specify more.
+							            return name + '#' + realNode.id + (path ? '>' + path : '');
+							        } else if (realNode.className) {
+							            name += '.' + realNode.className.split(/\s+/).join('.');
+							            name = name.replace(/\.+$/,"");
+							        }
+	
+							        var parent = node.parent(), siblings = parent.children(name);
+							        if (siblings.length > 1) name += ':eq(' + siblings.index(node) + ')';
+							        path = name + (path ? '>' + path : '');
+	
+							        node = parent;
+							    }
+	
+							    return path;
+							};
+	
+							wpi_jquery.fn.scrollStopped = function(delay,callback) {           
+								wpi_jquery(this).scroll(function(){
+						            var self = this, $this = wpi_jquery(self);
+						            if ($this.data('scrollTimeout')) {
+						              clearTimeout($this.data('scrollTimeout'));
+						            }
+						            $this.data('scrollTimeout', setTimeout(callback,delay,self));
+						        });
+						    };
+
+						    jQuery.getScript( "<?php echo $stickyfloat_js_url.'?v='.self::VERSION?>", function()
+								    {
+								    	 jQuery.getScript( "<?php echo $wpi_selector_js_url.'?v='.self::VERSION?>", function() 
+							  		  			  {
+								  					wpi.select({
+													      "trackingUrl": "<?php echo $wpi_tracking_url?>",
+													    });
+				
+							  			  			}
+							  		  			);	
+						    		});
+
+						   		    
+
+				  				
+			  			});
+	
+					}	  			
+					//]]>
+			</script>
+		<?php 
+
+	}
+	
 	public function add_wpinsights_scripts() {
 		$wpi_js_url = plugins_url('js/wpi-js.min.js', __FILE__);
 		$wpi_tracking_url = admin_url( 'admin-ajax.php' );		
@@ -920,7 +1018,6 @@ class WP_Insights {
 		//error_log("Inside add_wpinsights_scripts");
 		$json3_js_url = plugins_url('js/dev/json3.min.js', __FILE__);
 		$wpi_recorder_js_url = plugins_url('js/dev/wpi-recorder.js', __FILE__);
-		$lz_string_js_url = plugins_url('js/dev/lz-string-1.3.3.js', __FILE__);
 		$wpi_tracking_url = admin_url( 'admin-ajax.php' );
 		
 		?>
