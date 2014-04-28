@@ -879,62 +879,61 @@ class WP_Insights {
 					
 					if(addressBarURL.toLowerCase().indexOf("plugins/wp-insights/views") < 0) {
 			  			var wpi_jquery_url = "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js";
+			  			var jquery_ui_url = "//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js";
 	
 			  			jQuery.getScript( "<?php echo $json3_js_url?>");
+			  			jQuery("head").append("<link rel='stylesheet' type='text/css' href='//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css' />");
 	
-			  			jQuery.getScript(wpi_jquery_url, function() { 
-			  				wpi_jquery = $.noConflict(true);
-			  				wpi_jquery.fn.getcssPath = function () {
-							    if (this.length != 1) throw 'Requires one element.';
-	
-							    var path, node = this;
-							    while (node.length) {
-							        var realNode = node[0], name = realNode.localName || realNode.nodeName;
-							        if (!name) break;
-	
-							        name = name.toLowerCase();
-							        if (realNode.id) {
-							            // As soon as an id is found, there's no need to specify more.
-							            return name + '#' + realNode.id + (path ? '>' + path : '');
-							        } else if (realNode.className) {
-							            name += '.' + realNode.className.split(/\s+/).join('.');
-							            name = name.replace(/\.+$/,"");
-							        }
-	
-							        var parent = node.parent(), siblings = parent.children(name);
-							        if (siblings.length > 1) name += ':eq(' + siblings.index(node) + ')';
-							        path = name + (path ? '>' + path : '');
-	
-							        node = parent;
-							    }
-	
-							    return path;
-							};
-	
-							wpi_jquery.fn.scrollStopped = function(delay,callback) {           
-								wpi_jquery(this).scroll(function(){
-						            var self = this, $this = wpi_jquery(self);
-						            if ($this.data('scrollTimeout')) {
-						              clearTimeout($this.data('scrollTimeout'));
-						            }
-						            $this.data('scrollTimeout', setTimeout(callback,delay,self));
-						        });
-						    };
+			  			jQuery.getScript(wpi_jquery_url, function() { 						   
 
-						    jQuery.getScript( "<?php echo $stickyfloat_js_url.'?v='.self::VERSION?>", function()
+						    jQuery.getScript(jquery_ui_url, function()
 								    {
+									    	wpi_jquery = $.noConflict(true);
+							  				wpi_jquery.fn.getcssPath = function () {
+											    if (this.length != 1) throw 'Requires one element.';
+					
+											    var path, node = this;
+											    while (node.length) {
+											        var realNode = node[0], name = realNode.localName || realNode.nodeName;
+											        if (!name) break;
+					
+											        name = name.toLowerCase();
+											        if (realNode.id) {
+											            // As soon as an id is found, there's no need to specify more.
+											            return name + '#' + realNode.id + (path ? '>' + path : '');
+											        } else if (realNode.className) {
+											            name += '.' + realNode.className.split(/\s+/).join('.');
+											            name = name.replace(/\.+$/,"");
+											        }
+					
+											        var parent = node.parent(), siblings = parent.children(name);
+											        if (siblings.length > 1) name += ':eq(' + siblings.index(node) + ')';
+											        path = name + (path ? '>' + path : '');
+					
+											        node = parent;
+											    }
+					
+											    return path;
+											};
+					
+											wpi_jquery.fn.scrollStopped = function(delay,callback) {           
+												wpi_jquery(this).scroll(function(){
+										            var self = this, $this = wpi_jquery(self);
+										            if ($this.data('scrollTimeout')) {
+										              clearTimeout($this.data('scrollTimeout'));
+										            }
+										            $this.data('scrollTimeout', setTimeout(callback,delay,self));
+										        });
+										    };
+										    
 								    	 jQuery.getScript( "<?php echo $wpi_selector_js_url.'?v='.self::VERSION?>", function() 
 							  		  			  {
 								  					wpi.select({
 													      "trackingUrl": "<?php echo $wpi_tracking_url?>",
 													    });
 				
-							  			  			}
-							  		  			);	
+							  			  			});	
 						    		});
-
-						   		    
-
 				  				
 			  			});
 	
