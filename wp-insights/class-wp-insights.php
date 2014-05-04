@@ -867,6 +867,7 @@ class WP_Insights {
 	public function add_wpinsights_selector_scripts() {
 		$json3_js_url = plugins_url('js/dev/json3.min.js', __FILE__);
 		$wpi_selector_js_url = plugins_url('js/dev/wpi-selector.js', __FILE__);
+		$wpi_selector_css_url = plugins_url('css/wpi-selector.css', __FILE__);
 		$stickyfloat_js_url = plugins_url('js/dev/stickyfloat.js', __FILE__);
 		$wpi_tracking_url = admin_url( 'admin-ajax.php' );
 		
@@ -883,6 +884,7 @@ class WP_Insights {
 	
 			  			jQuery.getScript( "<?php echo $json3_js_url?>");
 			  			jQuery("head").append("<link rel='stylesheet' type='text/css' href='//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css' />");
+			  			jQuery("head").append("<link rel='stylesheet' type='text/css' href='<?php echo $wpi_selector_css_url.'?v='.self::VERSION?>' />");
 	
 			  			jQuery.getScript(wpi_jquery_url, function() { 						   
 

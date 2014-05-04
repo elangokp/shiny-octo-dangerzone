@@ -25,6 +25,9 @@ class WP_Insights_DB_Utils {
 	const TBL_RECORDS = 'records';
 	
 	/** Table for storing wp insights page section data. */
+	const TBL_PAGE_SECTIONS_META = 'pagesections_meta';
+	
+	/** Table for storing wp insights page section data. */
 	const TBL_PAGE_SECTIONS = 'pagesections';
 	
 	/** Table for caching HTML logs. */
@@ -346,6 +349,21 @@ class WP_Insights_DB_Utils {
         PRIMARY KEY  (id) ) DEFAULT CHARSET utf8";
               
 		dbDelta( $records_table_sql );
+		
+		/* create page sections meta table ----------------------------------------------------- */
+		
+		$pagesections_meta_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_PAGE_SECTIONS_META;
+		
+		$pagesections_meta_table_sql = "CREATE TABLE $pagesections_meta_table (
+		id           BIGINT        unsigned  NOT NULL auto_increment,
+		url          VARCHAR(200)             NOT NULL,
+		host         VARCHAR(50)              NOT NULL,
+		params       VARCHAR(100)             NOT NULL,
+		match_type   VARCHAR(30)              NOT NULL,
+		PRIMARY KEY  (id),
+		UNIQUE KEY  (url) ) DEFAULT CHARSET utf8";
+		
+		dbDelta( $pagesections_meta_table_sql );
 		
 		$pagesections_table = $this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_PAGE_SECTIONS;
 		
