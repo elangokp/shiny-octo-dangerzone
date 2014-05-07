@@ -112,9 +112,11 @@ class WP_Insights {
 			add_action('wp_ajax_wpimouseeventdata', array( $this, 'get_mouse_event_data' ) );
 			add_action('wp_ajax_wpipagesections', array( $this, 'get_wpi_page_sections' ) );
 			add_action('wp_ajax_wpipsrecordingstats', array( $this, 'get_wpi_page_section_recording_stats' ) );
-				
+			add_action('wp_ajax_wpisavepagesections', array( $this, 'save_page_sections' ) );
+			
 			add_action('wp_ajax_nopriv_wpisave', array( $this, 'save_user_data' ) );
 			add_action('wp_ajax_nopriv_wpimouseeventdata', array( $this, 'get_mouse_event_data' ) );
+			add_action('wp_ajax_nopriv_wpisavepagesections', array( $this, 'save_page_sections' ) );
 		} else {
 			add_action('plugins_loaded', array($this, 'setRecorderStatus'));
 			add_shortcode( 'wpi_page_section', array($this, 'add_page_section') );
@@ -782,6 +784,10 @@ class WP_Insights {
 		'name' => 'unnamed-section'
 		), $atts ) );
 		return '<img id="wpipagesection-'.$id.'" data-psid="'.$id.'" data-psname="'.$name.'" class="wpipagesection" width=1px height=1px src="'.plugins_url("/assets/spacer.gif",  __FILE__).'"/>';
+	}
+	
+	public function save_page_sections() {
+		
 	}
 	
 	public function save_user_data() {

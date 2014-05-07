@@ -5,7 +5,8 @@
 		     * URL to local wpi website, i.e., the site URL to track
 		     * @type string
 		     */
-		    trackingUrl: ""
+		    trackingUrl: "",
+		    selectorId: 0
 		  };
 	 
 	var wpiSelector = {
@@ -15,6 +16,7 @@
 		pageSections: [],
 		canvas: null,
 		context: null,
+		url: null,
 		/**
 	     * Overrides (wpi) tracking options object with custom-provided options object
 	     * @return void
@@ -133,7 +135,17 @@
 	    },
 	    
 	    savePageSections: function() {
+	    	var requestData  = "url="        + encodeURIComponent(wpiSelector.url);
+	    	requestData  = "&selectorId="        + wpiOpt.selectorId;
+	    	requestData += "&pagesections="      + encodeURIComponent(JSON.stringify(wpiSelector.pageSections));
 	    	
+	    	wpi_jquery.ajax({
+				  type: "POST",
+				  url:  wpiOpt.trackingUrl+"?action="+action+"&_="+(new Date()).getTime(),
+				  cache: false,
+				  async: true,
+				  data: requestData
+			});	
 	    },
 	    
 	    addpageSection: function(sectionname) {
@@ -243,6 +255,7 @@
 
 	    
 	    init: function() {
+	    	wpiSelector.url = escape(window.location.href);
 			wpiSelector.canvas = document.createElement("canvas");
 			wpiSelector.canvas.setAttribute("id","replayerCanvas");
 			var body = document.getElementsByTagName("body")[0];
@@ -283,7 +296,7 @@
 					  +'<p class="validateTips">Please give a name for the page section.</p>'
 					  +'<form>'
 					  +'<fieldset>'
-					    +'<label for="name">Name</label>'
+					    +'<label for="name">Name  </label>'
 					    +'<input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all">'
 					  +'</fieldset>'
 					  +'</form>'

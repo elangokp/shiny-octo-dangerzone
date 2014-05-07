@@ -133,30 +133,6 @@ class WP_Insights_Recorder {
 		$relativefilepath = $this->cache();
 		//error_log("RID is : ".$_POST['rid']);
 		/* create database entry ---------------------------------------------------- */
-		$recorddetails = array(
-				"id" => $_POST['rid'],
-				"visitor_id" => $this->visitor_id,
-				"page_id" => $this->page_id,
-				"file" => $relativefilepath,
-				"sess_time" => $_POST['time'],
-				"focus_time" => $_POST['focusedTime'],
-				"lost_focus_count" => $_POST['lostFocusCount'],
-				"exit_page_section" => urldecode(stripslashes($_POST['currentPageSection'])),
-				"is_exit" => 1,
-				"is_session_exit" => 1
-		);
-		$recorddetailsformat = array(
-				'%s',
-				'%s',
-				'%d',
-				'%s',
-				'%d',
-				'%d',
-				'%d',
-				'%s',
-				'%d',
-				'%d'
-		);	
 		
 		$columnssql = "INSERT into $recordsTable 
 		(id,visitor_id,page_id,file,sess_time,focus_time,lost_focus_count,exit_page_section,is_exit,is_session_exit";
