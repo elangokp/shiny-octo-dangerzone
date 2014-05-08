@@ -787,7 +787,9 @@ class WP_Insights {
 	}
 	
 	public function save_page_sections() {
-		
+		$WP_Insights_Pagesections_Instance = WP_Insights_Pagesections::get_instance();
+		$WP_Insights_Pagesections_Instance->save_pagesections();
+		die();
 	}
 	
 	public function save_user_data() {
