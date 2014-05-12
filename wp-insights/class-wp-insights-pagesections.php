@@ -36,21 +36,38 @@ class WP_Insights_Pagesections {
 			echo 0;
 			die();
 		}
-		$elements_meta_table = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_ELEMENTS_META;
 		
-		$record_details = array (
-				"url" => urldecode(stripslashes($_POST['url'])),
-				"page_section_elements" => stripslashes($_POST['pagesections'])
-		);
+		$elements_meta_table = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_ELEMENTS_META;		
 		
-		$record_details_format = array(
-				"%s",
-				"%s"
-		);
+		$url = urldecode(stripslashes($_POST['url']));
+		$page_section_elements = stripslashes($_POST['pagesections']);
 		
-		$selectorId = $this->wp_insights_db_utils->db_insert($elements_meta_table, $record_details, $record_details_format);
+		if(isset($_POST['selectorId'])) {
+			$selectorId = $_POST['selectorId'];
+			$tuples = "page_section_elements = '.$page_section_elements.'";
+			$condition = "id=".$selectorId;
+			$success = $this->wp_insights_db_utils->db_update($elements_meta_table, $tuples, $condition);
+			if($success) {
+				return $selectorId;
+			} else {
+				return 0;
+			}
+		}else {
+			$record_details = array (
+					"url" => $url,
+					"page_section_elements" => $page_section_elements
+			);
+			
+			$record_details_format = array(
+					"%s",
+					"%s"
+			);
+			
+			$selectorId = $this->wp_insights_db_utils->db_insert($elements_meta_table, $record_details, $record_details_format);
+			
+			return $selectorId;
+		}		
 		
-		return $selectorId;
 		
 	}
 	

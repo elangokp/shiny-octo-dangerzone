@@ -879,6 +879,14 @@ class WP_Insights {
 		$wpi_selector_css_url = plugins_url('css/wpi-selector.css', __FILE__);
 		$stickyfloat_js_url = plugins_url('js/dev/stickyfloat.js', __FILE__);
 		$wpi_tracking_url = admin_url( 'admin-ajax.php' );
+		$selector_details = WP_Insights_Utils::get_selector_details();
+		if($selector_details === false) {
+			$selector_id = 0;
+			$page_section_elements = "";
+		}else {
+			$selector_id = $selector_details["id"];
+			$page_section_elements = $selector_details["page_section_elements"];
+		}
 		
 		?>
 
@@ -941,6 +949,8 @@ class WP_Insights {
 							  		  			  {
 								  					wpi.select({
 													      "trackingUrl": "<?php echo $wpi_tracking_url?>",
+													      "selectorId":  "<?php echo $selector_id?>",
+													      "pageSections": "<?php echo $page_section_elements?>"
 													    });
 				
 							  			  			});	

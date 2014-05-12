@@ -6,7 +6,8 @@
 		     * @type string
 		     */
 		    trackingUrl: "",
-		    selectorId: 0
+		    selectorId: 0,
+		    pageSections: ""
 		  };
 	 
 	var wpiSelector = {
@@ -89,27 +90,38 @@
 			wpiSelector.context.globalAlpha=0.2;
 			wpiSelector.context.fillStyle="black";
 			wpiSelector.context.fillRect(0,0,wpi_jquery(document).width(),wpi_jquery(document).height());
-	    	wpi_jquery(wpiSelector.pageSections).each(function(index,object) {
-	    		var thispageSectionId = '#pageSection'+object.id;
-	    		var thispageSectionNameId = '#pageSection'+object.id+'-name';
-	    		wpi_jquery(thispageSectionId).width(wpi_jquery(window).width()-10);
-	    		if(object.startElement === "body") {
-	    			var top = 0;
-	    		} else {
-	    			var top = wpi_jquery(object.startElement).offset().top;
-	    		}
+	    	wpiSelector.adjustAndDisplayPageSections();
+	    	
+	    	//wpi_jquery('#helloDiv').stickyfloat('destroy');
+	    	//wpi_jquery('#helloDiv').stickyfloat({ duration: 0,startOffset: 0,offsetY: 0});
+	    },
+	    
+	    adjustAndDisplayPageSections: function() {
+	    	if() {
 	    		
-	    		if(wpiSelector.pageSections[index+1] !== undefined){
-	    			var height = wpi_jquery(wpiSelector.pageSections[index+1].startElement).offset().top - top - 8;
-	    		} else {
-	    			var height = wpi_jquery(document).height() - top - 8;
-	    		}
-	    		
-	    		wpi_jquery(thispageSectionId).css({
-	    			"top": top
-	    		})
-	    		wpi_jquery(thispageSectionId).height(height);
-	    		
+	    	}
+	    	
+			wpi_jquery(wpiSelector.pageSections).each(function(index,object) {
+				var thispageSectionId = '#pageSection'+object.id;
+				var thispageSectionNameId = '#pageSection'+object.id+'-name';
+				wpi_jquery(thispageSectionId).width(wpi_jquery(window).width()-10);
+				if(object.startElement === "body") {
+					var top = 0;
+				} else {
+					var top = wpi_jquery(object.startElement).offset().top;
+				}
+				
+				if(wpiSelector.pageSections[index+1] !== undefined){
+					var height = wpi_jquery(wpiSelector.pageSections[index+1].startElement).offset().top - top - 8;
+				} else {
+					var height = wpi_jquery(document).height() - top - 8;
+				}
+				
+				wpi_jquery(thispageSectionId).css({
+					"top": top
+				})
+				wpi_jquery(thispageSectionId).height(height);
+				
 		    	setTimeout(function() {
 		    		wpi_jquery(thispageSectionNameId).position({
 			    		my: "right top",
@@ -119,10 +131,7 @@
 			    		within: thispageSectionId
 			    	});
 		    	},300);
-	    	})
-	    	
-	    	//wpi_jquery('#helloDiv').stickyfloat('destroy');
-	    	//wpi_jquery('#helloDiv').stickyfloat({ duration: 0,startOffset: 0,offsetY: 0});
+			});
 	    },
 	    
 	    getRandomColor: function() {
@@ -137,15 +146,31 @@
 	    savePageSections: function() {
 	    	console.log("savePageSections");
 	    	var requestData  = "url="        + encodeURIComponent(wpiSelector.url);
-	    	requestData  += "&selectorId="        + wpiOpt.selectorId;
 	    	requestData += "&pagesections="      + encodeURIComponent(JSON.stringify(wpiSelector.pageSections));
+	    	
+	    	if(wpiOpt.selectorId > 0) {
+	    		requestData  += "&selectorId="        + wpiOpt.selectorId;
+	    	}
+	    	
 	    	var action = "wpisavepagesections";
+	    	
 	    	wpi_jquery.ajax({
 				  type: "POST",
 				  url:  wpiOpt.trackingUrl+"?action="+action+"&_="+(new Date()).getTime(),
 				  cache: false,
 				  async: true,
-				  data: requestData
+				  data: requestData,
+				  success: function(data) {
+	    						var selectorId = parseInt(data);
+	    						if(isNaN(selectorId) || selectorId < 1) {
+	    							alert("Error occured while saving the page sections");
+	    						} else {
+	    							wpiOpt.selectorId = selectorId;
+	    							alert("Successfully saved page sections");
+	    						}
+	    						
+	    					}
+	    	
 			});	
 	    },
 	    
@@ -276,8 +301,8 @@
 	    },
 
 	    
-	    init: function() {
-	    	wpiSelector.url = escape(window.location.href);
+	    init: function() {   	
+	    	wpiSelector.url = window.location.href.replace(/&?(wpimode|wpidev)=([^&]$|[^&]*)/i, ""); //remove wpidev and wpimode parameters from url
 			wpiSelector.canvas = document.createElement("canvas");
 			wpiSelector.canvas.setAttribute("id","replayerCanvas");
 			var body = document.getElementsByTagName("body")[0];
@@ -367,7 +392,13 @@
 	    		}	    		
 	    	});
 	    	wpiSelector.getDOMPositions();
-	    	wpiSelector.addpageSection("Page Start");
+	    	if(wpiOpt.pageSections !== "") {
+	    		wpiSelector.pageSections = JSON.parse(wpiOpt.pageSections);
+	    		wpiSelector.adjustAndDisplayPageSections();
+	    	} else {
+	    		wpiSelector.addpageSection("Page Start");
+	    	}	    	
+	    	
 	    	console.log(wpiSelector.elementsWithPositions);
 	    }
 
