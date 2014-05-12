@@ -21,6 +21,7 @@
 require_once('class-wp-insights-db-utils.php');
 require_once('class-wp-insights-utils.php');
 require_once('class-wp-insights-recorder.php');
+require_once('class-wp-insights-pagesections.php');
 require_once(plugin_dir_path(__FILE__).'replay/class-wp-insights-event-data.php');
 require_once(plugin_dir_path(__FILE__).'views/class-wp-insights-recording-ps-stats-list-table.php');
 class WP_Insights {

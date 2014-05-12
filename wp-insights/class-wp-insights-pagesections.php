@@ -39,7 +39,7 @@ class WP_Insights_Pagesections {
 		$elements_meta_table = $this->wp_insights_db_utils->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_ELEMENTS_META;
 		
 		$record_details = array (
-				"url" => stripslashes($_POST['url']),
+				"url" => urldecode(stripslashes($_POST['url'])),
 				"page_section_elements" => stripslashes($_POST['pagesections'])
 		);
 		

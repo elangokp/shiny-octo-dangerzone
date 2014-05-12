@@ -285,16 +285,20 @@ class WP_Insights_DB_Utils {
 		
 		dbDelta( $aux_stats_table_sql );
 		
-		$init_aux_stats = array(
+		/*$init_aux_stats = array(
 								"stat_type" => self::AUX_STAT_TYPE_CONCURRENT_RECORDING_LIMIT,
 								"stat_value_int" => 0,
 						 );
 		$init_aux_stats_format = array(
 								"%s",
 								"%d"
-								);
+								);*/
+		$aux_stats_table_insert_sql = "INSERT INTO ".$this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_AUX_STATS." (stat_type,stat_value_int)
+										VALUES ('".self::AUX_STAT_TYPE_CONCURRENT_RECORDING_LIMIT."',0)
+  										ON DUPLICATE KEY UPDATE stat_value_int=stat_value_int;";
+		$this->db_query($aux_stats_table_insert_sql);
 		
-		$this->db_insert($this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_AUX_STATS, $init_aux_stats, $init_aux_stats_format);
+		//$this->db_insert($this->wp_insights_wpdb->prefix.self::TBL_PLUGIN_PREFIX.self::TBL_AUX_STATS, $init_aux_stats, $init_aux_stats_format);
 		
 		/* create visitors table ---------------------------------------------------- */
 		

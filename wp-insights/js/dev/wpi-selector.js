@@ -135,10 +135,11 @@
 	    },
 	    
 	    savePageSections: function() {
+	    	console.log("savePageSections");
 	    	var requestData  = "url="        + encodeURIComponent(wpiSelector.url);
-	    	requestData  = "&selectorId="        + wpiOpt.selectorId;
+	    	requestData  += "&selectorId="        + wpiOpt.selectorId;
 	    	requestData += "&pagesections="      + encodeURIComponent(JSON.stringify(wpiSelector.pageSections));
-	    	
+	    	var action = "wpisavepagesections";
 	    	wpi_jquery.ajax({
 				  type: "POST",
 				  url:  wpiOpt.trackingUrl+"?action="+action+"&_="+(new Date()).getTime(),
@@ -184,7 +185,7 @@
 	    			+'<button id="pageSection'+pageSection.id+'-name-button" class="wpipagesection">'+pageSection.name+'</button></div>');
 	    	var thispageSectionElement = wpi_jquery('#pageSection'+pageSection.id);
 	    	thispageSectionElement.data("pageSectionId",pageSection.id);
-	    	var thispageSectionNameElement = wpi_jquery('#pageSection'+pageSection.id+'-name');
+	    	
 	    	var thispageSectionNameButtonElement = wpi_jquery('#pageSection'+pageSection.id+'-name-button');
 	    	thispageSectionNameButtonElement
 	    		.button()
@@ -203,6 +204,7 @@
 	    	thispageSectionElement.width(wpi_jquery(window).width()-10);
 	    	thispageSectionElement.height(wpi_jquery(document).height() - top);
 	    	
+	    	var thispageSectionNameElement = wpi_jquery('#pageSection'+pageSection.id+'-name');
 	    	thispageSectionNameElement.css({
 	    									'z-index': '9999999',
 	    									'display': 'inline-block'});
@@ -220,16 +222,26 @@
 	    		lastPageSectionElement.resizable({
 		    		handles: "s",
 		    		resize: function(e, ui) {
+		    			/*setTimeout(function() {
+		    				
+		    			},1000);*/
+		    			
+		    			
+	            	},
+	            	stop: function(e, ui) {
+	            		
+	            		var thisPageSectionId = wpi_jquery(this).data('pageSectionId');
+	            		console.log(thisPageSectionId);
+	    				var thispageSectionNameElement = wpi_jquery('#pageSection'+thisPageSectionId+'-name');
 		    			thispageSectionNameElement.position({
 		    	    		my: "right top",
 		    	    		at: "right-30 top+30",
-		    	    		of: "#pageSection"+pageSection.id,
+		    	    		of: "#pageSection"+thisPageSectionId,
 		    	    		collision: "fit fit",
-		    	    		within: "#pageSection"+pageSection.id
+		    	    		within: "#pageSection"+thisPageSectionId
 		    	    	});
-	            	},
-	            	stop: function(e, ui) {
-	            		var nextPageSectionIdWouldBe = wpi_jquery(this).data('pageSectionId')+1;
+		    			
+	            		var nextPageSectionIdWouldBe = thisPageSectionId+1;
 	    	    		var nextPageSectionElementWouldBe = wpi_jquery('#pageSection'+nextPageSectionIdWouldBe);
 	    	    		var nextPageSectionElementWouldBeTop = nextPageSectionElementWouldBe.offset().top;
 	            		var thisSectionEnd = ui.element.offset().top + ui.element.outerHeight(true);
@@ -244,6 +256,16 @@
 	            		});
 	            		var heightDiffForNextPS =  thisSectionEnd - nextPageSectionElementWouldBeTop;
 	            		nextPageSectionElementWouldBe.height(nextPageSectionElementWouldBe.height() - heightDiffForNextPS);
+	            		
+	            		var nextPageSectionNameElementWouldBe = wpi_jquery('#pageSection'+nextPageSectionIdWouldBe+'-name');
+	            		nextPageSectionNameElementWouldBe.position({
+		    	    		my: "right top",
+		    	    		at: "right-30 top+30",
+		    	    		of: "#pageSection"+nextPageSectionIdWouldBe,
+		    	    		collision: "fit fit",
+		    	    		within: "#pageSection"+nextPageSectionIdWouldBe
+		    	    	});
+		    			
 	            		wpiSelector.pageSections[nextPageSectionIdWouldBe-1].startElement = nearestElementPath;
 	            		wpi_jquery(nearestElementPath).delay(100).fadeIn(500).fadeOut(500).fadeIn(500).fadeOut(500).fadeIn(500);
 	            	}
@@ -337,6 +359,7 @@
 			.button()
 			.click(function(event) {
 				event.preventDefault();
+				wpiSelector.savePageSections();
 			});
 	    	wpi_jquery(window).on("resize", function(e) {
 	    		if(e.target == window) {
