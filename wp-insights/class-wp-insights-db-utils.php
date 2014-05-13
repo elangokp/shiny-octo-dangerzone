@@ -190,8 +190,8 @@ class WP_Insights_DB_Utils {
 		//global $wpdb;
 		//$wpdb->db_connect();
 		$sql = "UPDATE $table SET $tuples WHERE $condition";
-		//error_log($sql);
-		$res = $this->db_query($sql);
+		error_log($sql);
+		$res = $this->wp_insights_wpdb->query($sql);
 	
 		return $res;
 	}

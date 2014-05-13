@@ -44,13 +44,14 @@ class WP_Insights_Pagesections {
 		
 		if(isset($_POST['selectorId'])) {
 			$selectorId = $_POST['selectorId'];
-			$tuples = "page_section_elements = '.$page_section_elements.'";
+			$tuples = "page_section_elements = '".$page_section_elements."'";
 			$condition = "id=".$selectorId;
 			$success = $this->wp_insights_db_utils->db_update($elements_meta_table, $tuples, $condition);
-			if($success) {
-				return $selectorId;
-			} else {
+			error_log(print_r($success,true));
+			if($success === false) {
 				return 0;
+			} else {
+				return $selectorId;
 			}
 		}else {
 			$record_details = array (

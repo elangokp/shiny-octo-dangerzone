@@ -18,19 +18,18 @@ class WP_Insights_Utils {
 		if($current_url == "") {
 			$current_url = WP_Insights_Utils::getCurrentPageURL();
 		}
+		$current_url = preg_replace('/&?(wpimode|wpidev)=([^&]$|[^&]*)/',"",$current_url);
+		$current_url = preg_replace('/\?$/',"",$current_url);
 		$WP_Insights_DB_Utils_Instance = WP_Insights_DB_Utils::get_instance();
 		$elements_meta_table = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_ELEMENTS_META;
 		$columns = "id,page_section_elements";
 		$condition = "url='".$current_url."'";
 		$result = $WP_Insights_DB_Utils_Instance->db_select($elements_meta_table, $columns, $condition);
+		//error_log(print_r($result, true));
 		if($result === false) {
 			return false;
 		} else {
-			$selector_details = array(
-					"id" => $result[0]["id"],
-					"page_section_elements" => $result[0]["page_section_elements"]
-			);
-			return $selector_details;
+			return $result;
 		}
 		
 	}

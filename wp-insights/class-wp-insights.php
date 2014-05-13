@@ -789,7 +789,7 @@ class WP_Insights {
 	
 	public function save_page_sections() {
 		$WP_Insights_Pagesections_Instance = WP_Insights_Pagesections::get_instance();
-		$WP_Insights_Pagesections_Instance->save_pagesections();
+		echo $WP_Insights_Pagesections_Instance->save_pagesections();
 		die();
 	}
 	
@@ -950,7 +950,7 @@ class WP_Insights {
 								  					wpi.select({
 													      "trackingUrl": "<?php echo $wpi_tracking_url?>",
 													      "selectorId":  "<?php echo $selector_id?>",
-													      "pageSections": "<?php echo $page_section_elements?>"
+													      "pageSections": '<?php echo $page_section_elements?>'
 													    });
 				
 							  			  			});	

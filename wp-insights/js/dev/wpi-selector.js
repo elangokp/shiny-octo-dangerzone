@@ -14,10 +14,39 @@
 	                      
 		elementsWithPositions: {},
 		elementPositions: [],
+		givenPageSections: [],
 		pageSections: [],
 		canvas: null,
 		context: null,
 		url: null,
+		
+		lookup: function(array, prop, value) {
+		    for (var i = 0, len = array.length; i < len; i++)
+		        if (array[i][prop] === value) return i;
+		},
+		
+		getNextActivePageSectionIndex: function(currentIndex) {
+			var nextIndex = currentIndex+1
+			if(nextIndex >= wpiSelector.pageSections.length) {
+				return false;
+			}
+			
+			for (var i = nextIndex, len = wpiSelector.pageSections.length; i < len; i++) {
+				if (wpiSelector.pageSections[i].isActive === true) return i;
+			}		
+				
+			return false;
+		},
+		
+		getLasttActivePageSectionIndex: function() {
+			
+			for (var i = wpiSelector.pageSections.length-1; i >= 0; i--) {
+				if (wpiSelector.pageSections[i].isActive === true) return i;
+			}		
+				
+			return false;
+		},
+		
 		/**
 	     * Overrides (wpi) tracking options object with custom-provided options object
 	     * @return void
@@ -96,41 +125,54 @@
 	    	//wpi_jquery('#helloDiv').stickyfloat({ duration: 0,startOffset: 0,offsetY: 0});
 	    },
 	    
-	    adjustAndDisplayPageSections: function() {
-	    	if() {
-	    		
+	    adjustAndDisplayPageSections: function(shouldInitialize) {
+	    	if (typeof shouldInitialize === "undefined" || shouldInitialize === null) { 
+	    		shouldInitialize = false; 
 	    	}
 	    	
+			if(shouldInitialize) {
+				wpi_jquery(wpiSelector.givenPageSections).each(function(index,object) {
+					if(object.isActive === true) {
+						wpiSelector.addpageSection(object.name,object.id);
+					}
+				});		
+				
+				wpiSelector.pageSections = wpiSelector.givenPageSections;
+			}
 			wpi_jquery(wpiSelector.pageSections).each(function(index,object) {
-				var thispageSectionId = '#pageSection'+object.id;
-				var thispageSectionNameId = '#pageSection'+object.id+'-name';
-				wpi_jquery(thispageSectionId).width(wpi_jquery(window).width()-10);
-				if(object.startElement === "body") {
-					var top = 0;
-				} else {
-					var top = wpi_jquery(object.startElement).offset().top;
-				}
+				if(object.isActive === true) {
+					var thispageSectionId = '#pageSection'+object.id;
+					var thispageSectionNameId = '#pageSection'+object.id+'-name';
+					wpi_jquery(thispageSectionId).width(wpi_jquery(window).width()-10);
+					if(object.startElement === "body") {
+						var top = 0;
+					} else {
+						var top = wpi_jquery(object.startElement).offset().top;
+					}
+					
+					var nextActiveIndex = wpiSelector.getNextActivePageSectionIndex(index);
+					if(nextActiveIndex === false){
+						var height = wpi_jquery(document).height() - top - 8;
+					} else {
+						var height = wpi_jquery(wpiSelector.pageSections[nextActiveIndex].startElement).offset().top - top - 8;
+					}
+					
+					wpi_jquery(thispageSectionId).css({
+						"top": top
+					})
+					wpi_jquery(thispageSectionId).height(height);
+					
+			    	setTimeout(function() {
+			    		wpi_jquery(thispageSectionNameId).position({
+				    		my: "right top",
+				    		at: "right-30 top+30",
+				    		of: thispageSectionId,
+				    		collision: "fit fit",
+				    		within: thispageSectionId
+				    	});
+			    	},300);
+				}	
 				
-				if(wpiSelector.pageSections[index+1] !== undefined){
-					var height = wpi_jquery(wpiSelector.pageSections[index+1].startElement).offset().top - top - 8;
-				} else {
-					var height = wpi_jquery(document).height() - top - 8;
-				}
-				
-				wpi_jquery(thispageSectionId).css({
-					"top": top
-				})
-				wpi_jquery(thispageSectionId).height(height);
-				
-		    	setTimeout(function() {
-		    		wpi_jquery(thispageSectionNameId).position({
-			    		my: "right top",
-			    		at: "right-30 top+30",
-			    		of: thispageSectionId,
-			    		collision: "fit fit",
-			    		within: thispageSectionId
-			    	});
-		    	},300);
 			});
 	    },
 	    
@@ -147,7 +189,7 @@
 	    	console.log("savePageSections");
 	    	var requestData  = "url="        + encodeURIComponent(wpiSelector.url);
 	    	requestData += "&pagesections="      + encodeURIComponent(JSON.stringify(wpiSelector.pageSections));
-	    	
+	    	console.log(wpiOpt.selectorId);
 	    	if(wpiOpt.selectorId > 0) {
 	    		requestData  += "&selectorId="        + wpiOpt.selectorId;
 	    	}
@@ -174,18 +216,27 @@
 			});	
 	    },
 	    
-	    addpageSection: function(sectionname) {
+	    addpageSection: function(sectionname,sectionid) {
+	    	var createdDate = "";
+			if (typeof sectionid === "undefined" || sectionid === null) { 
+				sectionid = wpiSelector.pageSections.length + 1;
+				createdDate = new Date();
+			}
 	    	var pageSection = {
-	    			id : wpiSelector.pageSections.length + 1,
-	    			name: sectionname
+	    			id : sectionid,
+	    			name: sectionname,
+	    			isActive: true,
+	    			createdDate: createdDate,
+	    			deletedDate: ""
 	    	};
 	    	var top;
 	    	if(pageSection.id == 1){
 	    		top=0;
 	    		pageSection.startElement = "body";
 	    	} else {
-	    		var lastPageSection = wpi_jquery(wpiSelector.pageSections).get(-1);
-	    		var lastPageSectionElement = wpi_jquery('#pageSection'+lastPageSection.id);	
+	    		var lastActivePageSectionIndex = wpiSelector.getLasttActivePageSectionIndex();
+	    		var lastActivePageSection = wpiSelector.pageSections[lastActivePageSectionIndex];
+	    		var lastPageSectionElement = wpi_jquery('#pageSection'+lastActivePageSection.id);	
 	    		if(lastPageSectionElement.height()>500) {
 	    			lastPageSectionElement.height(500);
 	    		} else {
@@ -207,17 +258,48 @@
 	    	}
 	    	wpi_jquery(document.body).append('<div id="pageSection'+pageSection.id+'" class="wpipagesection"></div>');
 	    	wpi_jquery(document.body).append('<div id="pageSection'+pageSection.id+'-name" class="wpipagesection">'
-	    			+'<button id="pageSection'+pageSection.id+'-name-button" class="wpipagesection">'+pageSection.name+'</button></div>');
+	    			+'<div id="pageSection'+pageSection.id+'-name-button" style="float:left;" class="wpipagesection">'+pageSection.name+'</div>'
+	    			+'<div id="pageSection'+pageSection.id+'-delete-button" style="float:left;" class="wpipagesection">Delete</div>'
+	    			+'<div id="pageSection'+pageSection.id+'-edit-button" style="float:left;" class="wpipagesection">Edit</div></div>');
 	    	var thispageSectionElement = wpi_jquery('#pageSection'+pageSection.id);
 	    	thispageSectionElement.data("pageSectionId",pageSection.id);
 	    	
+			var thispageSectionNameElement = wpi_jquery('#pageSection'+pageSection.id+'-name');
+			thispageSectionNameElement.css({
+				'z-index': '9999999',
+				'display': 'inline-block'});
+			
 	    	var thispageSectionNameButtonElement = wpi_jquery('#pageSection'+pageSection.id+'-name-button');
+	    	thispageSectionNameButtonElement.data("pageSectionId",pageSection.id);
 	    	thispageSectionNameButtonElement
 	    		.button()
 	    		.click(function(event) {
 	    			event.preventDefault();
 	    		});
 	    	
+			var thispageSectionDeleteButtonElement = wpi_jquery('#pageSection'+pageSection.id+'-delete-button');
+			thispageSectionDeleteButtonElement.data("pageSectionId",pageSection.id);
+			thispageSectionDeleteButtonElement
+				.button()
+				.click(function(event) {
+					event.preventDefault();
+					var pageSectionId = wpi_jquery(this).data("pageSectionId");
+					wpi_jquery('#pageSection'+pageSectionId).remove();
+					wpi_jquery('#pageSection'+pageSectionId+'-name').remove();
+					var pageSectionIndex = wpiSelector.lookup(wpiSelector.pageSections,"id",pageSectionId);
+					wpiSelector.pageSections[pageSectionIndex].isActive = false;
+					wpiSelector.pageSections[pageSectionIndex].deletedDate = new Date();
+					wpiSelector.adjustAndDisplayPageSections();
+				});
+	    	
+			var thispageSectionEditButtonElement = wpi_jquery('#pageSection'+pageSection.id+'-edit-button');
+			thispageSectionEditButtonElement.data("pageSectionId",pageSection.id);
+			thispageSectionEditButtonElement
+				.button()
+				.click(function(event) {
+					event.preventDefault();
+				});		
+			
 	    	thispageSectionElement.css({
 							    		'position': 'absolute',
 							    		'z-index': '9999999',
@@ -229,21 +311,19 @@
 	    	thispageSectionElement.width(wpi_jquery(window).width()-10);
 	    	thispageSectionElement.height(wpi_jquery(document).height() - top);
 	    	
-	    	var thispageSectionNameElement = wpi_jquery('#pageSection'+pageSection.id+'-name');
-	    	thispageSectionNameElement.css({
-	    									'z-index': '9999999',
-	    									'display': 'inline-block'});
-	    	thispageSectionNameElement.position({
-	    		my: "right top",
-	    		at: "right-30 top+30",
-	    		of: "#pageSection"+pageSection.id,
-	    		collision: "fit fit",
-	    		within: "#pageSection"+pageSection.id
-	    	});
+			
+			thispageSectionNameElement.position({
+			my: "right top",
+			at: "right-30 top+30",
+			of: "#pageSection"+pageSection.id,
+			collision: "fit fit",
+			within: "#pageSection"+pageSection.id
+			});
 	    	
 	    	if(wpiSelector.pageSections.length>0){
-	    		var lastPageSection = wpi_jquery(wpiSelector.pageSections).get(-1);
-	    		var lastPageSectionElement = wpi_jquery('#pageSection'+lastPageSection.id);
+	    		var lastActivePageSectionIndex = wpiSelector.getLasttActivePageSectionIndex();
+	    		var lastActivePageSection = wpiSelector.pageSections[lastActivePageSectionIndex];
+	    		var lastPageSectionElement = wpi_jquery('#pageSection'+lastActivePageSection.id);
 	    		lastPageSectionElement.resizable({
 		    		handles: "s",
 		    		resize: function(e, ui) {
@@ -266,7 +346,9 @@
 		    	    		within: "#pageSection"+thisPageSectionId
 		    	    	});
 		    			
-	            		var nextPageSectionIdWouldBe = thisPageSectionId+1;
+		    			var thisPageSectionIndex = wpiSelector.lookup(wpiSelector.pageSections,"id",thisPageSectionId);
+		    			var nextActiveIndex = wpiSelector.getNextActivePageSectionIndex(thisPageSectionIndex);
+	            		var nextPageSectionIdWouldBe = wpiSelector.pageSections[nextActiveIndex].id;
 	    	    		var nextPageSectionElementWouldBe = wpi_jquery('#pageSection'+nextPageSectionIdWouldBe);
 	    	    		var nextPageSectionElementWouldBeTop = nextPageSectionElementWouldBe.offset().top;
 	            		var thisSectionEnd = ui.element.offset().top + ui.element.outerHeight(true);
@@ -302,7 +384,7 @@
 
 	    
 	    init: function() {   	
-	    	wpiSelector.url = window.location.href.replace(/&?(wpimode|wpidev)=([^&]$|[^&]*)/i, ""); //remove wpidev and wpimode parameters from url
+	    	wpiSelector.url = window.location.href.replace(/&?(wpimode|wpidev)=([^&]$|[^&]*)/i, "").replace(/\?$/i, ""); //remove wpidev and wpimode parameters from url
 			wpiSelector.canvas = document.createElement("canvas");
 			wpiSelector.canvas.setAttribute("id","replayerCanvas");
 			var body = document.getElementsByTagName("body")[0];
@@ -316,8 +398,8 @@
 			wpiSelector.context.fillRect(0,0,wpi_jquery(document).width(),wpi_jquery(document).height());
 			
 			wpi_jquery(document.body).append('<div id="pageSectionControls" class="wpipagesection" style="z-index:10000000;display:inline-block">'
-					+'<button id="addPageSection" class="wpipagesection">Add Page Section</button>'
-					+'<button id="savePageSections" class="wpipagesection">Save</button></div>');
+					+'<p id="addPageSection" class="wpipagesection">Add Page Section</p>'
+					+'<p id="savePageSections" class="wpipagesection">Save</p></div>');
 			
 			setTimeout(function() {
 				wpi_jquery('#pageSectionControls').position({
@@ -393,8 +475,8 @@
 	    	});
 	    	wpiSelector.getDOMPositions();
 	    	if(wpiOpt.pageSections !== "") {
-	    		wpiSelector.pageSections = JSON.parse(wpiOpt.pageSections);
-	    		wpiSelector.adjustAndDisplayPageSections();
+	    		wpiSelector.givenPageSections = JSON.parse(wpiOpt.pageSections);
+	    		wpiSelector.adjustAndDisplayPageSections(true);
 	    	} else {
 	    		wpiSelector.addpageSection("Page Start");
 	    	}	    	
