@@ -900,7 +900,7 @@ class WP_Insights {
 			  			var jquery_ui_url = "//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js";
 	
 			  			jQuery.getScript( "<?php echo $json3_js_url?>");
-			  			jQuery("head").append("<link rel='stylesheet' type='text/css' href='//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css' />");
+			  			jQuery("head").append("<link rel='stylesheet' type='text/css' href='//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/start/jquery-ui.css' />");
 			  			jQuery("head").append("<link rel='stylesheet' type='text/css' href='<?php echo $wpi_selector_css_url.'?v='.self::VERSION?>' />");
 	
 			  			jQuery.getScript(wpi_jquery_url, function() { 						   

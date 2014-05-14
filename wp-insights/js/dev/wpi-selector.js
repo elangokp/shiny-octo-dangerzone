@@ -19,6 +19,7 @@
 		canvas: null,
 		context: null,
 		url: null,
+		borderColor: "",
 		
 		lookup: function(array, prop, value) {
 		    for (var i = 0, len = array.length; i < len; i++)
@@ -133,7 +134,7 @@
 			if(shouldInitialize) {
 				wpi_jquery(wpiSelector.givenPageSections).each(function(index,object) {
 					if(object.isActive === true) {
-						wpiSelector.addpageSection(object.name,object.id);
+						wpiSelector.addPageSection(object.name,object.id);
 					}
 				});		
 				
@@ -176,14 +177,40 @@
 			});
 	    },
 	    
+		ColorLuminance: function(hex, lum) {
+			  // validate hex string
+			  hex = String(hex).replace(/[^0-9a-f]/gi, '');
+			  if (hex.length < 6) {
+			    hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+			  }
+			  lum = lum || 0;
+		
+			  // convert to decimal and change luminosity
+			  var rgb = "#", c, i;
+			  for (i = 0; i < 3; i++) {
+			    c = parseInt(hex.substr(i*2,2), 16);
+			    c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+			    rgb += ("00"+c).substr(c.length);
+			  }
+		
+			  return rgb;
+		},
+	    
 	    getRandomColor: function() {
-	        var letters = '0123456789ABCDEF'.split('');
+			if(wpiSelector.borderColor !== "blue") {
+				wpiSelector.borderColor = "blue";
+			} else {
+				wpiSelector.borderColor = "green";
+			}
+			return wpiSelector.borderColor;
+			
+	        /*var letters = '0123456789ABCDEF'.split('');
 	        var color = '#';
 	        for (var i = 0; i < 6; i++ ) {
 	            color += letters[Math.floor(Math.random() * 16)];
 	        }
-	        return color;
-	    },
+	        return wpiSelector.ColorLuminance(color,-0.4);*/
+	    },  
 	    
 	    savePageSections: function() {
 	    	console.log("savePageSections");
@@ -216,7 +243,14 @@
 			});	
 	    },
 	    
-	    addpageSection: function(sectionname,sectionid) {
+	    editPageSection: function(section_name, section_id) {
+			var pageSectionIndex = wpiSelector.lookup(wpiSelector.pageSections,"id",section_id);
+			wpiSelector.pageSections[pageSectionIndex].name = section_name;
+			var thispageSectionNameButtonElement = wpi_jquery('#pageSection'+section_id+'-name-button');
+			thispageSectionNameButtonElement.button( "option", "label", section_name );
+	    },
+	    
+	    addPageSection: function(sectionname,sectionid) {
 	    	var createdDate = "";
 			if (typeof sectionid === "undefined" || sectionid === null) { 
 				sectionid = wpiSelector.pageSections.length + 1;
@@ -256,11 +290,9 @@
 	    		pageSection.startElement = nearestElementPath;
 	    		console.log(top);
 	    	}
-	    	wpi_jquery(document.body).append('<div id="pageSection'+pageSection.id+'" class="wpipagesection"></div>');
+	    	wpi_jquery(document.body).append('<div id="pageSection'+pageSection.id+'" class="wpipagesection wpipagesection1"></div>');
 	    	wpi_jquery(document.body).append('<div id="pageSection'+pageSection.id+'-name" class="wpipagesection">'
-	    			+'<div id="pageSection'+pageSection.id+'-name-button" style="float:left;" class="wpipagesection">'+pageSection.name+'</div>'
-	    			+'<div id="pageSection'+pageSection.id+'-delete-button" style="float:left;" class="wpipagesection">Delete</div>'
-	    			+'<div id="pageSection'+pageSection.id+'-edit-button" style="float:left;" class="wpipagesection">Edit</div></div>');
+	    			+'<div id="pageSection'+pageSection.id+'-name-button" style="float:left;" class="wpipagesection">'+pageSection.name+'</div></div>');
 	    	var thispageSectionElement = wpi_jquery('#pageSection'+pageSection.id);
 	    	thispageSectionElement.data("pageSectionId",pageSection.id);
 	    	
@@ -277,40 +309,54 @@
 	    			event.preventDefault();
 	    		});
 	    	
-			var thispageSectionDeleteButtonElement = wpi_jquery('#pageSection'+pageSection.id+'-delete-button');
-			thispageSectionDeleteButtonElement.data("pageSectionId",pageSection.id);
-			thispageSectionDeleteButtonElement
-				.button()
-				.click(function(event) {
-					event.preventDefault();
-					var pageSectionId = wpi_jquery(this).data("pageSectionId");
-					wpi_jquery('#pageSection'+pageSectionId).remove();
-					wpi_jquery('#pageSection'+pageSectionId+'-name').remove();
-					var pageSectionIndex = wpiSelector.lookup(wpiSelector.pageSections,"id",pageSectionId);
-					wpiSelector.pageSections[pageSectionIndex].isActive = false;
-					wpiSelector.pageSections[pageSectionIndex].deletedDate = new Date();
-					wpiSelector.adjustAndDisplayPageSections();
-				});
-	    	
+	    	if(pageSection.id !== 1){
+	    		
+	    		thispageSectionNameElement.append('<div id="pageSection'+pageSection.id+'-delete-button" style="float:left;" class="wpipagesection">Delete</div>');
+				var thispageSectionDeleteButtonElement = wpi_jquery('#pageSection'+pageSection.id+'-delete-button');
+				thispageSectionDeleteButtonElement.data("pageSectionId",pageSection.id);
+				thispageSectionDeleteButtonElement
+					.button()
+					.click(function(event) {
+						event.preventDefault();
+						var pageSectionId = wpi_jquery(this).data("pageSectionId");
+						wpi_jquery('#pageSection'+pageSectionId).remove();
+						wpi_jquery('#pageSection'+pageSectionId+'-name').remove();
+						var pageSectionIndex = wpiSelector.lookup(wpiSelector.pageSections,"id",pageSectionId);
+						wpiSelector.pageSections[pageSectionIndex].isActive = false;
+						wpiSelector.pageSections[pageSectionIndex].deletedDate = new Date();
+						wpiSelector.adjustAndDisplayPageSections();
+					});
+			}
+				
+			thispageSectionNameElement.append('<div id="pageSection'+pageSection.id+'-edit-button" style="float:left;" class="wpipagesection">Edit</div>');
 			var thispageSectionEditButtonElement = wpi_jquery('#pageSection'+pageSection.id+'-edit-button');
 			thispageSectionEditButtonElement.data("pageSectionId",pageSection.id);
 			thispageSectionEditButtonElement
 				.button()
 				.click(function(event) {
 					event.preventDefault();
-				});		
-			
-	    	thispageSectionElement.css({
-							    		'position': 'absolute',
-							    		'z-index': '9999999',
-							    		'float': 'left',
-							    		'top': top,
-	    								"border-color": wpiSelector.getRandomColor(), 
-							            "border-width":"4px", 
-							            "border-style":"solid"});
+					var pageSectionId = wpi_jquery(this).data("pageSectionId");
+					console.log(pageSectionId);
+					var pageSectionIndex = wpiSelector.lookup(wpiSelector.pageSections,"id",pageSectionId);
+					console.log(pageSectionIndex);
+					var pageSectionName = wpiSelector.pageSections[pageSectionIndex].name;
+					wpi_jquery( "#edit-page-section-dialog-form" ).data( "pageSectionId",pageSectionId);
+					wpi_jquery( "#edit-page-section-dialog-form" ).data( "pageSectionName",pageSectionName);
+					wpi_jquery( "#edit-page-section-dialog-form" ).dialog( "open" );
+				});	
+
 	    	thispageSectionElement.width(wpi_jquery(window).width()-10);
 	    	thispageSectionElement.height(wpi_jquery(document).height() - top);
 	    	
+			thispageSectionElement.css({
+				'position': 'absolute',
+				'z-index': '9999999',
+				'float': 'left',
+				'top': top,
+				"border-color": wpiSelector.getRandomColor(), 
+			    "border-width":"4px", 
+			    "border-style":"solid"
+				});
 			
 			thispageSectionNameElement.position({
 			my: "right top",
@@ -326,13 +372,6 @@
 	    		var lastPageSectionElement = wpi_jquery('#pageSection'+lastActivePageSection.id);
 	    		lastPageSectionElement.resizable({
 		    		handles: "s",
-		    		resize: function(e, ui) {
-		    			/*setTimeout(function() {
-		    				
-		    			},1000);*/
-		    			
-		    			
-	            	},
 	            	stop: function(e, ui) {
 	            		
 	            		var thisPageSectionId = wpi_jquery(this).data('pageSectionId');
@@ -374,7 +413,13 @@
 		    	    	});
 		    			
 	            		wpiSelector.pageSections[nextPageSectionIdWouldBe-1].startElement = nearestElementPath;
-	            		wpi_jquery(nearestElementPath).delay(100).fadeIn(500).fadeOut(500).fadeIn(500).fadeOut(500).fadeIn(500);
+	            		wpi_jquery(nearestElementPath).delay(100).fadeIn(100).fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100)
+	            		.fadeOut(100).fadeIn(100)
+	            		.fadeOut(100).fadeIn(100)
+	            		.fadeOut(100).fadeIn(100)
+	            		.fadeOut(100).fadeIn(100)
+	            		.fadeOut(100).fadeIn(100)
+	            		.fadeOut(100).fadeIn(100);
 	            	}
 		    	});
 	    	}
@@ -403,8 +448,8 @@
 			
 			setTimeout(function() {
 				wpi_jquery('#pageSectionControls').position({
-					my: "right bottom",
-		    		at: "right-30 bottom-30",
+					my: "left top",
+					at: "left+30 top+30",
 		    		of: window,
 		    		collision: "fit fit",
 		    		within: window
@@ -413,15 +458,15 @@
 			
 			wpi_jquery(window).scroll(function() {
 				wpi_jquery('#pageSectionControls').position({
-		    		my: "right bottom",
-		    		at: "right-30 bottom-30",
+		    		my: "left top",
+		    		at: "left+30 top+30",
 		    		of: window,
 		    		collision: "fit fit",
 		    		within: window
 		    	});
 			});
 			
-			wpi_jquery(document.body).append('<div id="page-section-dialog-form" title="Add Page Section">'
+			wpi_jquery(document.body).append('<div id="add-page-section-dialog-form" title="Add Page Section">'
 					  +'<p class="validateTips">Please give a name for the page section.</p>'
 					  +'<form>'
 					  +'<fieldset>'
@@ -430,56 +475,111 @@
 					  +'</fieldset>'
 					  +'</form>'
 					+'</div>');
-			var pageSectionNameElement = wpi_jquery("#page-section-dialog-form input#name");
-			var pageSectionNameTipsElement = wpi_jquery("#page-section-dialog-form p.validateTips");
-			wpi_jquery( "#page-section-dialog-form" ).dialog({
+			var addPageSectionNameElement = wpi_jquery("#add-page-section-dialog-form input#name");
+			var addPageSectionNameTipsElement = wpi_jquery("#add-page-section-dialog-form p.validateTips");
+			wpi_jquery( "#add-page-section-dialog-form" ).dialog({
 							      autoOpen: false,
-							      height: 400,
-							      width: 550,
+							      height: 300,
+							      width: 400,
 							      modal: true,
 							      buttons: {
 							        "Add Page Section": function() {							         
-							          if(pageSectionNameElement.val().length > 1) {
-							        	  wpiSelector.addpageSection(pageSectionNameElement.val());
+							          if(addPageSectionNameElement.val().length > 1) {
+							        	  wpiSelector.addPageSection(addPageSectionNameElement.val());
 							        	  wpi_jquery( this ).dialog( "close" );
 							          } else {
-							        	  pageSectionNameElement.val( "" ).addClass( "ui-state-error" );
-							        	  pageSectionNameTipsElement.text("Page Section name cannot be empty");
+							        	  addPageSectionNameElement.val( "" ).addClass( "ui-state-error" );
+							        	  addPageSectionNameTipsElement.text("Page Section name cannot be empty.");
 							          }
 							        },
 							        Cancel: function() {
+							        	addPageSectionNameElement.val( "" ).removeClass( "ui-state-error" );
+							        	addPageSectionNameTipsElement.text("Please give a name for the page section.");
 							        	wpi_jquery( this ).dialog( "close" );
 							        }
 							      },
 							      close: function() {
-							    	 pageSectionNameElement.val( "" ).removeClass( "ui-state-error" );
+							    	  addPageSectionNameElement.val( "" ).removeClass( "ui-state-error" );
+							    	  addPageSectionNameTipsElement.text("Please give a name for the page section.");
 							      }
 							    });
+			
+			wpi_jquery(document.body).append('<div id="edit-page-section-dialog-form" title="Edit Page Section">'
+						+'<p class="validateTips">You can change the page section name below.</p>'
+						+'<form>'
+						+'<fieldset>'
+						  +'<label for="name">Name  </label>'
+						  +'<input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all">'
+						+'</fieldset>'
+						+'</form>'
+						+'</div>');
+			var editPageSectionNameElement = wpi_jquery("#edit-page-section-dialog-form input#name");
+			var editPageSectionNameTipsElement = wpi_jquery("#edit-page-section-dialog-form p.validateTips");
+			wpi_jquery( "#edit-page-section-dialog-form" ).dialog({
+					      autoOpen: false,
+					      height: 300,
+					      width: 400,
+					      modal: true,
+					      open: function() {
+									editPageSectionNameElement.val(wpi_jquery( this ).data("pageSectionName"));
+								},			
+					      buttons: {
+					        "Apply": function() {							         
+					          if(editPageSectionNameElement.val().length > 1) {
+					        	  wpiSelector.editPageSection(editPageSectionNameElement.val(),wpi_jquery( this ).data("pageSectionId"));
+					        	  wpi_jquery( this ).dialog( "close" );
+					          } else {
+					        	  editPageSectionNameElement.val( "" ).addClass( "ui-state-error" );
+					        	  editPageSectionNameTipsElement.text("Page Section name cannot be empty.");
+					          }
+					        },
+					        Cancel: function() {
+					        	editPageSectionNameElement.val( "" ).removeClass( "ui-state-error" );
+					        	editPageSectionNameTipsElement.text("You can change the page section name below.");
+					        	wpi_jquery( this ).dialog( "close" );
+					        }
+					      },
+					      close: function() {
+					    	  editPageSectionNameElement.val( "" ).removeClass( "ui-state-error" );
+					    	  editPageSectionNameTipsElement.text("You can change the page section name below.");
+					      }
+					    });
 							 
 			wpi_jquery('#addPageSection')
 				.button()
 				.click(function(event) {
 					event.preventDefault();
-					wpi_jquery( "#page-section-dialog-form" ).dialog( "open" );
+					wpi_jquery( "#add-page-section-dialog-form" ).dialog( "open" );
 				});
+			
 			wpi_jquery('#savePageSections')
 			.button()
 			.click(function(event) {
 				event.preventDefault();
 				wpiSelector.savePageSections();
 			});
-	    	wpi_jquery(window).on("resize", function(e) {
+	    	
+			wpi_jquery(window).on("resize", function(e) {
 	    		if(e.target == window) {
 	    			setTimeout(wpiSelector.resizeSelectorHeight(),300);
 	    		}	    		
 	    	});
-	    	wpiSelector.getDOMPositions();
-	    	if(wpiOpt.pageSections !== "") {
+	    	
+			wpiSelector.getDOMPositions();
+	    	
+			if(wpiOpt.pageSections !== "") {
 	    		wpiSelector.givenPageSections = JSON.parse(wpiOpt.pageSections);
 	    		wpiSelector.adjustAndDisplayPageSections(true);
 	    	} else {
-	    		wpiSelector.addpageSection("Page Start");
-	    	}	    	
+	    		wpiSelector.addPageSection("Page Start");
+	    		wpiSelector.addPageSection("Next Section 01");
+	    	}
+			
+			wpi_jquery(window).on("load", function(e) {
+				console.log("Load event called");
+				wpiSelector.getDOMPositions();
+				wpiSelector.adjustAndDisplayPageSections();
+			});
 	    	
 	    	console.log(wpiSelector.elementsWithPositions);
 	    }
