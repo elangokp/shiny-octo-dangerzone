@@ -19,7 +19,7 @@
 		canvas: null,
 		context: null,
 		url: null,
-		borderColor: "",
+		pageSectionClass: 1,
 		
 		lookup: function(array, prop, value) {
 		    for (var i = 0, len = array.length; i < len; i++)
@@ -290,7 +290,7 @@
 	    		pageSection.startElement = nearestElementPath;
 	    		console.log(top);
 	    	}
-	    	wpi_jquery(document.body).append('<div id="pageSection'+pageSection.id+'" class="wpipagesection wpipagesection1"></div>');
+	    	wpi_jquery(document.body).append('<div id="pageSection'+pageSection.id+'" class="wpipagesection"></div>');
 	    	wpi_jquery(document.body).append('<div id="pageSection'+pageSection.id+'-name" class="wpipagesection">'
 	    			+'<div id="pageSection'+pageSection.id+'-name-button" style="float:left;" class="wpipagesection">'+pageSection.name+'</div></div>');
 	    	var thispageSectionElement = wpi_jquery('#pageSection'+pageSection.id);
@@ -344,27 +344,29 @@
 					wpi_jquery( "#edit-page-section-dialog-form" ).data( "pageSectionName",pageSectionName);
 					wpi_jquery( "#edit-page-section-dialog-form" ).dialog( "open" );
 				});	
+				
+			if(wpiSelector.pageSectionClass === 1){
+				thispageSectionElement.addClass("wpipagesection1");
+				wpiSelector.pageSectionClass = 2;
+			}else if(wpiSelector.pageSectionClass === 2){
+				thispageSectionElement.addClass("wpipagesection2");
+				wpiSelector.pageSectionClass = 1;
+			}			
 
 	    	thispageSectionElement.width(wpi_jquery(window).width()-10);
 	    	thispageSectionElement.height(wpi_jquery(document).height() - top);
 	    	
 			thispageSectionElement.css({
-				'position': 'absolute',
-				'z-index': '9999999',
-				'float': 'left',
-				'top': top,
-				"border-color": wpiSelector.getRandomColor(), 
-			    "border-width":"4px", 
-			    "border-style":"solid"
+				'top': top
 				});
 			
 			thispageSectionNameElement.position({
-			my: "right top",
-			at: "right-30 top+30",
-			of: "#pageSection"+pageSection.id,
-			collision: "fit fit",
-			within: "#pageSection"+pageSection.id
-			});
+												my: "right top",
+												at: "right-30 top+30",
+												of: "#pageSection"+pageSection.id,
+												collision: "fit fit",
+												within: "#pageSection"+pageSection.id
+												});
 	    	
 	    	if(wpiSelector.pageSections.length>0){
 	    		var lastActivePageSectionIndex = wpiSelector.getLasttActivePageSectionIndex();
@@ -438,7 +440,7 @@
 			wpiSelector.canvas.style.cssText = "position:absolute;top:0;left:0;z-index:9999998;";
 			wpi_jquery("body").append(wpiSelector.canvas);
 			wpiSelector.context=wpiSelector.canvas.getContext("2d");
-			wpiSelector.context.globalAlpha=0.2;
+			wpiSelector.context.globalAlpha=0;
 			wpiSelector.context.fillStyle="black";
 			wpiSelector.context.fillRect(0,0,wpi_jquery(document).width(),wpi_jquery(document).height());
 			
