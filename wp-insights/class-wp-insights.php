@@ -968,6 +968,14 @@ class WP_Insights {
 	public function add_wpinsights_scripts() {
 		$wpi_js_url = plugins_url('js/wpi-js.min.js', __FILE__);
 		$wpi_tracking_url = admin_url( 'admin-ajax.php' );		
+		$selector_details = WP_Insights_Utils::get_selector_details();
+		if($selector_details === false) {
+			$selector_id = 0;
+			$page_section_elements = "";
+		}else {
+			$selector_id = $selector_details["id"];
+			$page_section_elements = $selector_details["page_section_elements"];
+		}
 		?>
 		<!-- Powered by WP Insights version <?php echo self::VERSION?>-->
 						  <script id='wpi-trigger-script' type="text/javascript">
@@ -1021,7 +1029,9 @@ class WP_Insights {
 														    };
 										  					wpi.record({
 															      "trackingUrl": "<?php echo $wpi_tracking_url;?>",
-															      "postInterval": <?php echo get_option(self::$server_recording_interval_option_name, self::$default_server_recording_interval_option_value);?>
+															      "postInterval": <?php echo get_option(self::$server_recording_interval_option_name, self::$default_server_recording_interval_option_value);?>,
+													    		  "selectorId":  "<?php echo $selector_id?>",
+															      "pageSections": '<?php echo $page_section_elements?>'
 															    });
 						
 									  			  			}
@@ -1039,7 +1049,14 @@ class WP_Insights {
 		$json3_js_url = plugins_url('js/dev/json3.min.js', __FILE__);
 		$wpi_recorder_js_url = plugins_url('js/dev/wpi-recorder.js', __FILE__);
 		$wpi_tracking_url = admin_url( 'admin-ajax.php' );
-		
+		$selector_details = WP_Insights_Utils::get_selector_details();
+		if($selector_details === false) {
+			$selector_id = 0;
+			$page_section_elements = "";
+		}else {
+			$selector_id = $selector_details["id"];
+			$page_section_elements = $selector_details["page_section_elements"];
+		}
 		?>
 
 		<!-- Powered by WP Insights version <?php echo self::VERSION?>-->
@@ -1095,7 +1112,9 @@ class WP_Insights {
 				  		  			  {
 					  					wpi.record({
 										      "trackingUrl": "<?php echo $wpi_tracking_url?>",
-										      "postInterval": <?php echo get_option(self::$server_recording_interval_option_name, self::$default_server_recording_interval_option_value);?>
+										      "postInterval": <?php echo get_option(self::$server_recording_interval_option_name, self::$default_server_recording_interval_option_value);?>,
+								    		  "selectorId":  "<?php echo $selector_id?>",
+										      "pageSections": '<?php echo $page_section_elements?>'
 										    });
 	
 				  			  			}

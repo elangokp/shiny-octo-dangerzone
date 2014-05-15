@@ -145,6 +145,15 @@
 					var thispageSectionId = '#pageSection'+object.id;
 					var thispageSectionNameId = '#pageSection'+object.id+'-name';
 					wpi_jquery(thispageSectionId).width(wpi_jquery(window).width()-10);
+					
+					if(wpiSelector.pageSectionClass === 1){
+						wpi_jquery(thispageSectionId).addClass("wpipagesection1");
+						wpiSelector.pageSectionClass = 2;
+					}else if(wpiSelector.pageSectionClass === 2){
+						wpi_jquery(thispageSectionId).addClass("wpipagesection2");
+						wpiSelector.pageSectionClass = 1;
+					}
+					
 					if(object.startElement === "body") {
 						var top = 0;
 					} else {

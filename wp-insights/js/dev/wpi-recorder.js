@@ -20,7 +20,8 @@
      * @type int     
      */
     cookieDays: 730,
-    postInterval: 30
+    postInterval: 30,
+    pageSections: ""
   };
     
   /** 
@@ -51,6 +52,7 @@
     lastBlurTimeStamp: null,               // Timestamp when the window lost focus last time
     lastFocusTimeStamp: null,              // Timestamp when the window gained focus last time
     pageSections: [],                      // Array of page sections with data
+    givenPageSections: [],
     currentPageSection: "",                // Page section in view port now. Initialised to page start default page section.
     lastPageSection: "",                   // Page section that was in viewport before the current page section.
     scrollStopped: true,
@@ -518,7 +520,36 @@
     
     initPageSections: function()
     {
-    	var pageSectionSeparators = wpi_jquery("img.wpipagesection");
+    	if(wpiOpt.pageSections !== "") {
+    		wpiSelector.givenPageSections = JSON.parse(wpiOpt.pageSections);
+    	}
+    	//var pageSectionSeparators = wpi_jquery("img.wpipagesection");
+    	var psIndex = 0;
+    	wpi_jquery.each(wpiRec.givenPageSections, function(index){
+    		if(wpiRec.givenPageSections[index].isActive !== false) {
+    			var pageSection = {
+		   	 			sectionId : wpiRec.givenPageSections[index].id,
+		   				sectionName : wpiRec.givenPageSections[index].name,
+		   				order : wpiRec.pageSections.length,
+		   				top : 0,
+		   				bottom : Math.round(wpi_jquery(pageSectionSeparators.get(0)).offset().top),
+		   				prevSectionId: "",
+		   				prevSectionName: "",
+		   				nextSectionId: wpi_jquery(pageSectionSeparators.get(0)).data("psid"),
+		   				nextSectionName: wpi_jquery(pageSectionSeparators.get(0)).data("psname"),
+		   				viewed: false,
+		   				entryTimes: [],
+		   				exitTimes: [],
+		   				focusedEntryTimes: [],
+		   				focusedExitTimes: [],
+		   				totalTime: 0,
+		   				totalFocusedTime: 0,
+		   				lostFocusCount: 0,
+		   				currentPageSection: 0
+		   	 	};
+    		}
+    	});
+    	
     	if(pageSectionSeparators.length > 0) {
     		var pageSection = {
     		   	 			sectionId : "wpi_page_section_00",
