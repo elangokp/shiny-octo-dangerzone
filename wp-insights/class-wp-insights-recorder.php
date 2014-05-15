@@ -378,13 +378,15 @@ class WP_Insights_Recorder {
 		
 		error_log($type);
 		
+		$this->recording_id = $_POST['rid'];
+		
 		if($type == "init") {
 			$this->init_recording();
 			return;
 		}
 		
 		
-		$this->recording_id = $_POST['rid'];
+		
 		//error_log($this->recording_id);
 		
 		$values = "sess_time = '".                         (float) $_POST['time']    ."',";

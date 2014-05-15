@@ -52,7 +52,7 @@
     lastBlurTimeStamp: null,               // Timestamp when the window lost focus last time
     lastFocusTimeStamp: null,              // Timestamp when the window gained focus last time
     pageSections: [],                      // Array of page sections with data
-    givenPageSections: [],
+    givenPageSectionsMeta: [],
     currentPageSection: "",                // Page section in view port now. Initialised to page start default page section.
     lastPageSection: "",                   // Page section that was in viewport before the current page section.
     scrollStopped: true,
@@ -133,7 +133,35 @@
       }
     },
     
-    getVisitorId: function()
+    getNextActivePageSectionIndex: function(currentIndex) {
+		var nextIndex = currentIndex+1
+		if(nextIndex >= wpiRec.givenPageSectionsMeta.length) {
+			return false;
+		}
+		
+		for (var i = nextIndex, len = wpiRec.givenPageSectionsMeta.length; i < len; i++) {
+			if (wpiRec.givenPageSectionsMeta[i].isActive === true) return i;
+		}		
+			
+		return false;
+	},
+	
+	getPreviousActivePageSectionIndex: function(currentIndex) {
+		
+		if(currentIndex === 0){
+			return false;
+		}
+		
+		var prevIndex = currentIndex-1
+		
+		for (var i = prevIndex; i >= 0; i--) {
+			if (wpiRec.pageSections[i].isActive === true) return i;
+		}
+			
+		return false;
+	},
+    
+	getVisitorId: function()
     {
     	var visitorId = wpiRec.cookies.getCookie('wpi-visitor-id');
     	console.log(visitorId);
@@ -497,23 +525,21 @@
     
     adjustPageSections: function()
     {
-    	wpi_jquery.each(wpiRec.pageSections, function(index){
-    		var sectionId = wpiRec.pageSections[index].sectionId;
-    		var nextSectionId = wpiRec.pageSections[index].nextSectionId;
-    		if("wpi_page_section_00" == sectionId){
-        		var nextSelector = "img#wpipagesection-"+nextSectionId;
-        		wpiRec.pageSections[index].top = 0;
-        		wpiRec.pageSections[index].bottom = Math.round(wpi_jquery(nextSelector).offset().top);
-    		}else if("wpi_page_section_999" == nextSectionId) {
-    			var selector = "img#wpipagesection-"+sectionId;
-        		wpiRec.pageSections[index].top = Math.round(wpi_jquery(selector).offset().top);
-        		wpiRec.pageSections[index].bottom = (wpi_jquery(document).height() < wpi_jquery(window).height()) ? Math.round(wpi_jquery(window).height()) : Math.round(wpi_jquery(document).height());
-    		}else {
-    			var selector = "img#wpipagesection-"+sectionId;
-        		var nextSelector = "img#wpipagesection-"+nextSectionId;
-        		wpiRec.pageSections[index].top = Math.round(wpi_jquery(selector).offset().top);
-        		wpiRec.pageSections[index].bottom = Math.round(wpi_jquery(nextSelector).offset().top);
-    		}
+    	wpi_jquery.each(wpiRec.pageSections, function(index){    		
+			
+    		var startElement = wpiRec.pageSections[index].startElement;
+			if(startElement === "body"){
+				wpiRec.pageSections[index].top = 0;
+			} else {
+				wpiRec.pageSections[index].top = Math.round(wpi_jquery(startElement).offset().top);
+			}
+			
+			var endElement = wpiRec.pageSections[index].endElement;
+			if(endElement === ""){
+				wpiRec.pageSections[index].bottom = (wpi_jquery(document).height() < wpi_jquery(window).height()) ? Math.round(wpi_jquery(window).height()) : Math.round(wpi_jquery(document).height());
+			} else {
+				wpiRec.pageSections[index].bottom = Math.round(wpi_jquery(endElement).offset().top);
+			}
     		
     	});
     },
@@ -521,22 +547,36 @@
     initPageSections: function()
     {
     	if(wpiOpt.pageSections !== "") {
-    		wpiSelector.givenPageSections = JSON.parse(wpiOpt.pageSections);
+    		wpiRec.givenPageSectionsMeta = JSON.parse(wpiOpt.pageSections);
     	}
-    	//var pageSectionSeparators = wpi_jquery("img.wpipagesection");
-    	var psIndex = 0;
-    	wpi_jquery.each(wpiRec.givenPageSections, function(index){
-    		if(wpiRec.givenPageSections[index].isActive !== false) {
+    	
+    	wpi_jquery.each(wpiRec.givenPageSectionsMeta, function(index){
+    		if(wpiRec.givenPageSectionsMeta[index].isActive !== false) {
+    			
+    			var startElement = wpiRec.givenPageSectionsMeta[index].startElement;
+    			if(startElement === "body"){
+    				var top = 0;
+    			} else {
+    				var top = Math.round(wpi_jquery(startElement).offset().top);
+    			}
+    			
+				var nextActiveSectionIndex = wpiRec.getNextActivePageSectionIndex(index);
+				if(nextActiveSectionIndex === false) {	
+					var endElement = "";
+					var bottom = (wpi_jquery(document).height() < wpi_jquery(window).height()) ? Math.round(wpi_jquery(window).height()) : Math.round(wpi_jquery(document).height());
+				} else {
+					var endElement = wpiRec.givenPageSectionsMeta[nextActiveSectionIndex].startElement;
+					var bottom = Math.round(wpi_jquery(endElement).offset().top);
+				}
+    			
     			var pageSection = {
-		   	 			sectionId : wpiRec.givenPageSections[index].id,
-		   				sectionName : wpiRec.givenPageSections[index].name,
-		   				order : wpiRec.pageSections.length,
-		   				top : 0,
-		   				bottom : Math.round(wpi_jquery(pageSectionSeparators.get(0)).offset().top),
-		   				prevSectionId: "",
-		   				prevSectionName: "",
-		   				nextSectionId: wpi_jquery(pageSectionSeparators.get(0)).data("psid"),
-		   				nextSectionName: wpi_jquery(pageSectionSeparators.get(0)).data("psname"),
+		   	 			sectionId : wpiRec.givenPageSectionsMeta[index].id,
+		   				sectionName : wpiRec.givenPageSectionsMeta[index].name,
+		   				order : wpiRec.pageSections.length+1,
+		   				top : top,
+		   				bottom : bottom,
+		   				startElement: startElement,
+		   				endElement: endElement,
 		   				viewed: false,
 		   				entryTimes: [],
 		   				exitTimes: [],
@@ -547,81 +587,13 @@
 		   				lostFocusCount: 0,
 		   				currentPageSection: 0
 		   	 	};
+    			
+    			wpiRec.pageSections.push(pageSection);
     		}
     	});
     	
-    	if(pageSectionSeparators.length > 0) {
-    		var pageSection = {
-    		   	 			sectionId : "wpi_page_section_00",
-    		   				sectionName : "Page Start",
-    		   				order : 0,
-    		   				top : 0,
-    		   				bottom : Math.round(wpi_jquery(pageSectionSeparators.get(0)).offset().top),
-    		   				prevSectionId: "",
-    		   				prevSectionName: "",
-    		   				nextSectionId: wpi_jquery(pageSectionSeparators.get(0)).data("psid"),
-    		   				nextSectionName: wpi_jquery(pageSectionSeparators.get(0)).data("psname"),
-    		   				viewed: false,
-    		   				entryTimes: [],
-    		   				exitTimes: [],
-    		   				focusedEntryTimes: [],
-    		   				focusedExitTimes: [],
-    		   				totalTime: 0,
-    		   				totalFocusedTime: 0,
-    		   				lostFocusCount: 0,
-    		   				currentPageSection: 0
-    		   	 	};
-
-    		   		wpiRec.pageSections.push(pageSection);
-    		   	
-    		   		pageSectionSeparators.each(function(index) {
-    		   			pageSection = {
-    		   			 		sectionId : wpi_jquery(pageSectionSeparators.get(index)).data("psid"),
-    		   					sectionName : wpi_jquery(pageSectionSeparators.get(index)).data("psname"),
-    		   					order : index+1,
-    		   					top : Math.round(wpi_jquery(pageSectionSeparators.get(index)).offset().top),
-    		   					bottom : "",
-    		   					prevSectionId: "",
-    		   					prevSectionName: "",
-    		   					nextSectionId: "",
-    		   					nextSectionName: "",
-    		   					viewed: false,
-    		   					entryTimes: [],
-    		   					exitTimes: [],
-    		   					focusedEntryTimes: [],
-    		   					focusedExitTimes: [],
-    		   					totalTime: 0,
-    		   					totalFocusedTime: 0,
-    		   					lostFocusCount: 0,
-    		   					currentPageSection: 0
-    		   			 	};				  							
-    		   	
-    		   			if(index>0) {
-    		   				pageSection.prevSectionId = wpi_jquery(pageSectionSeparators.get(index - 1)).data("psid");
-    		   				pageSection.prevSectionName = wpi_jquery(pageSectionSeparators.get(index - 1)).data("psname");
-    		   			} else {
-    		   				pageSection.prevSectionId = "wpi_page_section_00";
-    		   				pageSection.prevSectionName = "Page Start";
-    		   			}
-    		   			
-    		   			if (index < pageSectionSeparators.size() - 1) {
-    		   				pageSection.bottom = Math.round(wpi_jquery(pageSectionSeparators.get(index+1)).offset().top);
-    		   				pageSection.nextSectionId = wpi_jquery(pageSectionSeparators.get(index + 1)).data("psid");
-    		   				pageSection.nextSectionName = wpi_jquery(pageSectionSeparators.get(index + 1)).data("psname");
-    		   		 	} else {
-    		   		 		pageSection.bottom = (wpi_jquery(document).height() < wpi_jquery(window).height()) ? Math.round(wpi_jquery(window).height()) : Math.round(wpi_jquery(document).height());
-    		   		 		pageSection.nextSectionId = "wpi_page_section_999";
-    		   				pageSection.nextSectionName = "Page End";
-    		   		 	}
-    		   	
-    		   			wpiRec.pageSections.push(pageSection);			  								
-    		   	            
-    		   		});
-    		   		wpiRec.log(wpiRec.pageSections);
-    		   		wpiRec.updatePageSections();
-    	
-    	}
-    	
+    	wpiRec.log(wpiRec.pageSections);
+    	wpiRec.updatePageSections();   	
 		
     },
     
