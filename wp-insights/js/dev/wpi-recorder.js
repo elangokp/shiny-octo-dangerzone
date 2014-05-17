@@ -133,6 +133,14 @@
       }
     },
     
+    isActiveAndAvailable: function(pageSection) {
+		if (pageSection.isActive === true && wpi_jquery(pageSection.startElement).length>0) {
+			return true;
+		}
+		
+		return false;
+	},
+    
     getNextActivePageSectionIndex: function(currentIndex) {
 		var nextIndex = currentIndex+1
 		if(nextIndex >= wpiRec.givenPageSectionsMeta.length) {
@@ -140,7 +148,7 @@
 		}
 		
 		for (var i = nextIndex, len = wpiRec.givenPageSectionsMeta.length; i < len; i++) {
-			if (wpiRec.givenPageSectionsMeta[i].isActive === true) return i;
+			if (wpiRec.isActiveAndAvailable(wpiRec.givenPageSectionsMeta[i]) === true) return i;
 		}		
 			
 		return false;
@@ -155,7 +163,7 @@
 		var prevIndex = currentIndex-1
 		
 		for (var i = prevIndex; i >= 0; i--) {
-			if (wpiRec.pageSections[i].isActive === true) return i;
+			if (wpiRec.isActiveAndAvailable(wpiRec.givenPageSectionsMeta[i]) === true) return i;
 		}
 			
 		return false;
@@ -551,7 +559,7 @@
     	}
     	
     	wpi_jquery.each(wpiRec.givenPageSectionsMeta, function(index){
-    		if(wpiRec.givenPageSectionsMeta[index].isActive !== false) {
+    		if(wpiRec.isActiveAndAvailable(wpiRec.givenPageSectionsMeta[index]) === true) {
     			
     			var startElement = wpiRec.givenPageSectionsMeta[index].startElement;
     			if(startElement === "body"){

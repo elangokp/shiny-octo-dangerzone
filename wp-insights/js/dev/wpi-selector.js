@@ -26,6 +26,14 @@
 		        if (array[i][prop] === value) return i;
 		},
 		
+		isActiveAndAvailable: function(pageSection) {
+			if (pageSection.isActive === true && wpi_jquery(pageSection.startElement).length>0) {
+				return true;
+			}
+			
+			return false;
+		},
+		
 		getNextActivePageSectionIndex: function(currentIndex) {
 			var nextIndex = currentIndex+1
 			if(nextIndex >= wpiSelector.pageSections.length) {
@@ -33,7 +41,7 @@
 			}
 			
 			for (var i = nextIndex, len = wpiSelector.pageSections.length; i < len; i++) {
-				if (wpiSelector.pageSections[i].isActive === true) return i;
+				if(wpiSelector.isActiveAndAvailable(wpiSelector.pageSections[i]) === true) return i;
 			}		
 				
 			return false;
@@ -42,7 +50,7 @@
 		getLasttActivePageSectionIndex: function() {
 			
 			for (var i = wpiSelector.pageSections.length-1; i >= 0; i--) {
-				if (wpiSelector.pageSections[i].isActive === true) return i;
+				if(wpiSelector.isActiveAndAvailable(wpiSelector.pageSections[i]) === true) return i;
 			}		
 				
 			return false;
@@ -133,7 +141,7 @@
 	    	
 			if(shouldInitialize) {
 				wpi_jquery(wpiSelector.givenPageSections).each(function(index,object) {
-					if(object.isActive === true) {
+					if(wpiSelector.isActiveAndAvailable(object) === true) {
 						wpiSelector.addPageSection(object.name,object.id);
 					}
 				});		
@@ -141,18 +149,10 @@
 				wpiSelector.pageSections = wpiSelector.givenPageSections;
 			}
 			wpi_jquery(wpiSelector.pageSections).each(function(index,object) {
-				if(object.isActive === true) {
+				if(wpiSelector.isActiveAndAvailable(object) === true) {
 					var thispageSectionId = '#pageSection'+object.id;
 					var thispageSectionNameId = '#pageSection'+object.id+'-name';
 					wpi_jquery(thispageSectionId).width(wpi_jquery(window).width()-10);
-					
-					if(wpiSelector.pageSectionClass === 1){
-						wpi_jquery(thispageSectionId).addClass("wpipagesection1");
-						wpiSelector.pageSectionClass = 2;
-					}else if(wpiSelector.pageSectionClass === 2){
-						wpi_jquery(thispageSectionId).addClass("wpipagesection2");
-						wpiSelector.pageSectionClass = 1;
-					}
 					
 					if(object.startElement === "body") {
 						var top = 0;
