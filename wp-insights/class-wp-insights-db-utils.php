@@ -342,7 +342,7 @@ class WP_Insights_DB_Utils {
         sess_time    FLOAT(7,2)    unsigned  NOT NULL,
         focus_time   FLOAT(7,2)    unsigned  NULL,
         lost_focus_count  TINYINT  unsigned  NULL,
-        exit_page_section VARCHAR(255)       NULL,
+        exit_page_section SMALLINT unsigned    NULL,
         is_exit      TINYINT(1)              NOT NULL,
         is_session_exit TINYINT(1)           NOT NULL,
         viewports    LONGTEXT                NOT NULL,

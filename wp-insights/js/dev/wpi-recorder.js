@@ -295,8 +295,8 @@
 			var sectionTop = wpiRec.pageSections[index].top;
 			var sectionBottom = wpiRec.pageSections[index].bottom;
 			if(sectionTop<center && sectionBottom>center) {
-				var pageSectionDetected = wpiRec.pageSections[index].sectionName;
-				if(pageSectionDetected != wpiRec.currentPageSection) {
+				var pageSectionDetected = wpiRec.pageSections[index].id;
+				if(pageSectionDetected !== wpiRec.currentPageSection) {
 					wpiRec.lastPageSection = wpiRec.currentPageSection;
 					wpiRec.currentPageSection = pageSectionDetected;
 					wpiRec.pageSections[index].currentPageSection = 1;
@@ -304,7 +304,7 @@
 					wpiRec.pageSections[index].entryTimes.push(wpiRec.getTime());
 					wpiRec.pageSections[index].focusedEntryTimes.push(wpiRec.getFocusTime());
 					if(wpiRec.lastPageSection !== "") {
-						var lastPageSectionIndex = wpiRec.find_in_array(wpiRec.pageSections,"sectionName",wpiRec.lastPageSection);
+						var lastPageSectionIndex = wpiRec.find_in_array(wpiRec.pageSections,"name",wpiRec.lastPageSection);
 						
 						wpiRec.pageSections[lastPageSectionIndex].exitTimes.push(wpiRec.getTime());
 						wpiRec.pageSections[lastPageSectionIndex].focusedExitTimes.push(wpiRec.getFocusTime());
@@ -439,7 +439,7 @@
 	      requestData += "&vp="        + vp;
 	      requestData += "&lostFocusCount=" + wpiRec.lostFocusCount;
 	      requestData += "&pageSections=" + encodeURIComponent(JSON.stringify(wpiRec.pageSections));
-	      requestData += "&currentPageSection=" + encodeURIComponent(wpiRec.currentPageSection);
+	      requestData += "&currentPageSection=" + wpiRec.currentPageSection;
           requestData += "&action="    + action;
           requestData += "&type="    + type;
           
@@ -578,8 +578,8 @@
 				}
     			
     			var pageSection = {
-		   	 			sectionId : wpiRec.givenPageSectionsMeta[index].id,
-		   				sectionName : wpiRec.givenPageSectionsMeta[index].name,
+		   	 			id : wpiRec.givenPageSectionsMeta[index].id,
+		   				name : wpiRec.givenPageSectionsMeta[index].name,
 		   				order : wpiRec.pageSections.length+1,
 		   				top : top,
 		   				bottom : bottom,
@@ -747,8 +747,8 @@
       		wpiRec.inFocus = false;
       		wpiRec.lostFocusCount += 1;
       		wpiRec.elem.lostFocus.push(wpiRec.elem.hovered[wpiRec.elem.hovered.length - 1]);
-      		var currentPageSectionIndex = wpiRec.find_in_array(wpiRec.pageSections,"sectionName",wpiRec.currentPageSection);
-      		if(currentPageSectionIndex != false) {
+      		var currentPageSectionIndex = wpiRec.find_in_array(wpiRec.pageSections,"id",wpiRec.currentPageSection);
+      		if(currentPageSectionIndex !== false) {
       			wpiRec.pageSections[currentPageSectionIndex].lostFocusCount += 1;
       		}	
       		
