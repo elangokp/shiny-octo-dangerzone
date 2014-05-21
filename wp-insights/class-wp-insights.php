@@ -121,6 +121,7 @@ class WP_Insights {
 		} else {
 			add_action('plugins_loaded', array($this, 'setRecorderStatus'));
 			add_shortcode( 'wpi_page_section', array($this, 'add_page_section') );
+			add_action( 'admin_bar_menu', array($this, 'add_wp_insights_toolbar_nodes'), 999 );
 			if(is_admin()) {
 				// Add the options page and menu item.
 				add_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );
@@ -176,6 +177,35 @@ class WP_Insights {
 	function add_sticky_column($columns) {
 		return array_merge( $columns,
 				array('sticky' => __('Sticky')) );
+	}
+	
+	public function add_wp_insights_toolbar_nodes( $wp_admin_bar ) {
+	
+		// add a parent item
+		$args = array(
+				'id'    => 'wpi_toolbar_parent',
+				'title' => 'WP Insights'
+		);
+		$wp_admin_bar->add_node( $args );
+	
+		// add a child item to our parent item
+		$args = array(
+				'id'     => 'wpi_toolbar_define_pagesections',
+				'title'  => 'Define Page Sections',
+				'href'   => '#',
+				'parent' => 'wpi_toolbar_parent'
+		);
+		$wp_admin_bar->add_node( $args );
+	
+		// add a group node with a class "first-toolbar-group"
+		$args = array(
+				'id'     => 'wpi_toolbar_detailed_page_stats',
+				'title' => 'Detailed Page Stats',
+				'href' => '#',
+				'parent'   => 'wpi_toolbar_parent'
+		);
+		$wp_admin_bar->add_node( $args );
+	
 	}
 
 	
