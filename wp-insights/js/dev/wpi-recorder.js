@@ -304,7 +304,7 @@
 					wpiRec.pageSections[index].entryTimes.push(wpiRec.getTime());
 					wpiRec.pageSections[index].focusedEntryTimes.push(wpiRec.getFocusTime());
 					if(wpiRec.lastPageSection !== "") {
-						var lastPageSectionIndex = wpiRec.find_in_array(wpiRec.pageSections,"name",wpiRec.lastPageSection);
+						var lastPageSectionIndex = wpiRec.find_in_array(wpiRec.pageSections,"id",wpiRec.lastPageSection);
 						
 						wpiRec.pageSections[lastPageSectionIndex].exitTimes.push(wpiRec.getTime());
 						wpiRec.pageSections[lastPageSectionIndex].focusedExitTimes.push(wpiRec.getFocusTime());
@@ -769,6 +769,14 @@
       wpi_jquery(window).on("beforeunload", function() { wpiRec.sendMouseData('exit'); });
       wpi_jquery(window).on("unload", function() { wpiRec.sendMouseData('exit'); })
 	  setTimeout(function() { wpiRec.sendMouseData('init'); }, 10);
+      setTimeout(function() {
+    	  wpiRec.sendMouseData();
+    	  
+    	  setTimeout(function() {
+        	  wpiRec.sendMouseData(); 
+        	  }, 10000);
+    	  
+    	  }, 10000);
       var randomSecs = Math.floor(Math.random()*1000); // this will get a number between 1 and 99;
       randomSecs *= Math.floor(Math.random()*2) == 1 ? 1 : -1; // this will add minus sign in 50% of cases
       var requestInterval = (wpiOpt.postInterval*1000)+randomSecs;

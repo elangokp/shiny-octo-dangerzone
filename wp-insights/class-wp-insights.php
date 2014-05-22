@@ -120,20 +120,24 @@ class WP_Insights {
 			add_action('wp_ajax_nopriv_wpisavepagesections', array( $this, 'save_page_sections' ) );
 		} else {
 			add_action('plugins_loaded', array($this, 'setRecorderStatus'));
-			add_shortcode( 'wpi_page_section', array($this, 'add_page_section') );
-			add_action( 'admin_bar_menu', array($this, 'add_wp_insights_toolbar_nodes'), 999 );
+			//add_shortcode( 'wpi_page_section', array($this, 'add_page_section') );
 			if(is_admin()) {
 				// Add the options page and menu item.
 				add_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );
 				// Load admin style sheet and JavaScript.
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
-				add_action( 'add_meta_boxes', array( $this, 'add_wpi_meta_box' ) );
-				add_action( 'save_post', array( $this, 'save_wpi_meta' ) );
+				//add_action( 'add_meta_boxes', array( $this, 'add_wpi_meta_box' ) );
+				//add_action( 'save_post', array( $this, 'save_wpi_meta' ) );
 				add_action( 'media_buttons', array( $this, 'add_wpi_shortcode_button' ) );
 				
 				add_filter('manage_posts_columns' , array( $this, 'add_sticky_column' ));
 			}
+			
+			if(!is_admin()) {
+				add_action('plugins_loaded', array($this, 'customize_admin_bar'));
+			}
+			
 			
 		}
 		
@@ -179,6 +183,13 @@ class WP_Insights {
 				array('sticky' => __('Sticky')) );
 	}
 	
+	public function customize_admin_bar() {
+		if(!is_admin() && is_admin_bar_showing()) {
+			add_action( 'admin_bar_menu', array($this, 'add_wp_insights_toolbar_nodes'), 999 );
+			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_admin_bar_scripts' ) );
+		}
+	}
+	
 	public function add_wp_insights_toolbar_nodes( $wp_admin_bar ) {
 	
 		// add a parent item
@@ -193,18 +204,18 @@ class WP_Insights {
 				'id'     => 'wpi_toolbar_define_pagesections',
 				'title'  => 'Define Page Sections',
 				'href'   => '#',
-				'parent' => 'wpi_toolbar_parent'
+				'parent' => 'wpi_toolbar_parent',
+				'meta'   => array('class' => 'xyz')
 		);
 		$wp_admin_bar->add_node( $args );
 	
-		// add a group node with a class "first-toolbar-group"
-		$args = array(
+		/*$args = array(
 				'id'     => 'wpi_toolbar_detailed_page_stats',
 				'title' => 'Detailed Page Stats',
 				'href' => '#',
 				'parent'   => 'wpi_toolbar_parent'
 		);
-		$wp_admin_bar->add_node( $args );
+		$wp_admin_bar->add_node( $args );*/
 	
 	}
 
@@ -464,6 +475,17 @@ class WP_Insights {
 			wp_enqueue_script('jquery-ui-datepicker');
 		//}
 
+	}
+	
+	/**
+	 * Register and enqueue admin-bar specific JavaScript.
+	 *
+	 * @since     1.0.0
+	 *
+	 * @return    null    Return early if no settings page is registered.
+	 */
+	public function enqueue_admin_bar_scripts() {
+		wp_enqueue_script( $this->plugin_slug . '-admin-bar-script', plugins_url( 'js/admin-bar.js', __FILE__ ), array( 'jquery' ), self::VERSION );	
 	}
 
 	/**
