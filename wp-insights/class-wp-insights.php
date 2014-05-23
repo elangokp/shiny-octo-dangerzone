@@ -129,7 +129,7 @@ class WP_Insights {
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
 				//add_action( 'add_meta_boxes', array( $this, 'add_wpi_meta_box' ) );
 				//add_action( 'save_post', array( $this, 'save_wpi_meta' ) );
-				add_action( 'media_buttons', array( $this, 'add_wpi_shortcode_button' ) );
+				//add_action( 'media_buttons', array( $this, 'add_wpi_shortcode_button' ) );
 				
 				add_filter('manage_posts_columns' , array( $this, 'add_sticky_column' ));
 			}

@@ -79,12 +79,12 @@ class WP_Insights_Recording_PS_Stats_List_Table extends WPI_WP_List_Table {
         	<?php
      }
      
-     function column_section_order($item){
+     /*function column_section_order($item){
      	 
      	return sprintf('%1$s',
      			$item['section_order'] +1
      	);
-     }
+     }*/
     
     function column_viewed($item){
     	
@@ -128,6 +128,29 @@ class WP_Insights_Recording_PS_Stats_List_Table extends WPI_WP_List_Table {
     	);
     }
     
+    function column_exit_page($item){
+    
+    	if($item['exited_page'] > 0) {
+    		$exited_page = "Yes";
+    	}else {
+    		$exited_page = "No";
+    	}
+    	return sprintf('%1$s',
+    			$exited_page
+    	);
+    }
+    
+    function column_exit_session($item){
+    
+    	if($item['exited_session'] > 0) {
+    		$exited_session = "Yes";
+    	}else {
+    		$exited_session = "No";
+    	}
+    	return sprintf('%1$s',
+    			$exited_session
+    	);
+    }
     
     
     /** ************************************************************************
@@ -145,12 +168,14 @@ class WP_Insights_Recording_PS_Stats_List_Table extends WPI_WP_List_Table {
      **************************************************************************/
     function get_columns(){
         $columns = array(
-        	'section_order' => 'order',
+        	//'section_order' => 'order',
         	'section_name'  => 'Page Section',
         	'viewed'        => 'Viewed',
         	'browser_open_time' => 'Browser Open Time',
         	'focused_browsing_time' => 'Focused Browsing Time',
-        	'lost_focus_count' => 'Lost Focus Count'
+        	'lost_focus_count' => 'Lost Focus Count',
+        	'exit_page' => 'Exited page',
+        	'exit_session' => 'Exited Session'
         );
         return $columns;
     }
@@ -226,6 +251,8 @@ class WP_Insights_Recording_PS_Stats_List_Table extends WPI_WP_List_Table {
         $WP_Insights_DB_Utils_Instance->setWpdb($wpdb);
         
         $pageSectionsTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_PAGE_SECTIONS;
+        
+        $recordingsTable = $WP_Insights_DB_Utils_Instance->getWpdb()->prefix.WP_Insights_DB_Utils::TBL_PLUGIN_PREFIX.WP_Insights_DB_Utils::TBL_RECORDS;
 
         $total_items = $wpdb->get_var("select count(*) from $pageSectionsTable where record_id='$this->recording_id' ");
         
@@ -248,8 +275,11 @@ class WP_Insights_Recording_PS_Stats_List_Table extends WPI_WP_List_Table {
         pageSections.focus_time,
         pageSections.lost_focus_count,
         SEC_TO_TIME(ROUND(pageSections.sess_time)) as browser_open_time,
-        SEC_TO_TIME(ROUND(pageSections.focus_time)) as focused_browsing_time
+        SEC_TO_TIME(ROUND(pageSections.focus_time)) as focused_browsing_time,
+        CASE WHEN pageSections.current_page_section>0 THEN 1 ELSE 0 END as exited_page,
+        CASE WHEN pageSections.current_page_section>0 AND r.is_session_exit=1 THEN 1 ELSE 0 END as exited_session
         FROM $pageSectionsTable as pageSections
+        INNER JOIN $recordingsTable as r ON pageSections.record_id = r.id
         where pageSections.record_id = '$this->recording_id'
         ORDER BY pageSections.section_order asc
         LIMIT ".($current_page-1)*$per_page.",".$per_page;

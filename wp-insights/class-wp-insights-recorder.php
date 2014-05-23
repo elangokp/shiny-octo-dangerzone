@@ -448,7 +448,7 @@ class WP_Insights_Recorder {
 				$focusedEntryTimesCaseStmt = "focusedEntryTimes = CASE section_id ";
 				$focusedExitTimesCaseStmt = "focusedExitTimes = CASE section_id ";
 				foreach($pageSections as $pageSection){
-					if($currentPageSection == $pageSection['name']){
+					if($currentPageSection == $pageSection['id']){
 						if(sizeof($pageSection['exitTimes']) < sizeof($pageSection['entryTimes'])){
 							array_push($pageSection['exitTimes'],$_POST['time']);
 							$entryTimesLastIndex = sizeof($pageSection['entryTimes']) - 1;

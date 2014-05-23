@@ -107,15 +107,23 @@ class WP_Insights_Page_PS_Stats_List_Table extends WPI_WP_List_Table {
     	);
     }
     
-    function column_exited($item){
+    function column_exited_page($item){
     
-    	$exited = round((($item['exited_by']/$item['loaded_by'])*100),2)."%";
+    	$exited_page = round((($item['exited_page_by']/$item['loaded_by'])*100),2)."%";
     	 
     	return sprintf('%1$s',
-    			$exited
+    			$exited_page
     	);
     }
     
+    function column_exited_session($item){
+    
+    	$exited_session = round((($item['exited_session_by']/$item['loaded_by'])*100),2)."%";
+    
+    	return sprintf('%1$s',
+    			$exited_session
+    	);
+    }
     
     
     function column_avg_browser_open_time($item){
@@ -159,7 +167,8 @@ class WP_Insights_Page_PS_Stats_List_Table extends WPI_WP_List_Table {
         	//'section_order' => 'order',
         	'section_name'  => 'Page Section',
         	'viewed'        => 'Viewed',
-        	'exited'          => 'Exited',
+        	'exited_session'          => 'Exited (Session)',
+        	'exited_page'          => 'Exited (Page)',
         	'avg_browser_open_time' => 'Avg Browser Open Time',
         	'avg_focused_browsing_time' => 'Avg Focused Browsing Time',
         	'lost_focus_count' => 'Lost Focus Count'
@@ -261,7 +270,8 @@ class WP_Insights_Page_PS_Stats_List_Table extends WPI_WP_List_Table {
 		ps.section_name as section_name, 
 		count(ps.section_id) as loaded_by,
 		count(CASE WHEN ps.sess_time>0 THEN 1 ELSE NULL END) as seen_by,
-		count(CASE WHEN ps.current_page_section>0 AND r.is_session_exit=1 THEN 1 ELSE NULL END) as exited_by,
+		count(CASE WHEN ps.current_page_section>0 AND r.is_session_exit=1 THEN 1 ELSE NULL END) as exited_session_by,
+		count(CASE WHEN ps.current_page_section>0 THEN 1 ELSE NULL END) as exited_page_by,
 		SEC_TO_TIME(ROUND(AVG(ps.sess_time))) as avg_sess_time, 
 		SEC_TO_TIME(ROUND(AVG(ps.focus_time))) avg_focus_time,
 		SUM(ps.lost_focus_count) as lost_focus_count

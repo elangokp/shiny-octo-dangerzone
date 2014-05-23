@@ -353,13 +353,13 @@
       var ms = 0;
       if(document.hasFocus()) {
     	  ms = ((new Date()).getTime() - wpiRec.timestamp) - wpiRec.blurTime; 
-    	  wpiRec.log("Document Has Focus : " + ms/1000);
+    	  //wpiRec.log("Document Has Focus : " + ms/1000);
       } else {
-    	  wpiRec.log("Document Doesnt have Focus : lastBlurTimeStamp : " + wpiRec.lastBlurTimeStamp);
-    	  wpiRec.log("Document Doesnt have Focus : blurTime : " + wpiRec.blurTime);
-    	  wpiRec.log("Document Doesnt have Focus : time till last blur : " + (wpiRec.lastBlurTimeStamp - wpiRec.timestamp));
+    	  //wpiRec.log("Document Doesnt have Focus : lastBlurTimeStamp : " + wpiRec.lastBlurTimeStamp);
+    	  //wpiRec.log("Document Doesnt have Focus : blurTime : " + wpiRec.blurTime);
+    	  //wpiRec.log("Document Doesnt have Focus : time till last blur : " + (wpiRec.lastBlurTimeStamp - wpiRec.timestamp));
     	  ms = (wpiRec.lastBlurTimeStamp - wpiRec.timestamp) - wpiRec.blurTime;
-    	  wpiRec.log("Document Doesnt have Focus : " + ms/1000);
+    	  //wpiRec.log("Document Doesnt have Focus : " + ms/1000);
       }
       return ms/1000; // use seconds
     },

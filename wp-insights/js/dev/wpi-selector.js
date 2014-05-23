@@ -327,13 +327,16 @@
 					.button()
 					.click(function(event) {
 						event.preventDefault();
-						var pageSectionId = wpi_jquery(this).data("pageSectionId");
-						wpi_jquery('#pageSection'+pageSectionId).remove();
-						wpi_jquery('#pageSection'+pageSectionId+'-name').remove();
-						var pageSectionIndex = wpiSelector.lookup(wpiSelector.pageSections,"id",pageSectionId);
-						wpiSelector.pageSections[pageSectionIndex].isActive = false;
-						wpiSelector.pageSections[pageSectionIndex].deletedDate = new Date();
-						wpiSelector.adjustAndDisplayPageSections();
+						if (confirm('Are you sure you want to delete this page section?')) {
+							var pageSectionId = wpi_jquery(this).data("pageSectionId");
+							wpi_jquery('#pageSection'+pageSectionId).remove();
+							wpi_jquery('#pageSection'+pageSectionId+'-name').remove();
+							var pageSectionIndex = wpiSelector.lookup(wpiSelector.pageSections,"id",pageSectionId);
+							wpiSelector.pageSections[pageSectionIndex].isActive = false;
+							wpiSelector.pageSections[pageSectionIndex].deletedDate = new Date();
+							wpiSelector.adjustAndDisplayPageSections();
+						}
+						
 					});
 			}
 				
