@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://caremore.com/entities/plan" 
+xmlns:tns="http://caremore.com/entities/plan" elementFormDefault="qualified">
+
+	<element name="Plans" type="tns:PlansType"></element>
+	
+	<complexType name="PlansType">
+		<sequence>
+			<element name="Plan" type="tns:PlanType" maxOccurs="unbounded" minOccurs="1"/>
+		</sequence>	
+	</complexType>    
+
+	<complexType name="PlanType">
+		<sequence>
+			<element name="ID" type="string" minOccurs="0" maxOccurs="1"/>
+			<element name="Name" type="string" minOccurs="0" maxOccurs="1"/>
+			<element name="EffectiveDate" type="date" minOccurs="0"	maxOccurs="1"/>
+			<element name="TermDate" type="date" minOccurs="0" maxOccurs="1"/>
+			<element name="MonthsPassedSinceEffectiveDate" type="int" minOccurs="0" maxOccurs="1"/>
+		</sequence>
+	</complexType>
+	
+</schema>

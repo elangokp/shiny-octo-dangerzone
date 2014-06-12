@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://caremore.com/entities/address" 
+xmlns:tns="http://caremore.com/entities/address" elementFormDefault="qualified">
+
+
+	<element name="Addresses" type="tns:AddressesType"></element>
+	
+	<complexType name="AddressesType">
+		<sequence>
+			<element name="Address" type="tns:AddressType" maxOccurs="unbounded" minOccurs="1"/>
+		</sequence>	
+	</complexType>    
+    
+    <complexType name="AddressType">
+    	<sequence>
+    		<element name="TypeOfAddress" type="string" minOccurs="0" maxOccurs="1"></element>
+    		<element name="AddressLine1" type="string" minOccurs="0" maxOccurs="1"></element>
+    		<element name="AddressLine2" type="string" minOccurs="0" maxOccurs="1"></element>
+    		<element name="AddressLine3" type="string" minOccurs="0" maxOccurs="1"></element>
+    		<element name="City" type="string" minOccurs="0" maxOccurs="1"></element>
+    		<element name="State" type="string" minOccurs="0" maxOccurs="1"></element>
+    		<element name="Zip" type="string" minOccurs="0" maxOccurs="1"></element>
+    		<element name="County" type="string" minOccurs="0" maxOccurs="1"></element>
+    		<element name="Country" type="string" minOccurs="0" maxOccurs="1"></element>
+    	</sequence>
+    </complexType>
+    
+</schema>

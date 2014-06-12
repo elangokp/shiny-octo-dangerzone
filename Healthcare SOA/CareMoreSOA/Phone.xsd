@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://caremore.com/entities/phone" 
+xmlns:tns="http://caremore.com/entities/phone" elementFormDefault="qualified" xmlns:cmn="http://caremore.com/entities/common">
+
+    <import schemaLocation="Common.xsd" namespace="http://caremore.com/entities/common"></import>
+    <complexType name="PhoneType">
+    	<sequence>
+    		<element name="TypeCode" type="cmn:CodeType" maxOccurs="1" minOccurs="0"></element>
+    		<element name="Number" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="AreaCode" type="cmn:CodeType" maxOccurs="1" minOccurs="0"></element>
+    		<element name="ExtensionNumber" type="string" maxOccurs="1" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="PhonesType">
+    	<sequence>
+    		<element name="Phone" type="tns:PhoneType" maxOccurs="unbounded" minOccurs="1"></element>
+    	</sequence>
+    </complexType>
+</schema>

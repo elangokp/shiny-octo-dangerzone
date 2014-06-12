@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://caremore.com/entities/network"
+	xmlns:tns="http://caremore.com/entities/network" xmlns:cmn="http://caremore.com/entities/common"
+	elementFormDefault="qualified">
+
+	<import schemaLocation="Common.xsd" namespace="http://caremore.com/entities/common" />
+	<element name="Networks" type="tns:NetworksType"></element>
+
+	<complexType name="NetworksType">
+		<sequence>
+			<element name="Network" type="tns:NetworkType" maxOccurs="unbounded"
+				minOccurs="1" />
+		</sequence>
+	</complexType>
+
+	<complexType name="NetworkType">
+		<sequence>
+			<element name="Identifier" type="string" minOccurs="0"
+				maxOccurs="1" />
+			<element name="ID" type="string" minOccurs="0" maxOccurs="1" />
+			<element name="Name" type="string" minOccurs="0" maxOccurs="1" />
+			<element name="EffectiveDate" type="date" minOccurs="0"
+				maxOccurs="1" />
+			<element name="TerminationDate" type="date" minOccurs="0"
+				maxOccurs="1" />
+			<element name="TerminationReasonCode" type="cmn:CodeType"
+				minOccurs="0" maxOccurs="1" />
+		</sequence>
+	</complexType>
+
+</schema>

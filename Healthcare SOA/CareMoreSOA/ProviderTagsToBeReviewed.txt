@@ -1,0 +1,6 @@
+ProviderOrganizationContractFilingDaysLimitAmount
+ProviderOrganizationSpecialtySorCode
+ProviderOrganizationSpecialtySorCodeDescriptionText
+ReasonSorCode
+ReasonSorCodeDescriptionText
+ProfessionalProviderTitleCode

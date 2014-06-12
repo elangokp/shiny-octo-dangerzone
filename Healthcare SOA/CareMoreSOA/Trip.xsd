@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://caremore.com/entities/trips" 
+xmlns:tns="http://caremore.com/entities/trips"
+ elementFormDefault="qualified">
+
+	<element name="Trips" type="tns:TripsType"></element>
+    
+	<complexType name="TripsType">
+		<sequence>
+			<element name="Trip" type="tns:TripType"  minOccurs="0" maxOccurs="unbounded"></element>
+			<element name="FromDate" type="date" maxOccurs="1" minOccurs="0" nillable="true"></element>
+    		<element name="TillDate" type="date" maxOccurs="1" minOccurs="0" nillable="true"></element>
+		</sequence>
+	</complexType>
+
+    <complexType name="TripType">
+    	<sequence>
+	    	<element name="PickupDate" type="date" minOccurs="0" maxOccurs="unbounded" nillable="true"></element>
+        	<element name="PickupTime" type="dateTime" minOccurs="0" maxOccurs="unbounded" nillable="true"></element>
+        	<element name="Cancelled" type="string" minOccurs="0" maxOccurs="unbounded" nillable="true"></element>
+        	<element name="Escort" type="string" minOccurs="0" maxOccurs="unbounded" nillable="true"></element>
+        	<element name="Stairs" type="string" minOccurs="0" maxOccurs="unbounded" nillable="true"></element>
+        	<element name="SpeacialNeeds" type="string" minOccurs="0" maxOccurs="unbounded" nillable="true"></element>
+        	<element name="ContactName" type="string" minOccurs="0" maxOccurs="unbounded" nillable="true"></element>
+        	<element name="Destination" type="string" minOccurs="0" maxOccurs="unbounded" nillable="true"></element>
+       	    <element name="DestinationAddress" type="string" minOccurs="0" maxOccurs="unbounded" nillable="true"></element>
+        	<element name="DestinationCity" type="string" minOccurs="0" maxOccurs="unbounded" nillable="true"></element>
+        	<element name="DestinationPhone" type="string" minOccurs="0" maxOccurs="unbounded" nillable="true"></element>
+        	<element name="PickupAtHome" type="string" minOccurs="0" maxOccurs="unbounded" nillable="true"></element>
+    	</sequence>
+    </complexType>
+    
+</schema>

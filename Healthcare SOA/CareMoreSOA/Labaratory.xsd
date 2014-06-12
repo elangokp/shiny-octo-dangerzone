@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://services.caremore.com/Labaratory"
+	xmlns:tns="http://services.caremore.com/Labaratory" 
+	elementFormDefault="qualified">
+	<xs:element name="Labaratory">
+		<xs:complexType>
+			<xs:sequence>
+					<xs:element name="observation" type="xs:string"
+					minOccurs="0" />
+					<xs:element name="orderingProviderID" type="xs:string"
+					minOccurs="0" />
+					<xs:element name="orderingProviderLastName" type="xs:string"
+					minOccurs="0" />
+					<xs:element name="orderingProviderFirstName" type="xs:string"
+					minOccurs="0" />
+					<xs:element name="valueType" type="xs:string"
+					minOccurs="0" />
+					<xs:element name="loinc" type="xs:string"
+					minOccurs="0" />
+					<xs:element name="loincDescription" type="xs:string"
+					minOccurs="0" />
+					<xs:element name="observationValue" type="xs:string"
+					minOccurs="0" />
+					<xs:element name="units" type="xs:string"
+					minOccurs="0" />
+					<xs:element name="referenceRange" type="xs:string"
+					minOccurs="0" />
+					<xs:element name="abnormalFlags" type="xs:string"
+					minOccurs="0" />
+					<xs:element name="observationComments" type="xs:string"
+					minOccurs="0" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

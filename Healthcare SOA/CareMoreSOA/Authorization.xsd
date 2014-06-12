@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+<xs:schema targetNamespace="http://services.caremore.com/entity/authorization" xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+xmlns:tns="http://services.caremore.com/entity/authorization" elementFormDefault="qualified"> 
+
+<element name="Authorizations" type="tns:AuthorizationsType" />
+
+	<complexType name="AuthorizationsType">
+		<sequence>
+			<element name="Authorization" type="tns:AuthorizationType" maxOccurs="unbounded"
+				minOccurs="1">
+			</element>
+		</sequence>
+	</complexType>
+
+	<xs:element name="AuthorizationType">
+		<xs:complexType>
+			<xs:sequence>
+						<xs:element name="AuthorizationNumber" type="xs:string" minOccurs="0"/>
+						<xs:element name="AuthorizationDate" type="xs:string" minOccurs="0"/>
+						<xs:element name="ExpirationDate" type="xs:string" minOccurs="0"/>
+						<xs:element name="ServiceType" type="xs:string" minOccurs="0"/>
+						<xs:element name="Category" type="xs:string" minOccurs="0"/>
+						<xs:element name="Status" type="xs:string" minOccurs="0"/>
+						<xs:element name="ServicePlace" type="xs:string" minOccurs="0"/>
+						<xs:element name="Speciality" type="xs:string" minOccurs="0"/>
+						<xs:element name="ReferredFrom" type="xs:string" minOccurs="0"/>
+						<xs:element name="ReferredTo" type="xs:string" minOccurs="0"/>
+						<xs:element name="Diagnosis" type="xs:string" minOccurs="0"/>
+						<xs:element name="Procedures" type="xs:string" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

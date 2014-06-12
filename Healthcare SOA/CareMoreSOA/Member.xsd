@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://caremore.com/entities/member"
+	xmlns:tns="http://caremore.com/entities/member" elementFormDefault="qualified"
+	xmlns:p="http://caremore.com/entities/plan" xmlns:addr="http://caremore.com/entities/address" 
+	xmlns:ph="http://caremore.com/entities/phone" xmlns:fx="http://caremore.com/entities/fax"
+	xmlns:prv="http://caremore.com/entities/provider">
+
+    <import schemaLocation="Fax.xsd" namespace="http://caremore.com/entities/fax"></import>
+    <import schemaLocation="Phone.xsd" namespace="http://caremore.com/entities/phone"></import>
+    <import schemaLocation="Provider.xsd" namespace="http://caremore.com/entities/provider"></import>
+    <import schemaLocation="Address.xsd" namespace="http://caremore.com/entities/address">
+	</import>
+
+	<import schemaLocation="Plan.xsd" namespace="http://caremore.com/entities/plan"></import>
+	<element name="Members" type="tns:MembersType" />
+
+	<complexType name="MembersType">
+		<sequence>
+			<element name="Member" type="tns:MemberType" maxOccurs="unbounded"
+				minOccurs="1">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="MemberType">
+		<sequence>
+			<element name="SubscriberID" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="MemberID" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="MedicareNumber" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="HICN" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+
+			<element name="HealthCardID" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+
+			<element name="SSNNumber" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="HonorificTitle" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="FirstName" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="MiddleInitial" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="LastName" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="MaritalStatus" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="Language" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="Sex" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="HomePhone" type="ph:PhoneType" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="HomeFax" type="fx:FaxType" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="WorkPhone" type="ph:PhoneType" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="WorkFax" type="fx:FaxType" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="EmailAddress" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="BirthDate" type="date" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="Age" type="int" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="Plans" type="p:PlansType" maxOccurs="1"
+				minOccurs="0" />
+			<element name="HomeAddress" type="addr:AddressType"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="WorkAddress" type="addr:AddressType"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="DeceasedDate" type="date" minOccurs="0"
+				maxOccurs="0">
+			</element>
+			<element name="isDependant" type="boolean" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="Dependants" type="tns:MembersType" maxOccurs="1" minOccurs="0"></element>
+			
+			<element name="primaryCarePhysician" maxOccurs="1" minOccurs="0">
+			<complexType>
+				<sequence>
+					<element name="physician" type="prv:ProviderType" maxOccurs="1" minOccurs="1"/>
+					<element name="effectiveDate" type="date" minOccurs="1"	maxOccurs="1"/>
+					<element name="termDate" type="date" minOccurs="1"	maxOccurs="1"/>
+				</sequence>
+			</complexType>
+			</element>
+		</sequence>
+	</complexType>
+
+</schema>

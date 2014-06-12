@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://caremore.com/entities/drug" xmlns:tns="http://caremore.com/entities/drug" elementFormDefault="qualified" xmlns:cmn="http://caremore.com/entities/common">
+
+    <import schemaLocation="Common.xsd" namespace="http://caremore.com/entities/common"></import>
+    <element name="Drugs">
+    	<complexType>
+    		<sequence>
+    			<element name="Drug" type="tns:DrugType" maxOccurs="unbounded" minOccurs="1"></element>
+    		</sequence>
+    	</complexType>
+    </element>
+
+    <complexType name="DrugType">
+        	<sequence>
+				<element name="NDC" type="cmn:CodeType" maxOccurs="1" minOccurs="0"></element>
+    			<element name="DrugDescription" type="string" maxOccurs="1" minOccurs="0"></element>
+    			<element name="TypeOfDrug" type="int" maxOccurs="1" minOccurs="0"></element>
+    			<element name="DaysSupply" type="int" maxOccurs="1" minOccurs="0"></element>
+    			<element name="MetricQuantity" type="double" maxOccurs="1" minOccurs="0"></element>
+    			<element name="RxInstructions" type="string" maxOccurs="1" minOccurs="0"></element>
+    			<element name="Strength" type="int" maxOccurs="1" minOccurs="0"></element>
+    			<element name="PharmacyName" type="string" maxOccurs="1" minOccurs="0"></element>
+    			<element name="PrescriberName" type="string" maxOccurs="1" minOccurs="0"></element>
+    			<element name="ServiceTier" type="string" maxOccurs="1" minOccurs="0"></element>
+				<element name="ServiceDate" type="date" maxOccurs="1" minOccurs="0"></element>
+    			<element name="ClaimReversed" type="string" maxOccurs="1" minOccurs="0"></element>
+    		</sequence>
+    </complexType>
+</schema>

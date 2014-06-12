@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<xs:schema targetNamespace="http://services.caremore.com/entities/claim" xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+xmlns:tns="http://services.caremore.com/entities/claim" elementFormDefault="qualified"> 
+
+<element name="Claims" type="tns:ClaimsType" />
+
+	<complexType name="ClaimsType">
+		<sequence>
+			<element name="Claim" type="tns:ClaimType" maxOccurs="unbounded"
+				minOccurs="1">
+			</element>
+		</sequence>
+	</complexType>
+
+	<xs:element name="ClaimType">
+		<xs:complexType>
+			<xs:sequence>
+						<xs:element name="ClaimId" type="xs:string" minOccurs="0"/>
+						<xs:element name="ClaimStatus" type="xs:string" minOccurs="0"/>
+						<xs:element name="LowServiceDate" type="xs:string" minOccurs="0"/>
+						<xs:element name="HighServiceDate" type="xs:string" minOccurs="0"/>
+						<xs:element name="PaidAmount" type="xs:string" minOccurs="0"/>
+						<xs:element name="ReceivedAmount" type="xs:string" minOccurs="0"/>
+						<xs:element name="TotalChargeAmount" type="xs:string" minOccurs="0"/>
+						<xs:element name="TotalPayableAmount" type="xs:string" minOccurs="0"/>
+						<xs:element name="PaidDate" type="xs:string" minOccurs="0"/>
+						<xs:element name="RecordSource" type="xs:string" minOccurs="0"/>
+						<xs:element name="ClaimType" type="xs:string" minOccurs="0"/>
+						<xs:element name="PlanId" type="xs:string" minOccurs="0"/>
+						<xs:element name="ProviderName" type="xs:string" minOccurs="0"/>
+						<xs:element name="ServicePlace" type="xs:string" minOccurs="0"/>
+						<xs:element name="SpecialityCode" type="xs:string" minOccurs="0" nillable="true"/>
+						<xs:element name="Diagnosis" type="xs:string" minOccurs="0"/>
+						<xs:element name="ServiceProcedure" type="xs:string" minOccurs="0"/>
+						<xs:element name="IsClaimReversed" type="xs:string" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
+

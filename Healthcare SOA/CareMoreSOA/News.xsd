@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://services.caremore.com/news">
+<xs:element name="News">
+
+ <xs:complexType>
+   <xs:sequence>
+    <xs:element name="newsContent" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+    <xs:element name="newsDate" type="xs:date" minOccurs="0" maxOccurs="unbounded" />
+	<xs:element name="newsType" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+	 <xs:complexType>
+	   <xs:sequence>
+	    <xs:element name="siteNews" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+		<xs:element name="patientNews" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+		<xs:element name="rxNews" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+		<xs:element name="laboratoryNews" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+		<xs:element name="siteUpdateNews" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+	   </xs:sequence>
+	 </xs:complexType>
+   </xs:sequence>
+ </xs:complexType>
+</xs:element>
+
+</xs:schema>

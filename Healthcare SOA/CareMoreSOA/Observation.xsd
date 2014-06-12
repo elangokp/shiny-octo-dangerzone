@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://caremore.com/entities/observations" 
+xmlns:tns="http://caremore.com/entities/observations" elementFormDefault="qualified">
+
+    <element name="Observations" type="tns:ObservationsType"></element>
+
+    <complexType name="ObservationsType">
+	<sequence>
+		<element name="Observation" type="tns:ObservationType"  minOccurs="0" maxOccurs="unbounded"></element>
+		<element name="FromDate" type="date" maxOccurs="1" minOccurs="0" nillable="true"></element>
+    	<element name="TillDate" type="date" maxOccurs="1" minOccurs="0" nillable="true"></element>
+	</sequence>
+  </complexType>
+
+  <complexType name="ObservationType">
+   <sequence>
+     <element name="Observation" type="string" minOccurs="0" maxOccurs="unbounded" ></element>
+	 <element name="OrderingProviderId" type="string" minOccurs="0" maxOccurs="unbounded" ></element>
+	 <element name="OrderingProviderLastName" type="string" minOccurs="0" maxOccurs="unbounded" ></element>
+	 <element name="orderingProviderFirstName" type="string" minOccurs="0" maxOccurs="unbounded" ></element>
+	 <element name="ValueType" type="string" minOccurs="0" maxOccurs="unbounded" ></element>
+	 <element name="LOINC" type="string" minOccurs="0" maxOccurs="unbounded" ></element>
+	 <element name="LOINCDescription" type="string" minOccurs="0" maxOccurs="unbounded" ></element>
+	 <element name="ObservationValue" type="string" minOccurs="0" maxOccurs="unbounded" ></element>
+	 <element name="Units" type="string" minOccurs="0" maxOccurs="unbounded" ></element>
+	 <element name="ReferenceRange" type="string" minOccurs="0" maxOccurs="unbounded" ></element>
+	 <element name="AbnormalFlags" type="string" minOccurs="0" maxOccurs="unbounded" ></element>
+	 <element name="Comments" type="string" minOccurs="0" maxOccurs="unbounded" ></element>
+   </sequence>
+  </complexType>
+    
+</schema>

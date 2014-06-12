@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://caremore.com/entities/appointment"
+	xmlns:tns="http://caremore.com/entities/appointment"
+	elementFormDefault="qualified" xmlns:addr="http://caremore.com/entities/address">
+
+	<import schemaLocation="Address.xsd" namespace="http://caremore.com/entities/address">
+	</import>
+	<element name="Appointments" type="tns:AppointmentsType" />
+	<complexType name="AppointmentsType">
+		<sequence>
+			<element name="Appointment" type="tns:AppointmentType"
+				maxOccurs="unbounded" minOccurs="1">
+			</element>
+		</sequence>
+	</complexType>
+	<complexType name="AppointmentType">
+		<sequence>
+			<element name="Date" type="date" minOccurs="0" maxOccurs="1" />
+			<element name="BeginTime" type="string" minOccurs="0"
+				maxOccurs="1" />
+			<element name="EndTime" type="string" minOccurs="0"
+				maxOccurs="1" />
+			<element name="ConfirmStatus" type="string" minOccurs="0"
+				maxOccurs="1" />
+			<element name="KeptStatus" type="string" minOccurs="0"
+				maxOccurs="1" />
+			<element name="ProviderFirstName" type="string" minOccurs="0"
+				maxOccurs="1" />
+			<element name="ProviderMiddleName" type="string" minOccurs="0"
+				maxOccurs="1" />
+			<element name="ProviderLastName" type="string" minOccurs="0"
+				maxOccurs="1" />
+			<element name="AppointmentStatus" type="string" minOccurs="0"
+				maxOccurs="1" />
+			<element name="Location" type="string" minOccurs="0" />
+			<element name="Address" type="addr:AddressType" maxOccurs="unbounded"
+				minOccurs="0" />
+		</sequence>
+	</complexType>
+</schema>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://caremore.com/entities/events" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://caremore.com/entities/events">
+
+	<element name="Events" type="tns:EventsType"></element>
+    
+    <complexType name="EventsType">
+    	<sequence>
+    		<element name="Event" type="tns:EventType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="FromDate" type="date" maxOccurs="1"
+    			minOccurs="0" nillable="true">
+    		</element>
+    		<element name="TillDate" type="date" maxOccurs="1" minOccurs="0" nillable="true"></element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="EventType">
+    	<sequence>
+    		<element name="Date" type="date" maxOccurs="1" minOccurs="1"
+    			nillable="false">
+    		</element>
+    		<element name="Time" type="time" maxOccurs="1" minOccurs="0"
+    			nillable="true">
+    		</element>
+    		<element name="Description" type="string" maxOccurs="1" minOccurs="1" nillable="false"></element>
+    	</sequence>
+    </complexType>
+    
+</schema>

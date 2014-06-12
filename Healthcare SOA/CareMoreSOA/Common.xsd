@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://caremore.com/entities/common"
+	xmlns:tns="http://caremore.com/entities/common" elementFormDefault="qualified">
+
+	<element name="Codes" type="tns:CodesType"></element>
+
+	<complexType name="CodesType">
+		<sequence>
+			<element name="Code" type="tns:CodeType" minOccurs="1"
+				maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+	<complexType name="CodeType">
+		<sequence>
+			<element name="Value" type="string" minOccurs="0" maxOccurs="1" />
+			<element name="Description" type="string" minOccurs="0"
+				maxOccurs="1" />
+		</sequence>
+	</complexType>
+
+
+	<complexType name="Id">
+		<sequence>
+			<element name="Value" type="string" minOccurs="0" maxOccurs="1" />
+			<element name="Suffix" type="string" minOccurs="0" maxOccurs="1" />
+		</sequence>
+	</complexType>
+
+
+	<complexType name="Person">
+		<sequence>
+			<element name="HonorificTitle" type="string" minOccurs="0"
+				maxOccurs="1" />
+			<element name="FirstName" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="MiddleInitial" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="LastName" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="MaritalStatus" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="Language" type="string" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="Gender" type="string" minOccurs="0" maxOccurs="1">
+			</element>
+			<element name="BirthDate" type="date" minOccurs="0"
+				maxOccurs="1">
+			</element>
+			<element name="Age" type="int" minOccurs="0" maxOccurs="1">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="Organization">
+		<sequence>
+			<element name="Name" type="string" minOccurs="0" maxOccurs="1" />
+			<element name="NameSuffix" type="string" minOccurs="0"
+				maxOccurs="1" />
+		</sequence>
+	</complexType>
+
+	<complexType name="ServiceArea">
+		<sequence>
+			<element name="Id" type="string" minOccurs="0" maxOccurs="1" />
+			<element name="Name" type="string" minOccurs="0" maxOccurs="1" />
+			<element name="Description" type="string" minOccurs="0"
+				maxOccurs="1" />
+		</sequence>
+	</complexType>
+	
+	<complexType name="Metadata">
+		<sequence>
+			<element name="Pagination" type="tns:PaginationType" minOccurs="0" maxOccurs="1" />
+			<element name="Name" type="string" minOccurs="0" maxOccurs="1" />
+			<element name="Description" type="string" minOccurs="0"	maxOccurs="1" />
+		</sequence>
+	</complexType>
+	
+	<complexType name="PaginationType">
+		<sequence>
+			<element name="CurrentPage" type="string" minOccurs="1" maxOccurs="1" nillable="false"/>
+			<element name="RecordsPerPage" type="string" minOccurs="1" maxOccurs="1" nillable="false"/>
+		</sequence>
+	</complexType>
+
+</schema>

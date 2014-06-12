@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://caremore.com/entities/hierarchicalconditioncategory" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://caremore.com/entities/hierarchicalconditioncategory">
+
+	<element name="HierarchicalConditionCategories" type="tns:HierarchicalConditionCategoriesType"></element>
+    
+    <complexType name="HierarchicalConditionCategoriesType">
+    	<sequence>
+    		<element name="HierarchicalConditionCategory"
+    			type="tns:HierarchicalConditionCategoryType" minOccurs="0"
+    			maxOccurs="unbounded">
+    		</element>
+    		<element name="FromYear" type="gYear" maxOccurs="1" minOccurs="0" nillable="true"></element>
+    		<element name="TillYear" type="gYear" maxOccurs="1" minOccurs="0" nillable="true"></element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="HierarchicalConditionCategoryType">
+    	<sequence>
+    		<element name="CategoryCode" type="string" maxOccurs="1" minOccurs="1" nillable="false"></element>
+    		<element name="CategoryDescription" type="string" maxOccurs="1" minOccurs="1" nillable="false"></element>
+    		<element name="ConditionStatus" type="tns:HierarchicalConditionStatusType" maxOccurs="unbounded" minOccurs="1"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="HierarchicalConditionStatusType">
+    	<sequence>
+    		<element name="Year" type="gYear" maxOccurs="1"
+    			minOccurs="1" nillable="false">
+    		</element>
+    		<element name="isPresent" maxOccurs="1" minOccurs="1" nillable="false">
+    			<simpleType>
+    				<restriction base="string">
+    				</restriction>
+    			</simpleType>
+    		</element>
+    	</sequence>
+    </complexType>
+    
+</schema>

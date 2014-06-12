@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://caremore.com/entities/provider"
+	xmlns:tns="http://caremore.com/entities/provider" elementFormDefault="qualified"
+	xmlns:addr="http://caremore.com/entities/address" xmlns:cmn="http://caremore.com/entities/common"
+	xmlns:ntwrk="http://caremore.com/entities/network" xmlns:phn="http://caremore.com/entities/phone">
+
+	<import schemaLocation="Address.xsd" namespace="http://caremore.com/entities/address" />
+	<import schemaLocation="Common.xsd" namespace="http://caremore.com/entities/common" />
+	<import schemaLocation="Network.xsd" namespace="http://caremore.com/entities/network" />
+	<import schemaLocation="Phone.xsd" namespace="http://caremore.com/entities/phone" />
+	<element name="Providers" type="tns:ProvidersType" />
+	<complexType name="ProvidersType">
+		<sequence>
+			<element name="Provider" type="tns:ProviderType" maxOccurs="unbounded"
+				minOccurs="1">
+			</element>
+		</sequence>
+	</complexType>
+	<complexType name="PractitionersType">
+		<sequence>
+			<element name="Practitioner" type="tns:PractitionerType"
+				maxOccurs="unbounded" minOccurs="1">
+			</element>
+		</sequence>
+	</complexType>
+	<complexType name="OrganizationsType">
+		<sequence>
+			<element name="Organization" type="tns:OrganizationType"
+				maxOccurs="unbounded" minOccurs="1">
+			</element>
+		</sequence>
+	</complexType>
+	<complexType name="ProviderType">
+		<sequence>
+			<element name="Id" type="cmn:Id" minOccurs="0" maxOccurs="1" />
+			<element name="EntityTypeCode" type="cmn:CodeType" minOccurs="0"
+				maxOccurs="1" />
+			<choice>
+				<element name="Practitioners" type="tns:PractitionersType" />
+				<element name="Organizations" type="tns:OrganizationsType" />
+			</choice>
+		</sequence>
+	</complexType>
+
+	<complexType name="PractitionerType">
+		<sequence>
+			<element name="NPI" type="string" minOccurs="0" maxOccurs="1" />
+			<element name="TaxId" type="cmn:Id" minOccurs="0" maxOccurs="1" />
+			<element name="PersonalDetails" type="cmn:Person" minOccurs="0"
+				maxOccurs="1" />
+			<element name="ServiceArea" type="cmn:ServiceArea" minOccurs="0"
+				maxOccurs="1" />
+			<element name="Address" type="addr:AddressType" maxOccurs="unbounded"
+				minOccurs="0" />
+			<element name="Phone" type="phn:PhoneType" maxOccurs="unbounded"
+				minOccurs="0" />
+			<element name="Network" type="ntwrk:NetworkType" minOccurs="0"
+				maxOccurs="unbounded" />
+			<element name="PatientAcceptanceCriteria" type="tns:AcceptanceCriteria"
+				minOccurs="0" maxOccurs="1" />
+			<element name="SpecialityTypeCode" type="cmn:CodeType"
+				minOccurs="0" maxOccurs="1" />
+			<element name="HealthPlanEffectiveDate" type="date"
+				minOccurs="0" maxOccurs="1" />
+			<element name="HealthPlanTerminationDate" type="date"
+				minOccurs="0" maxOccurs="1" />
+			<element name="HealthPlanTerminationReasonCode" type="cmn:CodeType"
+				minOccurs="0" maxOccurs="1" />
+			<element name="OrganizatonId" type="cmn:Id" minOccurs="0"
+				maxOccurs="unbounded" />
+			<element name="OrganizationName" type="cmn:Organization"
+				minOccurs="0" maxOccurs="unbounded" />
+			<element name="Agreement" type="tns:Agreement" minOccurs="0"
+				maxOccurs="1" />
+			<element name="OrganizationAffiliationEffectiveDate" type="date"
+				minOccurs="0" maxOccurs="1" />
+			<element name="OrganizationAffiliationTerminationDate" type="date"
+				minOccurs="0" maxOccurs="1" />
+			<element name="OrganizationAffiliationTerminationReasonCode"
+				type="cmn:CodeType" minOccurs="0" maxOccurs="1" />
+		</sequence>
+	</complexType>
+	<complexType name="OrganizationType">
+		<sequence>
+			<element name="NPI" type="string" minOccurs="0" maxOccurs="1" />
+			<element name="TaxId" type="string" minOccurs="0" maxOccurs="1" />
+			<element name="Organization" type="cmn:Organization"
+				minOccurs="0" maxOccurs="1" />
+			<element name="ServiceArea" type="cmn:ServiceArea" minOccurs="0"
+				maxOccurs="1" />
+			<element name="Address" type="addr:AddressType" maxOccurs="unbounded"
+				minOccurs="0" />
+			<element name="Phone" type="phn:PhoneType" maxOccurs="unbounded"
+				minOccurs="0" />
+			<element name="Network" type="ntwrk:NetworkType" minOccurs="0"
+				maxOccurs="unbounded" />
+			<element name="PatientAcceptanceCriteria" type="tns:AcceptanceCriteria"
+				maxOccurs="unbounded" minOccurs="0" />
+			<element name="SpecialityTypeCode" type="cmn:CodeType"
+				minOccurs="0" maxOccurs="1" />
+			<element name="HealthPlanEffectiveDate" type="date"
+				minOccurs="0" maxOccurs="1" />
+			<element name="HealthPlanTerminationDate" type="date"
+				minOccurs="0" maxOccurs="1" />
+			<element name="Agreement" type="tns:Agreement" minOccurs="0"
+				maxOccurs="1" />
+			<element name="HealthPlanTerminationReasonCode" type="cmn:CodeType"
+				minOccurs="0" maxOccurs="1" />
+		</sequence>
+	</complexType>
+
+	<complexType name="AcceptanceCriteria">
+		<sequence>
+			<element name="PatientMinimumAge" type="int" minOccurs="0"
+				maxOccurs="1" />
+			<element name="PatientMaximumAge" type="int" minOccurs="0"
+				maxOccurs="1" />
+			<element name="Gender" type="string" minOccurs="0" maxOccurs="1" />
+			<element name="AcceptingNewPatientCode" type="string"
+				minOccurs="0" maxOccurs="1" />
+		</sequence>
+	</complexType>
+	<complexType name="Agreement">
+		<sequence>
+			<element name="Id" type="string" minOccurs="0" maxOccurs="1" />
+			<element name="Type" type="int" minOccurs="0" maxOccurs="1" />
+			<element name="EffectiveDate" type="date" minOccurs="0"
+				maxOccurs="1" />
+			<element name="TerminationDate" type="date" minOccurs="0"
+				maxOccurs="1" />
+			<element name="TerminationReasonCode" type="cmn:CodeType"
+				minOccurs="0" maxOccurs="1" />
+		</sequence>
+	</complexType>
+</schema>

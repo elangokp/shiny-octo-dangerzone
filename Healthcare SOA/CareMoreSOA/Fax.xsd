@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://caremore.com/entities/fax" 
+xmlns:tns="http://caremore.com/entities/fax" elementFormDefault="qualified">
+
+	
+
+
+    <complexType name="FaxesType">
+    	<sequence>
+    		<element name="Fax" type="tns:FaxType" maxOccurs="unbounded" minOccurs="1"></element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="FaxType">
+    	<sequence>
+    		<element name="Number" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="ExtensionNumber" type="string" maxOccurs="1" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+</schema>

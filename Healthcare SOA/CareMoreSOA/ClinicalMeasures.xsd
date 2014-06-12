@@ -1,0 +1,25 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified" xmlns:tns="http://services.caremore.com/clinical"
+	targetNamespace="http://services.caremore.com/clinical">
+	
+	<xs:element name="ClinicalMeasures" type="tns:MeasuresType" />
+
+	<xs:complexType name="MeasuresType">
+		<xs:sequence>
+		   <xs:element name="measure" type="xs:string" minOccurs="0" />
+		   <xs:element name="description" type="xs:string"	minOccurs="0" />
+		   <xs:element name="event" type="tns:EventType" maxOccurs="unbounded"
+				minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+		
+	<xs:element name="EventType">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="event" type="xs:string" minOccurs="0" />
+				<xs:element name="eventDate" type="xs:string" minOccurs="0" />
+				<xs:element name="eventValue" type="xs:string" minOccurs="0" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

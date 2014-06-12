@@ -1,0 +1,34 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified" xmlns:tns="http://services.caremore.com/appointment"
+	targetNamespace="http://services.caremore.com/appointment">
+	<xs:element name="AppointmentSchema">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="AppointmentDate" type="xs:string"
+					minOccurs="0" />
+				<xs:element name="AppointmentBeginTime" type="xs:string"
+					minOccurs="0" />
+				<xs:element name="AppointmentEndTime" type="xs:string"
+					minOccurs="0" />
+				<xs:element name="Confirm_Status" type="xs:string"
+					minOccurs="0" />
+				<xs:element name="Kept_Status" type="xs:string"
+					minOccurs="0" />
+				<xs:element name="Provider_First_Name" type="xs:string"
+					minOccurs="0" />
+				<xs:element name="Provider_Middle_Name" type="xs:string"
+					minOccurs="0" />
+				<xs:element name="Provider_Last_Name" type="xs:string"
+					minOccurs="0" />
+				<xs:element name="Appointment_Status" type="xs:string"
+					minOccurs="0" />
+				<xs:element name="location" type="xs:string" minOccurs="0" />
+				<xs:element name="address" type="xs:string" minOccurs="0" />
+				<xs:element name="address2" type="xs:string" minOccurs="0" />
+				<xs:element name="city" type="xs:string" minOccurs="0" />
+				<xs:element name="state" type="xs:string" minOccurs="0" />
+				<xs:element name="zip" type="xs:string" minOccurs="0" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
