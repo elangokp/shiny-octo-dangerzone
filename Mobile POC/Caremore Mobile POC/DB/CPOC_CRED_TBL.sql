@@ -1,0 +1,26 @@
+USE [FITDEV]
+GO
+
+/****** Object:  Table [dbo].[CPOC_CRED_TBL]    Script Date: 01/23/2013 13:53:17 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+SET ANSI_PADDING ON
+GO
+
+CREATE TABLE [dbo].[CPOC_CRED_TBL](
+	[USR_NAME] [varchar](12) NOT NULL,
+	[USR_PASSWORD] [varchar](12) NOT NULL,
+	[ENABLED] [int] NOT NULL,
+	[ROLE] [varchar](20) NOT NULL
+) ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO
+
+
