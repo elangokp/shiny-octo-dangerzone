@@ -1,0 +1,1 @@
+java -jar GetTablesAndColumns.jar "D:\Ashok\spy.log" "D:\Ashok\p6spy-columns.csv" "CMFacets.csv" "D:\Ashok\p6spy-delta.csv" "D:\Ashok\p6spy-queriesAndColumns.txt" "D:\Ashok\p6spy-detectedSPs.txt" "p6spyLogFile"

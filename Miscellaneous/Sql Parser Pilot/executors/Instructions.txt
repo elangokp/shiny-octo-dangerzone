@@ -1,0 +1,21 @@
+1. Place GetTableColumns.jar and GetTableColumns.bat file in the same folder.
+2. Edit the "GetTableColumns.bat" file to give file path of input and ouput file.
+3. Command in Bat file is :java -jar GetTablesAndColumns.jar "D:/Elango/SBI/Services/Get_LimLiabCoordOfBenefits/getLimLiabCoordOfBenefits-queries.txt" "D:/Elango/SBI/Services/Get_LimLiabCoordOfBenefits/getLimLiabCoordOfBenefits-columns.csv" "D:/Elango/Get Table and Columns/CMFacets.csv" "D:/Elango/SBI/Services/Get_LimLiabCoordOfBenefits/getLimLiabCoordOfBenefits-delta.csv" "D:/Elango/SBI/Services/Get_LimLiabCoordOfBenefits/getLimLiabCoordOfBenefits-queriesAndColumns.txt" "D:/Elango/SBI/Services/Get_LimLiabCoordOfBenefits/detectedSPs.txt" "newLineSeparatedStatements"
+
+where "D:/SBI-workspace/GetmemPcpdetails-console query.txt" is path of file containing a list of sql queries and each query is separated by a line break. i.e. : each new line has a single query. This should be a text file.
+
+and "D:/SBI-workspace/columns.csv" is path to write the output file containing tables and columns used in the given list of queries. The file name extension should be .csv
+
+and "D:/Elango/Get Table and Columns/CMFacets.csv" is path of Caremore Facets datamodel as csv.
+
+and "D:/SBI-workspace/delta.csv" is path to write the delta output file containing tables and columns used in the given list of queries but not avaialble in caremore facets datamodel. The file name extension should be .csv
+
+and "D:/Elango/SBI/Services/Get_LimLiabCoordOfBenefits/getLimLiabCoordOfBenefits-queriesAndColumns.txt" is path to write the queries and their respective columns in an easily readable format as text file.
+
+and "D:/Elango/SBI/Services/Get_LimLiabCoordOfBenefits/detectedSPs.txt" is path to write the detected SPs as text file.
+
+and "newLineSeparatedStatements" is the parameter that says given "getLimLiabCoordOfBenefits-queries.txt" file contains new line separated queries.
+
+or "separatorSeparatedStatements" is the parameter that says given "getLimLiabCoordOfBenefits-queries.txt" file contains "****SEPARATOR****"" separated queries.
+
+or "p6spyLogFile" is the parameter to be given when P6spy log file is given in place of "queries.txt".
