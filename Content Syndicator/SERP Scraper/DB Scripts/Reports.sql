@@ -1,0 +1,1 @@
+select urls.*, keywords.keyword, 1 Count, 1/urls.rank CR from urls, keywords where urls.keyword_id = keywords.keyword_id

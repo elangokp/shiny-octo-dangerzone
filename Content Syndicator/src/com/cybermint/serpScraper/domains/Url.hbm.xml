@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Nov 25, 2010 3:42:02 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <class name="com.cybermint.serpScraper.domains.Url" schema="serp" table="URLS">
+    <id name="urlId" type="big_decimal">
+      <column name="URL_ID" precision="22" scale="0"/>
+      <generator class="identity"/>
+    </id>
+    <many-to-one class="com.cybermint.serpScraper.domains.Keyword" fetch="select" name="keyword">
+      <column name="KEYWORD_ID" not-null="true" precision="22" scale="0"/>
+    </many-to-one>
+    <many-to-one class="com.cybermint.serpScraper.domains.Project" fetch="select" name="project">
+      <column name="project_id" not-null="true"/>
+    </many-to-one>
+    <property name="url" type="string">
+      <column length="1000" name="URL" not-null="true"/>
+    </property>
+    <property name="domain" type="string">
+      <column length="500" name="DOMAIN" not-null="true"/>
+    </property>
+    <property name="rank" type="big_decimal">
+      <column name="RANK" not-null="true" precision="22" scale="0"/>
+    </property>
+    <property name="majesticSeoBacklinksStatus" type="string">
+      <column length="100" name="majesticseo_backlinks_status"/>
+    </property>
+    <property name="majesticSeoUrlType" type="string">
+      <column length="100" name="majesticseo_url_type"/>
+    </property>
+    <property name="majesticSeoACRank" type="big_decimal">
+      <column name="majesticseo_acrank" precision="22" scale="0"/>
+    </property>
+    <property name="majesticSeoExternalBacklinksCount" type="big_decimal">
+      <column name="majesticseo_external_backlinks_count" precision="22" scale="0"/>
+    </property>
+    <property name="majesticSeoGovExternalBacklinksCount" type="big_decimal">
+      <column name="majesticseo_gov_external_backlinks_count" precision="22" scale="0"/>
+    </property>
+    <property name="majesticSeoEduExternalBacklinksCount" type="big_decimal">
+      <column name="majesticseo_edu_external_backlinks_count" precision="22" scale="0"/>
+    </property>
+    <property name="majesticSeoReferringDomainsCount" type="big_decimal">
+      <column name="majesticseo_referring_domains_count" precision="22" scale="0"/>
+    </property>
+    <property name="majesticSeoGovReferringDomainsCount" type="big_decimal">
+      <column name="majesticseo_gov_referring_domains_Count" precision="22" scale="0"/>
+    </property>
+    <property name="majesticSeoEduReferringDomainsCount" type="big_decimal">
+      <column name="majesticseo_edu_referring_domains_Count" precision="22" scale="0"/>
+    </property>
+    <property name="majesticSeoIPAddressesCount" type="big_decimal">
+      <column name="majesticseo_ip_addresses_count" precision="22" scale="0"/>
+    </property>
+    <property name="majesticSeoClassCSubnetsCount" type="big_decimal">
+      <column name="majesticseo_class_c_subnets_count" precision="22" scale="0"/>
+    </property>
+    <property name="majesticSeoBacklinksToDomainStatus" type="string">
+      <column length="100" name="majesticseo_backlinks_to_domain_status"/>
+    </property>
+    <property name="majesticSeoExternalBacklinksToDomainCount" type="big_decimal">
+      <column name="majesticseo_external_backlinks_to_domain_count" precision="22" scale="0"/>
+    </property>
+    <property name="majesticSeoGovExternalBacklinksToDomainCount" type="big_decimal">
+      <column name="majesticseo_gov_external_backlinks_to_domain_count" precision="22" scale="0"/>
+    </property>
+    <property name="majesticSeoEduExternalBacklinksToDomainCount" type="big_decimal">
+      <column name="majesticseo_edu_external_backlinks_to_domain_count" precision="22" scale="0"/>
+    </property>
+    <property name="majesticSeoReferringDomainsToDomainCount" type="big_decimal">
+      <column name="majesticseo_referring_domains_to_domain_count" precision="22" scale="0"/>
+    </property>
+    <property name="majesticSeoGovReferringDomainsToDomainCount" type="big_decimal">
+      <column name="majesticseo_gov_referring_domains_to_domain_Count" precision="22" scale="0"/>
+    </property>
+    <property name="majesticSeoEduReferringDomainsToDomainCount" type="big_decimal">
+      <column name="majesticseo_edu_referring_domains_to_domain_Count" precision="22" scale="0"/>
+    </property>
+    <property name="majesticSeoIPAddressesToDomainCount" type="big_decimal">
+      <column name="majesticseo_ip_addresses_to_domain_count" precision="22" scale="0"/>
+    </property>
+    <property name="majesticSeoClassCSubnetsToDomainCount" type="big_decimal">
+      <column name="majesticseo_class_c_subnets_to_domain_count" precision="22" scale="0"/>
+    </property>
+  </class>
+</hibernate-mapping>

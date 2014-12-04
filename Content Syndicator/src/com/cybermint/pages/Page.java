@@ -1,0 +1,234 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.cybermint.pages;
+
+import com.cybermint.utils.TextFileReaderUtils;
+import com.gargoylesoftware.htmlunit.AlertHandler;
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.CollectingAlertHandler;
+import com.gargoylesoftware.htmlunit.DefaultCredentialsProvider;
+import com.gargoylesoftware.htmlunit.IncorrectnessListenerImpl;
+import com.gargoylesoftware.htmlunit.ProxyConfig;
+import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
+import com.gargoylesoftware.htmlunit.WebClient;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.apache.commons.codec.binary.Base64;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxBinary;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.support.PageFactory;
+
+/**
+ *
+ * @author Elango
+ */
+public class Page {
+
+    protected WebDriver driver;
+
+    public Page(WebDriver driver) {
+        this.driver = driver;
+    }
+
+    public void initialize() {
+        PageFactory.initElements(driver, this);
+    }
+
+    public WebDriver getDriver() {
+        return driver;
+    }
+
+    public static boolean isPageLoaded(HashMap<String, String> elementIdentifiers) {
+        boolean isLoaded = false;
+        Set<Entry<String, String>> elementIdentifierEntries = elementIdentifiers.entrySet();
+        for (Entry anElementIdentifier : elementIdentifierEntries) {
+        }
+        return isLoaded;
+    }
+
+    public boolean waitForElementToLoad(String by, String identifier) {
+        boolean isLoaded = false;
+        for (int i = 0; isLoaded == false && i < 65; i++) {
+            isLoaded = isElementVisible(by, identifier);
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+        return isLoaded;
+    }
+
+    public boolean waitForElementToBeEnabled(WebElement element) {
+        boolean isEnabled = false;
+        for (int i = 0; isEnabled == false && i < 30; i++) {
+            isEnabled = element.isEnabled();
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+        return isEnabled;
+    }
+    
+    public boolean waitForElementToBeDisappear(String by, String identifier, Integer secondsToWait) {
+        boolean doesAppear = false;
+        for (int i = 0; doesAppear == false && i < secondsToWait; i++) {
+        	doesAppear = !isElementVisible(by, identifier);
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+        return doesAppear;
+    }
+
+    public boolean isElementVisible(String by, String identifier) {
+        boolean isVisible = false;
+        try {
+            if ("id".equalsIgnoreCase(by)) {
+                isVisible = true;
+                driver.findElement(By.id(identifier));
+            } else if ("name".equalsIgnoreCase(by)) {
+                isVisible = true;
+                driver.findElement(By.name(identifier));
+            } else if ("linkText".equalsIgnoreCase(by)) {
+                isVisible = true;
+                driver.findElement(By.linkText(identifier));
+            } else if ("xpath".equalsIgnoreCase(by)) {
+                isVisible = true;
+                driver.findElement(By.xpath(identifier));
+            }
+        } catch (Exception e) {
+            isVisible = false;
+        }
+        return isVisible;
+
+    }
+
+    public void clearAndType(WebElement givenElement, String givenString) {
+        givenElement.clear();
+        givenElement.click();
+        if(null!=givenString) {
+            givenElement.sendKeys(givenString);
+        }
+    }
+
+    //Doesnt work properly
+    public void pasteText(WebElement givenElement, String text) {
+        givenElement.clear();
+        givenElement.click();
+        JavascriptExecutor js=(JavascriptExecutor)driver;
+        String webElementID = givenElement.getAttribute("id");
+        if(null!=text) {
+            js.executeScript("document.getElementById('"+ webElementID +"').value='"+ TextFileReaderUtils.escapeString(text) +"';");
+        }
+    }
+
+    public static WebDriver constructDriver(String driverType) {
+        @SuppressWarnings("all") WebDriver driver;
+        if ("firefox".equalsIgnoreCase(driverType)) {
+//            FirefoxBinary fb = new FirefoxBinary();
+//            fb.setEnvironmentProperty("DISPLAY", ":1");
+            //FirefoxProfile profile = new FirefoxProfile();
+           // profile.setPreference("network.http.max-connections", 48);
+           // driver = new FirefoxDriver(profile);
+        	FirefoxBinary fb = new FirefoxBinary(new File("C:/Program Files (x86)/Mozilla Firefox/firefox.exe"));
+        	FirefoxProfile profile = new FirefoxProfile();
+        	driver = new FirefoxDriver(fb,profile);
+        }else if ("firefoxproxy".equalsIgnoreCase(driverType)) {
+            FirefoxProfile profile = new FirefoxProfile();
+            profile.setPreference("network.proxy.http", "bproxy123:ichoosebproxy@173.0.61.237");
+            profile.setPreference("network.proxy.http_port", "3128");
+            driver = new FirefoxDriver(profile);
+        } else if ("ie".equalsIgnoreCase(driverType)) {
+            driver = new InternetExplorerDriver();
+        }else if ("htmlunit".equalsIgnoreCase(driverType)) {
+            HtmlUnitDriver htmldriver = new HtmlUnitDriver(BrowserVersion.INTERNET_EXPLORER_8) {
+
+                @Override
+                protected WebClient modifyWebClient(WebClient client) {
+                    client.setCssErrorHandler(new SilentCssErrorHandler());
+                    client.setIncorrectnessListener(new IncorrectnessListenerImpl() {
+
+                        @Override
+                          public void notify(String arg0, Object arg1)
+                          {
+                            //System.err.println("Argument : " + arg0.toString() + ", Object : ");
+                          }
+                    });
+                    client.setAlertHandler(new CollectingAlertHandler(new ArrayList()) );
+                    return client;
+                }
+            };
+            htmldriver.setJavascriptEnabled(false);
+            driver = htmldriver;
+        } else if ("htmlunitproxy".equalsIgnoreCase(driverType)) {
+            HtmlUnitDriver htmldriver = new HtmlUnitDriver(BrowserVersion.FIREFOX_3_6) {
+
+                @Override
+                protected WebClient modifyWebClient(WebClient client) {
+                    //client.setProxyConfig(new ProxyConfig("proxy.cognizant.com", 6050));
+
+                    /*DefaultCredentialsProvider credentialsProvider = new DefaultCredentialsProvider();
+                    credentialsProvider.addCredentials("331847", "ch@rl3s_b_pass03");
+                    //credentialsProvider.addProxyCredentials("309680", "nov@1234", "proxy.tcs.com", 8080);
+                    client.setCredentialsProvider(credentialsProvider);*/
+                    String userAndPassword = "331847" + ":" + "ch@rl3s_b_pass03";
+                    String userAndPasswordBase64 = Base64.encodeBase64String(userAndPassword.getBytes());
+                    client.addRequestHeader("Proxy-Authorization", "Basic "+userAndPasswordBase64);
+                    client.getProxyConfig().setProxyHost("proxy.cognizant.com");
+                    client.getProxyConfig().setProxyPort(6050);
+                    client.setCssErrorHandler(new SilentCssErrorHandler());
+                    /*client.setIncorrectnessListener(new IncorrectnessListenerImpl() {
+
+                        @Override
+                          public void notify(String arg0, Object arg1)
+                          {
+                            //System.err.println("Argument : " + arg0.toString() + ", Object : ");
+                          }
+                    });*/
+                    client.setAlertHandler(new CollectingAlertHandler(new ArrayList()) );
+                    
+                    return client;
+                }
+            };
+            htmldriver.setJavascriptEnabled(true);
+            //htmldriver.setProxy("proxy.tcs.com", 8080);
+            driver = htmldriver;
+        } else if ("chrome".equalsIgnoreCase(driverType)) {
+            System.setProperty("webdriver.chrome.driver", "D:/setups/Open Source Apps/chromedriver_win_16.0.902.0/chromedriver.exe");
+            driver = new ChromeDriver();
+        } else {
+            driver = new FirefoxDriver();
+        }
+        return driver;
+    }
+    
+    public static void main(String args[]) throws Exception{
+    	HtmlUnitDriver htmldriver = (HtmlUnitDriver) Page.constructDriver("htmlunitproxy");
+    	htmldriver.get("http://www.google.com");
+    	System.out.println(htmldriver.getPageSource());
+    }
+}

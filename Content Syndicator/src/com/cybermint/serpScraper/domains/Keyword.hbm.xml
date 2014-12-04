@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Nov 25, 2010 3:42:02 PM by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <class name="com.cybermint.serpScraper.domains.Keyword" schema="serp" table="KEYWORDS">
+    <id name="keywordId" type="big_decimal">
+      <column name="KEYWORD_ID" precision="22" scale="0"/>
+      <generator class="identity"/>
+    </id>
+    <many-to-one class="com.cybermint.serpScraper.domains.Project" fetch="select" name="project">
+      <column name="project_id" not-null="true" unique="true"/>
+    </many-to-one>
+    <property name="keyword" type="string">
+      <column length="1000" name="KEYWORD" not-null="true"/>
+    </property>
+    <property name="status" type="string">
+      <column length="50" name="STATUS" not-null="true"/>
+    </property>
+    <property name="SEOBC" type="big_decimal">
+      <column name="SEOBC" precision="22" scale="0"/>
+    </property>
+    <property name="SEOPC" type="big_decimal">
+      <column name="SEOPC" precision="22" scale="0"/>
+    </property>
+    <property name="SEOTC" type="big_decimal">
+      <column name="SEOTC" precision="22" scale="0"/>
+    </property>
+    <property name="SEOBLI" type="big_decimal">
+      <column name="SEOBLI" precision="22" scale="0"/>
+    </property>
+    <property name="SEOPLI" type="big_decimal">
+      <column name="SEOPLI" precision="22" scale="0"/>
+    </property>
+    <set inverse="false" name="urls" order-by="RANK asc">
+      <key>
+        <column name="KEYWORD_ID" not-null="true" precision="22" scale="0"/>
+      </key>
+      <one-to-many class="com.cybermint.serpScraper.domains.Url"/>
+    </set>
+  </class>
+</hibernate-mapping>

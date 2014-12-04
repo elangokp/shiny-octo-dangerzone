@@ -1,0 +1,15 @@
+drop sequence keyword_id;
+
+drop sequence url_id;
+
+create sequence keyword_id;
+
+create sequence url_id;
+
+drop table keywords;
+
+drop table urls;
+
+create table keywords (keyword_id bigint not null primary key, keyword varchar2 not null, status varchar2 not null);
+
+create table urls (url_id bigint not null primary key, url varchar2 not null, keyword_id bigint, rank integer);
