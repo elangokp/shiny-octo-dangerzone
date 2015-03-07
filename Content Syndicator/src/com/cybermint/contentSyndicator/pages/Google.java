@@ -15,7 +15,7 @@ import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 public class Google {
 
     public static void main(String args[]) {
-        HtmlUnitDriver driver = new HtmlUnitDriver(BrowserVersion.FIREFOX_3_6);
+        HtmlUnitDriver driver = new HtmlUnitDriver(BrowserVersion.INTERNET_EXPLORER_11);
         driver.get("http://www.google.com");
         driver.getTitle();
         driver.findElementByName("q").sendKeys("Elango");

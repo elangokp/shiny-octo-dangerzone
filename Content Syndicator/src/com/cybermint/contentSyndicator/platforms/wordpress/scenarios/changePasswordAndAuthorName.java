@@ -87,7 +87,7 @@ public class changePasswordAndAuthorName implements Runnable {
         } else if ("ie".equalsIgnoreCase(driverType)) {
             driver = new InternetExplorerDriver();
         } else if ("htmlunit".equalsIgnoreCase(driverType)) {
-            HtmlUnitDriver htmldriver = new HtmlUnitDriver(BrowserVersion.FIREFOX_3_6);
+            HtmlUnitDriver htmldriver = new HtmlUnitDriver(BrowserVersion.INTERNET_EXPLORER_11);
             htmldriver.setJavascriptEnabled(true);
             driver = htmldriver;
         } else {

@@ -75,7 +75,7 @@ public class TextFileWriterUtils {
 
     }
     
-    public static void writeString(String givenString, String fileLocation, Boolean isAppend) {
+    public static void writeString(String givenString, String fileLocation, Boolean isAppend, Boolean isAppendInNewLine) {
         BufferedWriter writer = null;
         File givenFile = null;
         try {
@@ -85,6 +85,9 @@ public class TextFileWriterUtils {
                 givenFile.createNewFile();                
             }
             writer = new BufferedWriter(new FileWriter(givenFile, isAppend));
+            if(isAppendInNewLine) {
+            	writer.newLine();
+            }
             writer.append(givenString);
             writer.close();
         } catch (IOException ex) {

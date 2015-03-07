@@ -224,7 +224,7 @@ public class ALNUtils {
 				csvString.append(urlAndKeyword.getKey() + "," + urlAndKeyword.getValue()).append(System.getProperty("line.separator"));
 			}
        }
-	   TextFileWriterUtils.writeString(csvString.toString(), folderPath+"all-links.csv", false);
+	   TextFileWriterUtils.writeString(csvString.toString(), folderPath+"all-links.csv", false, false);
 	}
     
     public static List<ALNArticleFormObject> createALNArticles(String alnProjectFolderPath, String projectTitleBase) {

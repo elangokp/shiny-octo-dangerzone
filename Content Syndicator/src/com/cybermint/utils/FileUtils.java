@@ -31,7 +31,7 @@ public class FileUtils {
 			String replacedText = StringUtils.replaceThisCharacter(givenText, "\\{", "(");
 			replacedText = StringUtils.replaceThisCharacter(replacedText, "\\}", ")");
 			replacedText = StringUtils.removeThisCharacter(replacedText, "\\|");
-			TextFileWriterUtils.writeString(replacedText, destinationFilePath, false);
+			TextFileWriterUtils.writeString(replacedText, destinationFilePath, false, false);
 			if(replacedText.equalsIgnoreCase(givenText)) {
 				isReplaced = false;
 			} else {

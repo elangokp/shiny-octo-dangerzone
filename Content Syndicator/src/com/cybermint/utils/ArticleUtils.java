@@ -231,7 +231,7 @@ public class ArticleUtils {
 					}					
 				}
 				titleSpintax.append("}");
-				TextFileWriterUtils.writeString(titleSpintax.toString(), scrapedArticlesRootFolder.getAbsolutePath() + "/titles/" + afolderLocation.getName() + ".txt", false);
+				TextFileWriterUtils.writeString(titleSpintax.toString(), scrapedArticlesRootFolder.getAbsolutePath() + "/titles/" + afolderLocation.getName() + ".txt", false, true);
 			}
 			System.out.println("Titles for " + afolderLocation.getName() + " written.");
 		}
@@ -251,7 +251,7 @@ public class ArticleUtils {
 					titlesWithCoeff.append(",").append(StringUtils.wordsPresentPercentage(title, afolderLocation.getName()));
 					titlesWithCoeff.append(System.getProperty("line.separator"));
 				}
-				TextFileWriterUtils.writeString(titlesWithCoeff.toString(), scrapedArticlesRootFolder.getAbsolutePath() + "/titles/" + afolderLocation.getName() + ".csv", false);
+				TextFileWriterUtils.writeString(titlesWithCoeff.toString(), scrapedArticlesRootFolder.getAbsolutePath() + "/titles/" + afolderLocation.getName() + ".csv", false, false);
 			}
 			System.out.println("Titles for " + afolderLocation.getName() + " written.");
 		}
@@ -274,7 +274,7 @@ public class ArticleUtils {
 					}
 				}
 				descsInSpintax.append("}");				
-				TextFileWriterUtils.writeString(descsInSpintax.toString(), scrapedArticlesRootFolder.getAbsolutePath() + "/descs/" + afolderLocation.getName() + ".txt", false);
+				TextFileWriterUtils.writeString(descsInSpintax.toString(), scrapedArticlesRootFolder.getAbsolutePath() + "/descs/" + afolderLocation.getName() + ".txt", false, false);
 				descsInSpintax.setLength(0);
 				descs.clear();
 			}

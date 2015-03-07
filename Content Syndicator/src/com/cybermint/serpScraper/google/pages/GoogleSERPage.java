@@ -44,7 +44,7 @@ public class GoogleSERPage extends Page{
 
     public List<String> getSERPLinks() {
         List<String> links = new ArrayList<String>();
-        SERPLinks = driver.findElements(By.xpath("//a[@class=\"l\"]"));
+        SERPLinks = driver.findElements(By.xpath("//h3[@class=\"r\"]/a"));
         for(WebElement SERPLink:SERPLinks) {
             links.add(SERPLink.getAttribute("href"));
         }

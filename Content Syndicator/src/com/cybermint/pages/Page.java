@@ -11,16 +11,24 @@ import com.gargoylesoftware.htmlunit.CollectingAlertHandler;
 import com.gargoylesoftware.htmlunit.DefaultCredentialsProvider;
 import com.gargoylesoftware.htmlunit.IncorrectnessListenerImpl;
 import com.gargoylesoftware.htmlunit.ProxyConfig;
+import com.gargoylesoftware.htmlunit.ScriptException;
 import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HTMLParserListener;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.javascript.JavaScriptErrorListener;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.apache.commons.codec.binary.Base64;
+import org.openqa.jetty.log.LogFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -169,6 +177,7 @@ public class Page {
 
                 @Override
                 protected WebClient modifyWebClient(WebClient client) {
+
                     client.setCssErrorHandler(new SilentCssErrorHandler());
                     client.setIncorrectnessListener(new IncorrectnessListenerImpl() {
 
@@ -184,8 +193,84 @@ public class Page {
             };
             htmldriver.setJavascriptEnabled(false);
             driver = htmldriver;
-        } else if ("htmlunitproxy".equalsIgnoreCase(driverType)) {
-            HtmlUnitDriver htmldriver = new HtmlUnitDriver(BrowserVersion.FIREFOX_3_6) {
+        } else if ("htmlunitsilent".equalsIgnoreCase(driverType)) {
+            HtmlUnitDriver htmldriver = new HtmlUnitDriver(BrowserVersion.INTERNET_EXPLORER_8) {
+
+                @Override
+                protected WebClient modifyWebClient(WebClient client) {
+                	
+                	LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
+
+                    java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF); 
+                    java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
+
+                    //webClient = new WebClient(bv);
+                    //webClient.setCssEnabled(false);
+                    
+                    client.setCssErrorHandler(new SilentCssErrorHandler());
+                    client.setIncorrectnessListener(new IncorrectnessListenerImpl() {
+
+                        @Override
+                          public void notify(String arg0, Object arg1)
+                          {
+                            //System.err.println("Argument : " + arg0.toString() + ", Object : ");
+                          }
+                    });
+                    client.setHTMLParserListener(new HTMLParserListener() {
+
+						@Override
+						public void error(String arg0, URL arg1, String arg2,
+								int arg3, int arg4, String arg5) {
+							// TODO Auto-generated method stub
+							
+						}
+
+						@Override
+						public void warning(String arg0, URL arg1, String arg2,
+								int arg3, int arg4, String arg5) {
+							// TODO Auto-generated method stub
+							
+						}
+                    });
+                    client.setJavaScriptErrorListener(new JavaScriptErrorListener() {
+
+						@Override
+						public void loadScriptError(HtmlPage arg0, URL arg1,
+								Exception arg2) {
+							// TODO Auto-generated method stub
+							
+						}
+
+						@Override
+						public void malformedScriptURL(HtmlPage arg0,
+								String arg1, MalformedURLException arg2) {
+							// TODO Auto-generated method stub
+							
+						}
+
+						@Override
+						public void scriptException(HtmlPage arg0,
+								ScriptException arg1) {
+							// TODO Auto-generated method stub
+							
+						}
+
+						@Override
+						public void timeoutError(HtmlPage arg0, long arg1,
+								long arg2) {
+							// TODO Auto-generated method stub
+							
+						}
+
+                    });
+                    client.setAlertHandler(new CollectingAlertHandler(new ArrayList()) );
+                    return client;
+                }
+            };
+            htmldriver.setJavascriptEnabled(false);
+            driver = htmldriver;
+        }else if ("htmlunitproxy".equalsIgnoreCase(driverType)) {
+            HtmlUnitDriver htmldriver = new HtmlUnitDriver(BrowserVersion.INTERNET_EXPLORER_11) {
 
                 @Override
                 protected WebClient modifyWebClient(WebClient client) {
@@ -198,8 +283,8 @@ public class Page {
                     String userAndPassword = "331847" + ":" + "ch@rl3s_b_pass03";
                     String userAndPasswordBase64 = Base64.encodeBase64String(userAndPassword.getBytes());
                     client.addRequestHeader("Proxy-Authorization", "Basic "+userAndPasswordBase64);
-                    client.getProxyConfig().setProxyHost("proxy.cognizant.com");
-                    client.getProxyConfig().setProxyPort(6050);
+                    /*client.getProxyConfig().setProxyHost("proxy.cognizant.com");
+                    client.getProxyConfig().setProxyPort(6050);*/
                     client.setCssErrorHandler(new SilentCssErrorHandler());
                     /*client.setIncorrectnessListener(new IncorrectnessListenerImpl() {
 

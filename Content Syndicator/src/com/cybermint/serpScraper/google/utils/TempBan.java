@@ -48,7 +48,7 @@ public class TempBan {
 
     public void recheckBan() throws InterruptedException {
         isInvoked = true;
-        driver = new HtmlUnitDriver(BrowserVersion.FIREFOX_3_6);
+        driver = new HtmlUnitDriver(BrowserVersion.INTERNET_EXPLORER_11);
 //        driver = new FirefoxDriver();
         System.out.println("Rechecking Ban after " + totalbanTime + " minutes.");
         driver.get("http://www.google.com/search?complete=0&gl=US");

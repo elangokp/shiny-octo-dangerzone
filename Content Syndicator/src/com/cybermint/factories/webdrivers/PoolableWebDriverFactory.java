@@ -53,7 +53,7 @@ public class PoolableWebDriverFactory extends BasePoolableObjectFactory {
 			Proxy a = new Proxy();
 			a.setHttpProxy("184.22.228.177:80");
 			a.setAutodetect(false);
-			aProfile.setProxyPreferences(a);			
+			//aProfile.setProxyPreferences(a);			
 			driver = new FirefoxDriver(aBinary, aProfile);
       } else if ("firefox".equalsIgnoreCase(driverType)) {
           driver = new FirefoxDriver();

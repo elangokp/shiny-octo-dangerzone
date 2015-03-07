@@ -70,7 +70,7 @@ public class GetGoogleResultsForSingleKeyword implements Callable{
         try {
             driver = (WebDriver) driverPool.borrowObject();
             GoogleSearchPage aGoogleSearchPage = new GoogleSearchPage(driver,aTempBan);
-            aGoogleSearchPage = aGoogleSearchPage.ClickSearchSettings().setResultsPerPage(100);
+            //aGoogleSearchPage = aGoogleSearchPage.ClickSearchSettings().setResultsPerPage(100);
             GoogleSERPage aGoogleSERPage = aGoogleSearchPage.searchFor(searchString);
             //totalResults = aGoogleSERPage.getTotalResults();
             serps = aGoogleSERPage.getSERPLinks();
@@ -78,6 +78,7 @@ public class GetGoogleResultsForSingleKeyword implements Callable{
             while(aGoogleSERPage.isNextPageAvailable() && serps.size()<maxLinks) {
                 aGoogleSERPage = aGoogleSERPage.getNextSERPage();
                 serps.addAll(aGoogleSERPage.getSERPLinks());
+                //System.out.println(serps);
                 Thread.sleep(minNextPageDelay + rand.nextInt(maxNextPageDelay - minNextPageDelay + 1));
             }
             
@@ -152,7 +153,7 @@ public class GetGoogleResultsForSingleKeyword implements Callable{
 //     }
 
     public static void main(String args[]) throws InterruptedException {
-    	PoolableWebDriverFactory aPoolableWebDriverFactory = new PoolableWebDriverFactory("htmlunit");
+    	PoolableWebDriverFactory aPoolableWebDriverFactory = new PoolableWebDriverFactory("firefox");
 		GenericObjectPool driverPool = new GenericObjectPool(aPoolableWebDriverFactory);
 		driverPool.setLifo(false); //To make it behave a FIFO
         //List<String> linesList = TextFileReaderUtils.readLinesAsList("F:\\My Dropbox\\Projects\\GetBackYourExNow.com\\Top 100 keywords.txt",true);
@@ -163,7 +164,7 @@ public class GetGoogleResultsForSingleKeyword implements Callable{
             //aScenario.call();
         //}
         
-        GetGoogleResultsForSingleKeyword aScenario = new GetGoogleResultsForSingleKeyword(driverPool, "what is my ip", 1000, 0, 0, new TempBan());
+        GetGoogleResultsForSingleKeyword aScenario = new GetGoogleResultsForSingleKeyword(driverPool, "get your ex back", 1000, 0, 0, new TempBan());
         //GetGoogleResultsForSingleKeyword aScenario = new GetGoogleResultsForSingleKeyword("firefoxproxy", "\"What is Pligg?\"|\"pligg content management system\"|\"powered by pligg\" + inurl:story.php", 1000, 0, 0, new TempBan());
         try {
         	List<String> serps = aScenario.call();

@@ -90,7 +90,7 @@ public class AddNewPostToWordpress implements Runnable {
         } else if ("ie".equalsIgnoreCase(driverType)) {
             driver = new InternetExplorerDriver();
         } else if ("htmlunit".equalsIgnoreCase(driverType)) {
-           HtmlUnitDriver htmldriver = new HtmlUnitDriver(BrowserVersion.INTERNET_EXPLORER_7) {
+           HtmlUnitDriver htmldriver = new HtmlUnitDriver(BrowserVersion.INTERNET_EXPLORER_11) {
 
                 @Override
                 protected WebClient modifyWebClient(WebClient client) {
@@ -104,7 +104,7 @@ public class AddNewPostToWordpress implements Runnable {
                           }
                     });
                     client.setCookieManager(new MyCookieManager());
-                    System.out.println(client.getCookieManager().HTMLUNIT_COOKIE_POLICY);
+                    //System.out.println(client.getCookieManager().HTMLUNIT_COOKIE_POLICY);
                     return client;
                 }
             };
