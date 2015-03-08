@@ -39,6 +39,8 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.phantomjs.PhantomJSDriver;
+import org.openqa.selenium.phantomjs.PhantomJSDriverService;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.PageFactory;
 
@@ -305,6 +307,17 @@ public class Page {
         } else if ("chrome".equalsIgnoreCase(driverType)) {
             System.setProperty("webdriver.chrome.driver", "D:/setups/Open Source Apps/chromedriver_win_16.0.902.0/chromedriver.exe");
             driver = new ChromeDriver();
+        } else if ("phantomjs".equalsIgnoreCase(driverType)) {
+        	DesiredCapabilities sCaps = new DesiredCapabilities();
+            sCaps.setJavascriptEnabled(true);
+            sCaps.setCapability("takesScreenshot", false);
+            sCaps.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, "C:/Users/elangokp/Documents/Setups/phantomjs-2.0.0-windows/bin/phantomjs.exe");
+            ArrayList<String> cliArgsCap = new ArrayList<String>();
+            cliArgsCap.add("--web-security=false");
+            cliArgsCap.add("--ssl-protocol=any");
+            cliArgsCap.add("--ignore-ssl-errors=true");
+            sCaps.setCapability(PhantomJSDriverService.PHANTOMJS_CLI_ARGS, cliArgsCap);
+            driver = new PhantomJSDriver(sCaps);
         } else {
             driver = new FirefoxDriver();
         }
