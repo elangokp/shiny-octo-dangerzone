@@ -32,4 +32,13 @@ public class LevenshteinDistance {
 
             return distance[str1.length()][str2.length()];
     }
+    
+    public static void main(String args[]) {
+		   System.out.println(LevenshteinDistance.computeLevenshteinDistance("ANADIAEL-SAYEDFEMALE15322", "ANADIAEL SAYEDFEMALE15322"));
+		   System.out.println(LevenshteinDistance.computeLevenshteinDistance("CAROLEDWARDS CLEGGFEMALE18021", "CAROLEDWARDS-CLEGGFEMALE18021"));
+		   System.out.println(LevenshteinDistance.computeLevenshteinDistance("ANADIAEL-SAYEDFEMALE15322", "CAROLEDWARDS-CLEGGFEMALE18021"));
+		   System.out.println(LevenshteinDistance.computeLevenshteinDistance("CAROLEDWARDS CLEGGFEMALE18021", "ANADIAEL SAYEDFEMALE15322"));
+		   System.out.println(LevenshteinDistance.computeLevenshteinDistance("ANADIAEL-SAYEDFEMALE15322", "ANADIAEL-SAYEDFEMALE15322"));
+		   System.out.println(LevenshteinDistance.computeLevenshteinDistance("CAROLEDWARDS CLEGGFEMALE18021", "CAROLEDWARDS CLEGGFEMALE18021"));
+	   }
 }

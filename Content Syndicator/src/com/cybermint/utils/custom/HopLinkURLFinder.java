@@ -16,7 +16,7 @@ import com.cybermint.pages.Page;
 public class HopLinkURLFinder {
 
 	public static void main(String[] args) throws URISyntaxException {
-		WebDriver driver = Page.constructDriver("firefox");
+		WebDriver driver = Page.constructDriver("phantomjs");
 		List<String> lines = TextFileReaderUtils.readLinesAsList("C:\\Users\\elangokp\\Dropbox\\Projects\\Clickbank PPV Snipe\\HoplinksForProcessing.csv", true);
 		for(String line:lines) {
 			String[] lineItems = line.split(",");
@@ -39,12 +39,12 @@ public class HopLinkURLFinder {
 				lineToSave = lineToSave + ",\"" + hoplinkUrlString 
 						+ "\",\"" + hoplinkUrl.getHost() + "\",\"" + paylinkUrlString 
 						+ "\",\"" + vendorNumber + "\"";
-				TextFileWriterUtils.writeString(lineToSave, "C:\\Users\\elangokp\\Dropbox\\Projects\\Clickbank PPV Snipe\\Hoplinks-ff-processed.csv", true, true);
+				TextFileWriterUtils.writeString(lineToSave, "C:\\Users\\elangokp\\Dropbox\\Projects\\Clickbank PPV Snipe\\Hoplinks-pjs-processed.csv", true, true);
 				System.out.println(lineToSave);
 			} catch (Exception e) {
 				lineToSave = line + ",\"" + e.getMessage() + "\"";
 				System.out.println("EXCEPTION: " + lineToSave);
-				TextFileWriterUtils.writeString(lineToSave, "C:\\Users\\elangokp\\Dropbox\\Projects\\Clickbank PPV Snipe\\Hoplinks-ff-errors.csv", true, true);
+				TextFileWriterUtils.writeString(lineToSave, "C:\\Users\\elangokp\\Dropbox\\Projects\\Clickbank PPV Snipe\\Hoplinks-pjs-errors.csv", true, true);
 			}
 			
 			
