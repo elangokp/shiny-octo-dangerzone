@@ -32,7 +32,7 @@ public class ArticleUtils {
             	List<String> paragraphs = TextFileReaderUtils.readLinesAsList(articlesFolder.getAbsolutePath()+"/"+anArticleName, true);
             	if(paragraphs.size()>2) {
             		String title = paragraphs.get(0).trim();
-            		if(LetterPairSimilarity.compareStrings(title, articlesFolder.getName())>=0.45) {
+            		if(LetterPairSimilarity.compareStrings(title, articlesFolder.getName(), false)>=0.45) {
             				String desc = paragraphs.get(1).replaceAll("\\{", "(").replaceAll("\\}", ")").replaceAll("\\|", "").replaceAll("\\|", "").trim();
                         	Integer wordInDesc = StringUtils.getNumberOfWords(desc);
                         	//System.out.println(desc);
@@ -55,7 +55,7 @@ public class ArticleUtils {
 	            	if(paragraphs.size()>2) {
 	            		String title = paragraphs.get(0).trim();
 	            		paragraphs.remove(0);
-	            		if(LetterPairSimilarity.compareStrings(title, articlesFolder.getName())>=0.45) {
+	            		if(LetterPairSimilarity.compareStrings(title, articlesFolder.getName(), false)>=0.45) {
 	            			for(String aDesc:paragraphs) {
 	            				String desc = aDesc.replaceAll("\\{", "(").replaceAll("\\}", ")").replaceAll("\\|", "").replaceAll("\\|", "").trim();
 	                        	Integer wordInDesc = StringUtils.getNumberOfWords(desc);
@@ -81,7 +81,7 @@ public class ArticleUtils {
 	            	List<String> paragraphs = TextFileReaderUtils.readLinesAsList(articlesFolder.getAbsolutePath()+"/"+anArticleName, true);
 	            	if(paragraphs.size()>2) {
 	            		String title = paragraphs.get(0).trim();
-	            		double similarity = LetterPairSimilarity.compareStrings(title, articlesFolder.getName());
+	            		double similarity = LetterPairSimilarity.compareStrings(title, articlesFolder.getName(), false);
 	            		if(similarity<0.45 && similarity>=0.25) {
 	            				String desc = paragraphs.get(1).replaceAll("\\{", "(").replaceAll("\\}", ")").replaceAll("\\|", "").replaceAll("\\|", "").trim();
 	                        	Integer wordInDesc = StringUtils.getNumberOfWords(desc);
@@ -105,7 +105,7 @@ public class ArticleUtils {
 		            	if(paragraphs.size()>2) {
 		            		String title = paragraphs.get(0).trim();
 		            		paragraphs.remove(0);
-		            		double similarity = LetterPairSimilarity.compareStrings(title, articlesFolder.getName());
+		            		double similarity = LetterPairSimilarity.compareStrings(title, articlesFolder.getName(), false);
 		            		if(similarity<0.45 && similarity>=0.25) {
 		            			for(String aDesc:paragraphs) {
 		            				String desc = aDesc.replaceAll("\\{", "(").replaceAll("\\}", ")").replaceAll("\\|", "").replaceAll("\\|", "").trim();
@@ -140,7 +140,7 @@ public class ArticleUtils {
             	String title = paragraphs.get(0).replaceAll("\\{", "(").replaceAll("\\}", ")").replaceAll("\\|", "").replaceAll("\\|", "").trim();
             	Integer wordInTitle = StringUtils.getNumberOfWords(title);
             	//System.out.println(title);
-            	if(wordInTitle >= minWordsInTitle && wordInTitle <= maxWordsInTitle && (LetterPairSimilarity.compareStrings(title, articlesFolder.getName()) > 0.6 || StringUtils.wordsPresentPercentage(title, articlesFolder.getName()) == 1)) {
+            	if(wordInTitle >= minWordsInTitle && wordInTitle <= maxWordsInTitle && (LetterPairSimilarity.compareStrings(title, articlesFolder.getName(), false) > 0.6 || StringUtils.wordsPresentPercentage(title, articlesFolder.getName()) == 1)) {
             		titles.add(title);
             	}            	 	
             }
@@ -154,7 +154,7 @@ public class ArticleUtils {
 	            	String title = paragraphs.get(0).replaceAll("\\{", "(").replaceAll("\\}", ")").replaceAll("\\|", "").replaceAll("\\|", "").trim();
 	            	Integer wordInTitle = StringUtils.getNumberOfWords(title);
 	            	//System.out.println(title);
-	            	if(wordInTitle >= minWordsInTitle && wordInTitle <= maxWordsInTitle && (LetterPairSimilarity.compareStrings(title, articlesFolder.getName()) > 0.4)) {
+	            	if(wordInTitle >= minWordsInTitle && wordInTitle <= maxWordsInTitle && (LetterPairSimilarity.compareStrings(title, articlesFolder.getName(), false) > 0.4)) {
 	            		titles.add(title);
 	            	}            	 	
 	            }
@@ -246,7 +246,7 @@ public class ArticleUtils {
 				StringBuffer titlesWithCoeff = new StringBuffer();
 				for(String title:titles) {
 					title = StringUtils.removeThisCharacter(title, ",");
-					titlesWithCoeff.append(title).append(",").append(LetterPairSimilarity.compareStrings(title, afolderLocation.getName()));
+					titlesWithCoeff.append(title).append(",").append(LetterPairSimilarity.compareStrings(title, afolderLocation.getName(), false));
 					//titlesWithCoeff.append(",").append(StringUtils.doesContainAllWords(title, afolderLocation.getName()));
 					titlesWithCoeff.append(",").append(StringUtils.wordsPresentPercentage(title, afolderLocation.getName()));
 					titlesWithCoeff.append(System.getProperty("line.separator"));

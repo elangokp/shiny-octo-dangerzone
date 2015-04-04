@@ -58,9 +58,9 @@ public class ArticleBuilderForGSA {
 				     m.appendReplacement(camoReplacedTotalSpun, Matcher.quoteReplacement(camoLinks));
 				 }
 				 m.appendTail(camoReplacedTotalSpun);
-				TextFileWriterUtils.writeString(camoReplacedTotalSpun.toString(), gsaSuperSpunProjectArticleFilePath, false);
-				TextFileWriterUtils.writeString(titles, gsaSuperSpunProjectTitleFilePath, false);
-				TextFileWriterUtils.writeString(descs, gsaSuperSpunProjectDescFilePath, false);
+				TextFileWriterUtils.writeString(camoReplacedTotalSpun.toString(), gsaSuperSpunProjectArticleFilePath, false, false);
+				TextFileWriterUtils.writeString(titles, gsaSuperSpunProjectTitleFilePath, false, false);
+				TextFileWriterUtils.writeString(descs, gsaSuperSpunProjectDescFilePath, false, false);
 			}
 		}
 				

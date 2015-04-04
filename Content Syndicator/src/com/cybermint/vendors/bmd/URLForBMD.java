@@ -314,7 +314,7 @@ public class URLForBMD {
 		fileCount++;
 		//TextFileWriterUtils.writeString(allLinks.toString(), "C:/Users/Elango/Desktop/BMD CSVs/all-links-for-BMD-" + fileCount + ".csv");
 		//TextFileWriterUtils.writeString(allLinks.toString(), "G:/Dropbox/Website Campaigns/Promotion Metadata/all-links-for-BMD.csv");
-		TextFileWriterUtils.writeString(onlyTags.toString(), "G:/Dropbox/Website Campaigns/Promotion Metadata/only-tags.csv", false);
+		TextFileWriterUtils.writeString(onlyTags.toString(), "G:/Dropbox/Website Campaigns/Promotion Metadata/only-tags.csv", false, false);
 		/*String anchorSpin = "{clear tinnitus|{{how to|ways to} {clear tinnitus} {naturally|now}}|{{cure tinnitus|tinnitus treatment|tinnitus remedy}|{http://www.tinnitus411.com/clear-tinnitus/|http://www.tinnitus411.com|{click here|read here|read this|go here|read now|read it|have a look here}}}}";
 		List<String> spintaxes = new ArrayList<String> ();
 		System.out.println(spintaxParse(new Random(), anchorSpin, spintaxes));
@@ -482,8 +482,8 @@ public class URLForBMD {
 			gsaAnchors.append(projectCategoryMap.get(projectNameForMaps));
 			gsaAnchors.append("}");
 			
-			TextFileWriterUtils.writeString(gsaAnchors.toString(), gsaAnchorsFolder + "/" + projectName + ".txt", true);
-			TextFileWriterUtils.writeString(System.getProperty("line.separator"), gsaAnchorsFolder + "/" + projectName + ".txt", true);
+			TextFileWriterUtils.writeString(gsaAnchors.toString(), gsaAnchorsFolder + "/" + projectName + ".txt", true, true);
+			TextFileWriterUtils.writeString(System.getProperty("line.separator"), gsaAnchorsFolder + "/" + projectName + ".txt", true, true);
 			allLinks.append(anchorsWithoutHref.toString()).append(",");
 			allLinks.append(anchors.toString()).append(",");
 			allLinks.append(System.getProperty("line.separator"));
@@ -499,7 +499,7 @@ public class URLForBMD {
 			}*/
 		}	
 		//fileCount++;
-		TextFileWriterUtils.writeString(allLinks.toString(), "G:/Dropbox/Website Campaigns/Promotion Metadata/all-links-for-master2.csv", false);
+		TextFileWriterUtils.writeString(allLinks.toString(), "G:/Dropbox/Website Campaigns/Promotion Metadata/all-links-for-master2.csv", false, false);
 		/*String anchorSpin = "{clear tinnitus|{{how to|ways to} {clear tinnitus} {naturally|now}}|{{cure tinnitus|tinnitus treatment|tinnitus remedy}|{http://www.tinnitus411.com/clear-tinnitus/|http://www.tinnitus411.com|{click here|read here|read this|go here|read now|read it|have a look here}}}}";
 		List<String> spintaxes = new ArrayList<String> ();
 		System.out.println(spintaxParse(new Random(), anchorSpin, spintaxes));

@@ -135,7 +135,7 @@ public class ArticleClassifier {
 		 m.appendTail(camoReplacedTotalSpun);
 		//TextFileWriterUtils.writeString(camoReplacedTotalSpun.toString(), superSpunFilePath);
 		//TextFileWriterUtils.writeString(camoReplacedTotalSpun.toString(), dilutionSuperSpunFilePath);
-		TextFileWriterUtils.writeString(camoReplacedTotalSpun.toString(), gsaSuperSpunFilePath, false);
+		TextFileWriterUtils.writeString(camoReplacedTotalSpun.toString(), gsaSuperSpunFilePath, false, false);
 	}
 	
 	public static void loadCamoLinks() {

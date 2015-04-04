@@ -177,7 +177,7 @@ public class SpinRewriterAPI {
 			String articleWithSpintax = aSpinRewriterAPI.getTextWithSpintax(articleString.toString());
 			if(StringUtils.getNumberOfWords(articleWithSpintax)>50) {
 				String spunArtileFilePath = spunArticlesRootFolder.getAbsolutePath() + "/[Spun] " + articleFile.getName();
-				TextFileWriterUtils.writeString(articleWithSpintax, spunArtileFilePath, false);
+				TextFileWriterUtils.writeString(articleWithSpintax, spunArtileFilePath, false, false);
 				File spunDoneArticlesFolderArticleFile = new File(spunDoneArticlesFolder.getAbsolutePath() + "/" + articleFile.getName());
 				spunDoneArticlesFolderArticleFile.getParentFile().mkdirs();
 				try {

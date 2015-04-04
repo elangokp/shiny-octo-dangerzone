@@ -63,7 +63,7 @@ public class SpinRewriterUtils {
 			String cycleFolderName = articleFile.getParentFile().getName();
 			String projectFolderName = articleFile.getParentFile().getParentFile().getName();
 			String spunArtileFilePath = "G:/Google Drive/Scraped Articles/Scraped Articles In Cycles Spun/" + projectFolderName + "/" + cycleFolderName + "/" + articleFileName;
-			TextFileWriterUtils.writeString(article, spunArtileFilePath, false);
+			TextFileWriterUtils.writeString(article, spunArtileFilePath, false, false);
 			articleFile.delete();			
 		}
 	}
