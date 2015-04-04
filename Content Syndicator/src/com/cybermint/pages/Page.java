@@ -311,7 +311,7 @@ public class Page {
         	DesiredCapabilities sCaps = new DesiredCapabilities();
             sCaps.setJavascriptEnabled(true);
             sCaps.setCapability("takesScreenshot", false);
-            sCaps.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, "C:/Users/elangokp/Documents/Setups/phantomjs-2.0.0-windows/bin/phantomjs.exe");
+            sCaps.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, "lib/PhantomJS/phantomjs.exe");
             ArrayList<String> cliArgsCap = new ArrayList<String>();
             cliArgsCap.add("--web-security=false");
             cliArgsCap.add("--ssl-protocol=any");
