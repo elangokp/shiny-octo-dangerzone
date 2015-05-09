@@ -8,8 +8,10 @@ public class DriverPoolUtils {
 		int i = 0;
 		while(i<noOfObjectsToInitiate) {
 			try {
-				aPool.addObject();
-				Thread.sleep(50000);
+				if(i>0) {
+					Thread.sleep(50000);
+				}
+				aPool.addObject();				
 				i++;
 			} catch (InterruptedException e) {
 				e.printStackTrace();

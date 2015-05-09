@@ -57,7 +57,11 @@ public class Page {
     }
 
     public void initialize() {
-        PageFactory.initElements(driver, this);
+        try {
+			PageFactory.initElements(driver, this);
+		} catch (Exception e) {
+			//e.printStackTrace();
+		}
     }
 
     public WebDriver getDriver() {

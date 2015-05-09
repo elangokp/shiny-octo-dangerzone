@@ -49,7 +49,7 @@ public class TextFileWriterUtils {
 		}
 	}
 
-    public static void writeListAsLines(Collection<String> givenList, String fileLocation) {
+    public synchronized static void writeListAsLines(Collection<String> givenList, String fileLocation) {
         BufferedWriter writer = null;
         File givenFile = null;
         try {
@@ -75,7 +75,7 @@ public class TextFileWriterUtils {
 
     }
     
-    public static void writeString(String givenString, String fileLocation, Boolean isAppend, Boolean isAppendInNewLine) {
+    public synchronized static void writeString(String givenString, String fileLocation, Boolean isAppend, Boolean isAppendInNewLine) {
         BufferedWriter writer = null;
         File givenFile = null;
         try {
