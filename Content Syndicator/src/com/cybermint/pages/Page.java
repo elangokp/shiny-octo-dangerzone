@@ -5,6 +5,7 @@
 package com.cybermint.pages;
 
 import com.cybermint.utils.TextFileReaderUtils;
+import com.cybermint.utils.captchasolver.dbc.DBCCaptchaSolver;
 import com.gargoylesoftware.htmlunit.AlertHandler;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.CollectingAlertHandler;
@@ -18,7 +19,9 @@ import com.gargoylesoftware.htmlunit.html.HTMLParserListener;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.javascript.JavaScriptErrorListener;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -27,11 +30,17 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 
+import javax.imageio.ImageIO;
+
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
 import org.openqa.jetty.log.LogFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxBinary;
@@ -80,6 +89,23 @@ public class Page {
         boolean isLoaded = false;
         for (int i = 0; isLoaded == false && i < 65; i++) {
             isLoaded = isElementVisible(by, identifier);
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+        return isLoaded;
+    }
+    
+    public boolean waitForOneOfTheElementToLoad(HashMap<String, String> elementIdentifiers) {
+        boolean isLoaded = false;
+        for (int i = 0; isLoaded == false && i < 65; i++) {
+        	Set<Entry<String, String>> elementIdentifierEntries = elementIdentifiers.entrySet();
+            for (Entry<String, String> anElementIdentifier : elementIdentifierEntries) {
+            	isLoaded = isLoaded ? true : isElementVisible(anElementIdentifier.getKey(), anElementIdentifier.getValue());
+            }
             try {
                 Thread.sleep(1000);
             } catch (Exception e) {
@@ -158,6 +184,26 @@ public class Page {
         if(null!=text) {
             js.executeScript("document.getElementById('"+ webElementID +"').value='"+ TextFileReaderUtils.escapeString(text) +"';");
         }
+    }
+    
+    public File getImage(WebElement givenImageElement) {
+    	File screen = null;
+    	try {
+			//WebElement Image=driver.findElement(By.xpath(imageXpath));
+			screen=((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+			int width=givenImageElement.getSize().getWidth();
+			int height=givenImageElement.getSize().getHeight();
+			BufferedImage img=ImageIO.read(screen);
+			BufferedImage reqImg=img.getSubimage(givenImageElement.getLocation().getX(), givenImageElement.getLocation().getY(), width, height);
+			ImageIO.write(reqImg, "png", screen);
+			return screen;
+			//File file=new File(loc);
+			//FileUtils.copyFile(screen,file);
+		} catch (WebDriverException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return screen;
     }
 
     public static WebDriver constructDriver(String driverType) {
@@ -329,8 +375,17 @@ public class Page {
     }
     
     public static void main(String args[]) throws Exception{
-    	HtmlUnitDriver htmldriver = (HtmlUnitDriver) Page.constructDriver("htmlunitproxy");
-    	htmldriver.get("http://www.google.com");
-    	System.out.println(htmldriver.getPageSource());
+//    	HtmlUnitDriver htmldriver = (HtmlUnitDriver) Page.constructDriver("htmlunitproxy");
+//    	htmldriver.get("http://www.google.com");
+//    	System.out.println(htmldriver.getPageSource());
+    	WebDriver driver = Page.constructDriver("firefox");
+    	Page aPage = new Page(driver);
+    	driver.get("http://ipv6.google.com/sorry/IndexRedirect?continue=");
+    	WebElement Image=driver.findElement(By.xpath("//img"));
+    	File captchaImage = aPage.getImage(Image);
+    	File file=new File("C://data//img.jpeg");
+		FileUtils.copyFile(captchaImage,file);
+    	DBCCaptchaSolver cs = new DBCCaptchaSolver();
+    	cs.solveCaptchaFromFile("captcher12", "123solvecaptch!@#", captchaImage);
     }
 }

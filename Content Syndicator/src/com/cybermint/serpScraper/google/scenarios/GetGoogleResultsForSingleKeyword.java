@@ -12,6 +12,7 @@ import com.cybermint.scenarios.WaitThread;
 import com.cybermint.serpScraper.domains.Keyword;
 import com.cybermint.serpScraper.domains.Url;
 import com.cybermint.serpScraper.google.pages.GoogleSearchPage;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
@@ -20,14 +21,18 @@ import java.util.logging.Logger;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.openqa.selenium.WebDriver;
+
 import com.cybermint.serpScraper.domains.helpers.KeywordHelper;
 import com.cybermint.serpScraper.google.pages.GoogleSERPage;
 import com.cybermint.serpScraper.google.utils.TempBan;
 import com.cybermint.utils.TextFileReaderUtils;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -36,6 +41,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
@@ -63,9 +69,11 @@ public class GetGoogleResultsForSingleKeyword implements Callable{
         this.maxNextPageDelay = maxNextPageDelay;
     }
 
-    public List<String> call() throws Exception{
+    public Map<String,List<String>> call() throws Exception{
         WebDriver driver = null;
         List<String> serps = new ArrayList<String>();
+        List<String> ads = new ArrayList<String>();
+        Map<String,List<String>> results = new HashMap<String,List<String>>();
         Random rand = new Random();
         try {
             driver = (WebDriver) driverPool.borrowObject();
@@ -78,7 +86,10 @@ public class GetGoogleResultsForSingleKeyword implements Callable{
             while(aGoogleSERPage.isNextPageAvailable() && serps.size()<maxLinks) {
                 aGoogleSERPage = aGoogleSERPage.getNextSERPage();
                 serps.addAll(aGoogleSERPage.getSERPLinks());
+                ads.addAll(aGoogleSERPage.getAdLinks());
                 //System.out.println(serps);
+                results.put("serps", serps);
+                results.put("ads", ads);
                 Thread.sleep(minNextPageDelay + rand.nextInt(maxNextPageDelay - minNextPageDelay + 1));
             }
             
@@ -89,7 +100,7 @@ public class GetGoogleResultsForSingleKeyword implements Callable{
 //            }
 //            System.out.println(totalResults);
 //            System.out.println("SERP for keyword : " + searchString + " retrieved successfully");
-            driver.close();
+            //driver.close();
         } catch(Exception e) {
 //            if(driver != null) {
 //                driver.quit();
@@ -100,7 +111,7 @@ public class GetGoogleResultsForSingleKeyword implements Callable{
         } finally {
         	driverPool.returnObject(driver);
         }
-        return serps;
+        return results;
     }
 
 //    public static void main (String args[]) {
@@ -164,12 +175,15 @@ public class GetGoogleResultsForSingleKeyword implements Callable{
             //aScenario.call();
         //}
         
-        GetGoogleResultsForSingleKeyword aScenario = new GetGoogleResultsForSingleKeyword(driverPool, "get your ex back", 1000, 0, 0, new TempBan());
+        GetGoogleResultsForSingleKeyword aScenario = new GetGoogleResultsForSingleKeyword(driverPool, "solar panel", 1000, 0, 0, new TempBan());
         //GetGoogleResultsForSingleKeyword aScenario = new GetGoogleResultsForSingleKeyword("firefoxproxy", "\"What is Pligg?\"|\"pligg content management system\"|\"powered by pligg\" + inurl:story.php", 1000, 0, 0, new TempBan());
         try {
-        	List<String> serps = aScenario.call();
-        	for(String serp : serps) {
+        	Map<String,List<String>> results = aScenario.call();
+        	for(String serp : results.get("serps")) {
         		System.out.println(serp);
+        	}
+        	for(String ad : results.get("ads")) {
+        		System.out.println(ad);
         	}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

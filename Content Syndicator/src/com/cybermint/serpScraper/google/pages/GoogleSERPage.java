@@ -12,6 +12,7 @@ import com.cybermint.serpScraper.google.utils.TempBan;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,17 +30,24 @@ import org.openqa.selenium.support.PageFactory;
  */
 public class GoogleSERPage extends Page{
 
-    @FindBy(className = "l") protected List<WebElement> SERPLinks;
+    //@FindBy(className = "l") protected List<WebElement> SERPLinks;
+	protected List<WebElement> SERPLinks;
+	protected List<WebElement> ADLinks;
     @FindBy(id = "resultStats") protected WebElement resultStats;
     @FindBy(id = "ofr") protected WebElement endOfResultsNotice;
     @FindBy(id = "pnnext") protected WebElement nextPageLink;
     @FindBy(xpath = "//div[@id=\"botstuff\"]") protected WebElement relatedSearchesDiv;
     //@FindBy(xpath = "//div[@id=\"botstuff\"]//div[@class=\"brs_col\"][1]") protected WebElement relatedSearchDiv1;
     //@FindBy(xpath = "//div[@id=\"botstuff\"]//div[@class=\"brs_col\"][1]") protected WebElement relatedSearchDiv2;
-
+    private HashMap<String,String> isBanOrSerpElements;
+    
     public GoogleSERPage (WebDriver driver) {
         super(driver);
         this.initialize();
+        isBanOrSerpElements = new HashMap<String, String>();
+        isBanOrSerpElements.put("xpath", "//h3[@class=\"r\"])[1]/a");
+        isBanOrSerpElements.put("xpath", "//form[@action=\"CaptchaRedirect\"]");
+        isBanOrSerpElements.put("name", "q");
     }
 
     public List<String> getSERPLinks() {
@@ -47,6 +55,15 @@ public class GoogleSERPage extends Page{
         SERPLinks = driver.findElements(By.xpath("//h3[@class=\"r\"]/a"));
         for(WebElement SERPLink:SERPLinks) {
             links.add(SERPLink.getAttribute("href"));
+        }
+        return links;
+    }
+    
+    public List<String> getAdLinks() {
+        List<String> links = new ArrayList<String>();
+        ADLinks = driver.findElements(By.xpath("//li[@class=\"ads-ad\"]/div[@class=\"ads-visurl\"]/cite"));
+        for(WebElement ADLink:ADLinks) {
+            links.add("http://" + ADLink.getText().replace("\"", "").trim());
         }
         return links;
     }
@@ -97,12 +114,12 @@ public class GoogleSERPage extends Page{
     public GoogleSERPage getNextSERPage() {
         nextPageLink.click();
         checkAndWaitForTempBan();
-        super.waitForElementToLoad("id", "gbi5");
+        super.waitForElementToLoad("xpath", "//h3[@class=\"r\"]/a");
         return PageFactory.initElements(driver, GoogleSERPage.class);
     }
 
         private void checkAndWaitForTempBan() {
-        if(driver.getCurrentUrl().contains("sorry")) {
+/*        if(driver.getCurrentUrl().contains("sorry")) {
 //            aTempBan.setBannedAsTrue();
 //            while(aTempBan.isBanned()) {
 //                try {
@@ -119,19 +136,33 @@ public class GoogleSERPage extends Page{
             } catch (InterruptedException ex) {
                 Logger.getLogger(GoogleSERPage.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }*/
+    	super.waitForOneOfTheElementToLoad(isBanOrSerpElements);
+        while(driver.getCurrentUrl().contains("sorry")) {
+        	GoogleSorryPage aGoogleSorryPage = new GoogleSorryPage(driver);
+            aGoogleSorryPage.submitCaptcha();
+            super.waitForOneOfTheElementToLoad(isBanOrSerpElements);
         }
     }
    
    public static void main(String args[]) throws Exception {
-	   PoolableWebDriverFactory aPoolableWebDriverFactory = new PoolableWebDriverFactory("htmlunit");
+	   PoolableWebDriverFactory aPoolableWebDriverFactory = new PoolableWebDriverFactory("firefox");
 	   GenericObjectPool driverPool = new GenericObjectPool(aPoolableWebDriverFactory);
 	   driverPool.setLifo(false);
 	   WebDriver driver = (WebDriver) driverPool.borrowObject();
 	   GoogleSearchPage aGoogleSearchPage = new GoogleSearchPage(driver,new TempBan());
-	   GoogleSERPage aGoogleSERPage = aGoogleSearchPage.searchFor("how to make rap beats");
+	   GoogleSERPage aGoogleSERPage = aGoogleSearchPage.searchFor("solar panel installation");
 	   List<String> relatedSearches = aGoogleSERPage.getRelatedSearches();
 	   for(String aRelatedSearch:relatedSearches) {
 		   System.out.println(aRelatedSearch);
+	   }
+	   List<String> SERPLinks = aGoogleSERPage.getSERPLinks();
+	   for(String aSERPLink:SERPLinks) {
+		   System.out.println(aSERPLink);
+	   }
+	   List<String> ADLinks = aGoogleSERPage.getAdLinks();
+	   for(String anADLink:ADLinks) {
+		   System.out.println(anADLink);
 	   }
    }
 }

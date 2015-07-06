@@ -7,9 +7,12 @@ package com.cybermint.serpScraper.google.pages;
 
 import com.cybermint.pages.Page;
 import com.cybermint.serpScraper.google.utils.TempBan;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -25,17 +28,22 @@ import org.openqa.selenium.support.ui.Select;
 public class GoogleSearchPage extends Page{
 
     @FindBy(name = "q") protected WebElement searchTextBox;
-    @FindBy(name = "btnG") protected WebElement searchButton;
+    @FindBy(name = "btnK") protected WebElement searchButton;
     private String searchString;
     private TempBan aTempBan;
+    private HashMap<String,String> isBanOrSerpElements;
 
     public GoogleSearchPage (WebDriver driver, TempBan aTempBan) {
         super(driver);
         this.aTempBan = aTempBan;
         driver.get("http://www.google.com/search?complete=0&gl=US");
+        isBanOrSerpElements = new HashMap<String, String>();
+        isBanOrSerpElements.put("xpath", "(//h3[@class=\"r\"])[1]/a");
+        isBanOrSerpElements.put("name", "q");
+        isBanOrSerpElements.put("xpath", "//form[@action=\"CaptchaRedirect\"]");
         checkAndWaitForTempBan("home");
-        this.waitForElementToLoad("name", "q");
-        this.waitForElementToLoad("name", "btnG");
+        //this.waitForElementToLoad("name", "q");
+        //this.waitForElementToLoad("name", "btnK");
         this.initialize();
     }
 
@@ -56,21 +64,24 @@ public class GoogleSearchPage extends Page{
 //        searchButton.click();
         searchTextBox.submit();
         checkAndWaitForTempBan("serp");
-        super.waitForElementToLoad("id", "gbi5");
+        //super.waitForElementToLoad("xpath", "(//h3[@class='r'])[1]/a");
         return PageFactory.initElements(driver, GoogleSERPage.class);
     }
 
     private void checkAndWaitForTempBan(String where) {
+    	/*System.out.println("Inside checkAndWaitForTempBan");
+    	System.out.println(driver.getCurrentUrl());
         if(driver.getCurrentUrl().contains("sorry")) {
-//            aTempBan.setBannedAsTrue();
-//            while(aTempBan.isBanned()) {
-//                try {
-//                    Thread.sleep(16 * 60 * 1000);
-//                } catch (InterruptedException ex) {
-//                    Logger.getLogger(GoogleSearchPage.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//            }
+            //aTempBan.setBannedAsTrue();
+            while(aTempBan.isBanned()) {
+                try {
+                    Thread.sleep(16 * 60 * 1000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(GoogleSearchPage.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
             
+        	System.out.println("Inside sorry");
             GoogleSorryPage aGoogleSorryPage = new GoogleSorryPage(driver);
             aGoogleSorryPage.submitCaptcha();
             driver.get("http://www.google.com/search?complete=0&gl=US");
@@ -78,6 +89,12 @@ public class GoogleSearchPage extends Page{
                 this.initialize();
                 this.searchFor(searchString);
             }            
+        }*/
+    	super.waitForOneOfTheElementToLoad(isBanOrSerpElements);
+        while(driver.getCurrentUrl().contains("sorry")) {
+        	GoogleSorryPage aGoogleSorryPage = new GoogleSorryPage(driver);
+            aGoogleSorryPage.submitCaptcha();
+            super.waitForOneOfTheElementToLoad(isBanOrSerpElements);
         }
     }
     

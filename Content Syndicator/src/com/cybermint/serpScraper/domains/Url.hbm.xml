@@ -19,6 +19,9 @@
     <property name="domain" type="string">
       <column length="500" name="DOMAIN" not-null="true"/>
     </property>
+    <property name="resultType" type="string">
+      <column length="20" name="result_type"/>
+    </property>
     <property name="rank" type="big_decimal">
       <column name="RANK" not-null="true" precision="22" scale="0"/>
     </property>

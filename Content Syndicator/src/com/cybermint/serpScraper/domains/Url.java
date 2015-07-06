@@ -16,6 +16,7 @@ public class Url  implements java.io.Serializable {
      private Project project;
      private String url;
      private String domain;
+     private String resultType;
      private BigDecimal rank;
      private String majesticSeoBacklinksStatus;
  	 private String majesticSeoUrlType;
@@ -490,5 +491,15 @@ public class Url  implements java.io.Serializable {
 	public void setMajesticSeoClassCSubnetsToDomainCount(
 			BigDecimal majesticSeoClassCSubnetsToDomainCount) {
 		this.majesticSeoClassCSubnetsToDomainCount = majesticSeoClassCSubnetsToDomainCount;
+	}
+
+
+	public String getResultType() {
+		return resultType;
+	}
+
+
+	public void setResultType(String resultType) {
+		this.resultType = resultType;
 	}
 }

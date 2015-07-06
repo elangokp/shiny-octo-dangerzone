@@ -27,13 +27,21 @@ import org.hibernate.Transaction;
 public class KeywordHelper {
 
     Session session;
+    private static KeywordHelper aKeywordHelper = null;
+    
+    public synchronized static KeywordHelper getInstance() {
+    	if(aKeywordHelper == null) {
+    		aKeywordHelper = new KeywordHelper();
+    	}
+    	return aKeywordHelper;
+    }
 
-    public KeywordHelper() {
-        this.session = HibernateUtil.getSessionFactory().getCurrentSession();
+    private KeywordHelper() {
+        session = HibernateUtil.getSessionFactory().getCurrentSession();
     }
 
     public Keyword getKeywordById(Integer keywordId) {
-        this.session = HibernateUtil.getSessionFactory().getCurrentSession();
+        session = HibernateUtil.getSessionFactory().getCurrentSession();
         session.beginTransaction();
         Keyword aKeyword = (Keyword) session.createQuery("from Keyword kwd where kwd.keywordId=" + keywordId).uniqueResult();
         //session.close();
@@ -41,7 +49,7 @@ public class KeywordHelper {
     }
     
     public Keyword getNextPendingKeyword() {
-        this.session = HibernateUtil.getSessionFactory().getCurrentSession();
+        session = HibernateUtil.getSessionFactory().getCurrentSession();
         Transaction t = session.beginTransaction();
         t.begin();
         BigInteger keywordId = (BigInteger) session.createSQLQuery("Select keyword_id from keywords where status='Pending' order by keyword_id asc").setFirstResult(0).setMaxResults(1).uniqueResult();
@@ -56,7 +64,7 @@ public class KeywordHelper {
     }
 
     public Keyword getNextPendingKeyword(Project aProject) {
-        this.session = HibernateUtil.getSessionFactory().getCurrentSession();
+        session = HibernateUtil.getSessionFactory().getCurrentSession();
         Transaction t = session.beginTransaction();
         t.begin();
         BigInteger keywordId = (BigInteger) session.createSQLQuery("Select keyword_id from keywords where status='Pending' and project_id=" + aProject.getProjectId() + " order by keyword_id asc").setFirstResult(0).setMaxResults(1).uniqueResult();
@@ -70,17 +78,20 @@ public class KeywordHelper {
         return aKeyword;
     }
 
-    public Keyword getNextPendingKeyword(Integer projectId) {
-        this.session = HibernateUtil.getSessionFactory().getCurrentSession();
+    public synchronized Keyword getNextPendingKeyword(Integer projectId) {
+        session = HibernateUtil.getSessionFactory().getCurrentSession();
         Transaction t = session.beginTransaction();
+        Keyword aKeyword = null;
         t.begin();
         BigInteger keywordId = (BigInteger) session.createSQLQuery("Select keyword_id from keywords where status='Pending' and project_id=" + projectId + " order by keyword_id asc").setFirstResult(0).setMaxResults(1).uniqueResult();
 //        Keyword aKeyword = (Keyword) session.createQuery("from Keyword kwd where kwd.status='Pending' order by kwd.keywordId asc").setFirstResult(0).setMaxResults(1).uniqueResult();
-        Keyword aKeyword = (Keyword) session.load(Keyword.class, new BigDecimal(keywordId));
-        if(aKeyword!=null) {
-            aKeyword.setStatus("In Progress");
-            session.update(aKeyword);
-        }
+        if(keywordId != null) {
+        	aKeyword = (Keyword) session.load(Keyword.class, new BigDecimal(keywordId));
+        	if(aKeyword!=null) {
+                aKeyword.setStatus("In Progress");
+                session.update(aKeyword);
+            }
+        }        
         t.commit();
         return aKeyword;
     }
@@ -153,7 +164,7 @@ public class KeywordHelper {
     public static void main(String args[]) {
         KeywordHelper aKeywordHelper = new KeywordHelper();
         ProjectHelper aProjectHelper = new ProjectHelper();
-        Integer projectId = aProjectHelper.saveNewProject("04. HeartBurn", "For scraping first 10 results of all keywords in heartburn");
+        Integer projectId = aProjectHelper.saveNewProject("Apple Pay Squareup.com Keywords", "For scraping first 1000 results of squareup.com site - Apple Pay offer in Google US");
         Project aProject = aProjectHelper.getProjectById(projectId);
 
 //        for(Url aUrl:aKeywordHelper.getKeywordById(4).getUrls()) {
@@ -163,7 +174,7 @@ public class KeywordHelper {
         //List<String> keywords = TextFileReaderUtils.readLinesAsList("E:/Dropbox/scraping/basic english word list.txt");
         //List<String> pliggFootprints = TextFileReaderUtils.readLinesAsList("E:/Dropbox/scraping/Footprints/pligg footprints.txt");
         //List permutatedKeywords = KeywordUtils.permutateLists(keywords, pliggFootprints, Boolean.TRUE, Boolean.TRUE);
-        List<String> keywords = TextFileReaderUtils.readLinesAsList("E:/Dropbox/Website Campaigns/01.Cure Tinnitus/Keyword Research/New Methodology/Potential Keywords.txt", false);
+        List<String> keywords = TextFileReaderUtils.readLinesAsList("C:/Users/elangokp.AHC.000/Dropbox/Projects/PPV/Apple Pay/Squareup.com-Keywords.txt", true);
         List<BigDecimal> allID = aKeywordHelper.saveAllNewKeywords(aProject,keywords);
         //System.out.println(allID);
 //        aKeywordHelper.getKeywordById(7);
