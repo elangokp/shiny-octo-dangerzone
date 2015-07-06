@@ -87,7 +87,7 @@ public class GetNumberOfResults implements Callable {
     }
 
     public static void main(String args[]) {
-        KeywordHelper aKeywordHelper = new KeywordHelper();
+        KeywordHelper aKeywordHelper = KeywordHelper.getInstance();
         TempBan aTempBan = new TempBan();
         Keyword aKeyword = aKeywordHelper.getNextPendingKeyword();
         Callable<BigDecimal> aGetNumberOfResultsForBroadMatchScenario = new GetNumberOfResults("htmlunit", aKeyword.getKeyword(),"broad","estimated", aTempBan);
