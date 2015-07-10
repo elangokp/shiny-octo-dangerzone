@@ -52,7 +52,7 @@ public class GetAllParametersForSingleKeyword implements Runnable{
     }
 
     public void run(){
-        KeywordHelper aKeywordHelper = new KeywordHelper();
+        KeywordHelper aKeywordHelper = KeywordHelper.getInstance();
         Random rand = new Random();
         Set<Url> urlSet = new HashSet<Url>();
         PoolableWebDriverFactory aPoolableWebDriverFactory = new PoolableWebDriverFactory("firefox");
@@ -106,7 +106,7 @@ public class GetAllParametersForSingleKeyword implements Runnable{
     }
 
     public static void main(String args[]) {
-        KeywordHelper aKeywordHelper = new KeywordHelper();
+        KeywordHelper aKeywordHelper = KeywordHelper.getInstance();
         Keyword aKeyword;
         int corePoolSize =0;
         TempBan aTempBan = new TempBan();

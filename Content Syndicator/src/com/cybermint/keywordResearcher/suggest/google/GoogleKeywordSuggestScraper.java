@@ -75,7 +75,7 @@ public class GoogleKeywordSuggestScraper {
                     Matcher m1 = p1.matcher(aSuggestElement);
                     m1.find();
                     String aKeyword = m1.group();
-                    suggestedKeywords.add(aKeyword.subSequence(1, (aKeyword.length()-1)).toString().replaceAll("\\\\u003Cb\\\\u003E", "").replaceAll("\\\\u003C\\\\/b\\\\u003E", ""));
+                    suggestedKeywords.add(aKeyword.subSequence(1, (aKeyword.length()-1)).toString().replaceAll("\\\\u003cb\\\\u003e", "").replaceAll("\\\\u003c\\\\/b\\\\u003e", ""));
                     //System.out.println(aKeyword.subSequence(1, (aKeyword.length()-1)));
                 }                
             }           
@@ -106,21 +106,23 @@ public class GoogleKeywordSuggestScraper {
     }
 
     public static void main(String args[]) {
-        List<String> allMainKeywords = TextFileReaderUtils.readLinesAsList("G:/Dropbox/Website Campaigns/Metadata/get-ex-back-keywords.txt", false);
+        List<String> allMainKeywords = TextFileReaderUtils.readLinesAsList("C:/Users/elangokp.AHC.000/Dropbox/Projects/PPV/American SSD/keywords.txt", false);
         ArrayList<String> keywordsWithSuggestions = new ArrayList<String>();
+        Set<String> allWithoutDuplicates = new HashSet<String>();
 
         for(String aMainKeyword:allMainKeywords) {
-        	Set<String> allWithoutDuplicates = new HashSet<String>();
-        	ArrayList<String> allWithoutDuplicatesAsList = new ArrayList<String>();
+        	//Set<String> allWithoutDuplicates = new HashSet<String>();
+        	//ArrayList<String> allWithoutDuplicatesAsList = new ArrayList<String>();
             GoogleKeywordSuggestScraper ob = new GoogleKeywordSuggestScraper("htmlunit",aMainKeyword);
             try {
                 Thread.sleep(500 + new Random().nextInt(2000 - 500 + 1));
             } catch (InterruptedException ex) {
                 Logger.getLogger(GoogleKeywordSuggestScraper.class.getName()).log(Level.SEVERE, null, ex);
             }
+            allWithoutDuplicates.add(aMainKeyword);
             allWithoutDuplicates.addAll(ob.getSuggestedKeywords());
-            allWithoutDuplicatesAsList.addAll(allWithoutDuplicates);
-            StringBuffer sb = new StringBuffer();
+            //allWithoutDuplicatesAsList.addAll(allWithoutDuplicates);
+            /*StringBuffer sb = new StringBuffer();
             sb.append(aMainKeyword).append(",");
         	sb.append("{");
         	for(int i=0;i<allWithoutDuplicatesAsList.size();i++) {
@@ -131,9 +133,9 @@ public class GoogleKeywordSuggestScraper {
         	}
         	sb.append("}");
         	keywordsWithSuggestions.add(sb.toString());
-        	System.out.println(sb.toString());
+        	System.out.println(sb.toString());*/
         }
-        TextFileWriterUtils.writeListAsLines(keywordsWithSuggestions, "G:/Dropbox/Website Campaigns/Metadata/get-ex-back-keywords-suggestions.csv");
+        TextFileWriterUtils.writeListAsLines(allWithoutDuplicates, "C:/Users/elangokp.AHC.000/Dropbox/Projects/PPV/American SSD/keywords-with-suggestions.txt");
     	//tempFun();
     }
     
