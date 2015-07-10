@@ -2,7 +2,7 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated Nov 25, 2010 3:42:02 PM by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-  <class name="com.cybermint.serpScraper.domains.Keyword" schema="serp" table="KEYWORDS">
+  <class name="com.cybermint.serpScraper.domains.Keyword" schema="serp" table="keywords">
     <id name="keywordId" type="big_decimal">
       <column name="KEYWORD_ID" precision="22" scale="0"/>
       <generator class="identity"/>
