@@ -4,9 +4,9 @@
   <session-factory>
     <property name="hibernate.dialect">org.hibernate.dialect.MySQLInnoDBDialect</property>
     <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
-    <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/serp</property>
-    <property name="hibernate.connection.username">root</property>
-    <property name="hibernate.connection.password"></property>
+    <property name="hibernate.connection.url">jdbc:mysql://awsdb01.cr4d1orvfenz.us-west-2.rds.amazonaws.com:3306/serp</property>
+    <property name="hibernate.connection.username">elangokp</property>
+    <property name="hibernate.connection.password">86fcVpncXaK2</property>
     <property name="hibernate.current_session_context_class">thread</property>
     <property name="hibernate.show_sql">false</property>
     <mapping resource="com/cybermint/serpScraper/domains/Url.hbm.xml"/>

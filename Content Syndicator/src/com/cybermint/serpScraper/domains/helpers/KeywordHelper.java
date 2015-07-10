@@ -164,7 +164,7 @@ public class KeywordHelper {
     public static void main(String args[]) {
         KeywordHelper aKeywordHelper = new KeywordHelper();
         ProjectHelper aProjectHelper = new ProjectHelper();
-        Integer projectId = aProjectHelper.saveNewProject("Apple Pay Squareup.com Keywords", "For scraping first 1000 results of squareup.com site - Apple Pay offer in Google US");
+        Integer projectId = aProjectHelper.saveNewProject("Social security Disability Keywords", "For scraping first 50 results of SSD keywords - Google US");
         Project aProject = aProjectHelper.getProjectById(projectId);
 
 //        for(Url aUrl:aKeywordHelper.getKeywordById(4).getUrls()) {
@@ -174,7 +174,7 @@ public class KeywordHelper {
         //List<String> keywords = TextFileReaderUtils.readLinesAsList("E:/Dropbox/scraping/basic english word list.txt");
         //List<String> pliggFootprints = TextFileReaderUtils.readLinesAsList("E:/Dropbox/scraping/Footprints/pligg footprints.txt");
         //List permutatedKeywords = KeywordUtils.permutateLists(keywords, pliggFootprints, Boolean.TRUE, Boolean.TRUE);
-        List<String> keywords = TextFileReaderUtils.readLinesAsList("C:/Users/elangokp.AHC.000/Dropbox/Projects/PPV/Apple Pay/Squareup.com-Keywords.txt", true);
+        List<String> keywords = TextFileReaderUtils.readLinesAsList("F:/Dropbox/Projects/PPV/American SSD/Keywords.txt", true);
         List<BigDecimal> allID = aKeywordHelper.saveAllNewKeywords(aProject,keywords);
         //System.out.println(allID);
 //        aKeywordHelper.getKeywordById(7);

@@ -149,7 +149,7 @@ public class SaveGoogleResultsToDB implements Runnable{
         ExecutorService es = Executors.newFixedThreadPool(3);
         int i = 0;
         while(i++<5) {
-        	aSaveGoogleResultsToDB = new SaveGoogleResultsToDB(driverPool, 5, 100, 200, 1000, 100, 200);
+        	aSaveGoogleResultsToDB = new SaveGoogleResultsToDB(driverPool, 6, 100, 200, 50, 100, 200);
         	es.execute(aSaveGoogleResultsToDB);
         }
         es.shutdown();
