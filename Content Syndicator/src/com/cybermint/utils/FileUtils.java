@@ -4,6 +4,10 @@
 package com.cybermint.utils;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +26,21 @@ public class FileUtils {
 	
 	public Boolean move(File sourceFile, File destinationFile) {
 		return false;
+	}
+	
+	public Boolean saveFileFromURL(String URL, String destinationFilePath) {
+		Boolean isSuccess = true;
+		try {
+			URL weblink = new URL(URL);
+			ReadableByteChannel rbc = Channels.newChannel(weblink.openStream());
+			FileOutputStream fos = new FileOutputStream(destinationFilePath);
+			fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+			fos.close();
+		} catch(Exception e) {
+			isSuccess =  false;
+			e.printStackTrace();
+		}
+		return isSuccess;
 	}
 	
 	public static Boolean removeTheseCharactersAndCopy(String sourceFilePath, String destinationFilePath) {

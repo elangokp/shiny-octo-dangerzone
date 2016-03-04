@@ -5,7 +5,7 @@
   <!-- set global properties for this build -->
   <property name="plugin-name" value="wp-insights"/>
   <property name="plugins-folder" location="D:\Setups\Xampp\htdocs\wordpress\wp-content\plugins"/>
-  <property name="exports-folder" location="C:\Users\Elango\Desktop\exports-folder"/>
+  <property name="exports-folder" location="C:\Users\elangokp.AHC.000\Desktop\exports-folder"/>
   
   <!--<taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask"
            classpath="../build/taskjars/compiler.jar"/>-->

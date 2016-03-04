@@ -11,6 +11,7 @@ import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.CollectingAlertHandler;
 import com.gargoylesoftware.htmlunit.DefaultCredentialsProvider;
 import com.gargoylesoftware.htmlunit.IncorrectnessListenerImpl;
+import com.gargoylesoftware.htmlunit.InteractivePage;
 import com.gargoylesoftware.htmlunit.ProxyConfig;
 import com.gargoylesoftware.htmlunit.ScriptException;
 import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -99,6 +101,20 @@ public class Page {
         return isLoaded;
     }
     
+    public boolean waitForElementToLoad(String by, String identifier, int waitDurationInSeconds) {
+        boolean isLoaded = false;
+        for (int i = 0; isLoaded == false && i < waitDurationInSeconds; i++) {
+            isLoaded = isElementVisible(by, identifier);
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+        return isLoaded;
+    }
+    
     public boolean waitForOneOfTheElementToLoad(HashMap<String, String> elementIdentifiers) {
         boolean isLoaded = false;
         for (int i = 0; isLoaded == false && i < 65; i++) {
@@ -130,10 +146,56 @@ public class Page {
         return isEnabled;
     }
     
+    public boolean waitForElementToBeInteractable(WebElement element) {
+        boolean isInteractable = false;
+        for (int i = 0; isInteractable == false && i < 30; i++) {
+            try {
+            	element.click();
+            	isInteractable = true;
+            } catch (Exception e) {
+            	isInteractable = false;
+                //e.printStackTrace();
+                try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+            }
+
+        }
+        return isInteractable;
+    }
+    
+    public boolean waitForElementToHaveAttributeAvailable(WebElement element, String attributeName) {
+        boolean isAttributeAvailable = false;
+        for (int i = 0; isAttributeAvailable == false && i < 30; i++) {
+            try {
+            	if(element.getAttribute(attributeName) != null && element.getAttribute(attributeName).length()>0) {
+            		isAttributeAvailable = true;
+            	} else {
+            		try {
+    					Thread.sleep(1000);
+    				} catch (InterruptedException e1) {
+    					e1.printStackTrace();
+    				}
+            	}
+            } catch (Exception e) {
+            	isAttributeAvailable = false;
+            	try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+            }
+
+        }
+        return isAttributeAvailable;
+    }    
+    
     public boolean waitForElementToBeDisappear(String by, String identifier, Integer secondsToWait) {
-        boolean doesAppear = false;
-        for (int i = 0; doesAppear == false && i < secondsToWait; i++) {
-        	doesAppear = !isElementVisible(by, identifier);
+        boolean doesAppear = true;
+        for (int i = 0; doesAppear == true && i < secondsToWait; i++) {
+        	doesAppear = isElementVisible(by, identifier);
             try {
                 Thread.sleep(1000);
             } catch (Exception e) {
@@ -148,19 +210,18 @@ public class Page {
         boolean isVisible = false;
         try {
             if ("id".equalsIgnoreCase(by)) {
-                isVisible = true;
-                driver.findElement(By.id(identifier));
+                isVisible = driver.findElement(By.id(identifier)).isDisplayed();
             } else if ("name".equalsIgnoreCase(by)) {
-                isVisible = true;
-                driver.findElement(By.name(identifier));
+                isVisible = driver.findElement(By.name(identifier)).isDisplayed();
             } else if ("linkText".equalsIgnoreCase(by)) {
-                isVisible = true;
-                driver.findElement(By.linkText(identifier));
+                isVisible = driver.findElement(By.linkText(identifier)).isDisplayed();
             } else if ("xpath".equalsIgnoreCase(by)) {
-                isVisible = true;
-                driver.findElement(By.xpath(identifier));
+                isVisible = driver.findElement(By.xpath(identifier)).isDisplayed();
+            } else if ("css".equalsIgnoreCase(by)) {
+                isVisible = driver.findElement(By.cssSelector(identifier)).isDisplayed();
             }
         } catch (Exception e) {
+        	//e.printStackTrace();
             isVisible = false;
         }
         return isVisible;
@@ -287,29 +348,29 @@ public class Page {
                     client.setJavaScriptErrorListener(new JavaScriptErrorListener() {
 
 						@Override
-						public void loadScriptError(HtmlPage arg0, URL arg1,
-								Exception arg2) {
+						public void loadScriptError(InteractivePage arg0,
+								URL arg1, Exception arg2) {
 							// TODO Auto-generated method stub
 							
 						}
 
 						@Override
-						public void malformedScriptURL(HtmlPage arg0,
+						public void malformedScriptURL(InteractivePage arg0,
 								String arg1, MalformedURLException arg2) {
 							// TODO Auto-generated method stub
 							
 						}
 
 						@Override
-						public void scriptException(HtmlPage arg0,
+						public void scriptException(InteractivePage arg0,
 								ScriptException arg1) {
 							// TODO Auto-generated method stub
 							
 						}
 
 						@Override
-						public void timeoutError(HtmlPage arg0, long arg1,
-								long arg2) {
+						public void timeoutError(InteractivePage arg0,
+								long arg1, long arg2) {
 							// TODO Auto-generated method stub
 							
 						}

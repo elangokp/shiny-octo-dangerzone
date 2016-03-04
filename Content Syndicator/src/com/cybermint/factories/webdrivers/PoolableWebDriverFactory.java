@@ -4,7 +4,6 @@
 package com.cybermint.factories.webdrivers;
 
 import org.apache.commons.pool.BasePoolableObjectFactory;
-
 import org.openqa.selenium.WebDriver;
 
 import com.cybermint.pages.Page;
@@ -29,7 +28,16 @@ public class PoolableWebDriverFactory extends BasePoolableObjectFactory {
 		WebDriver driver = constructDriver();
 		return driver;
 	}	
+	
+	
 
+/*	@Override
+	public void destroyObject(Object obj) throws Exception {
+		// TODO Auto-generated method stub
+		((WebDriver)obj).quit();
+		super.destroyObject(obj);
+	}
+*/
 	protected WebDriver constructDriver() {
 		return Page.constructDriver(this.driverType);
 	}

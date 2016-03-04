@@ -41,12 +41,18 @@ public class TextFileWriterUtils {
 	
 	public synchronized void writeContentToFile (String content) {
 		try {
-			writerForClass.append(content);
 			writerForClass.newLine();
+			writerForClass.append(content);			
 			writerForClass.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public synchronized static boolean doesFileExist(String fileLocation) {
+		File givenFile = null;
+		givenFile = new File(fileLocation);
+		return givenFile.exists();
 	}
 
     public synchronized static void writeListAsLines(Collection<String> givenList, String fileLocation) {

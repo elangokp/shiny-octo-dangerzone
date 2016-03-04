@@ -72,7 +72,7 @@ public class LetterPairSimilarity {
 		   HashMap<String, String> searchMap = new HashMap<String, String>();
 		   //HashMap<String, String> resultsMap = new HashMap<String, String>();
 		   for(String anSearchItem: searchList) {
-			   String[] items = anSearchItem.split(",");
+			   String[] items = anSearchItem.split(";");
 			   searchMap.put(items[0], items[1]);
 		   }
 		   
@@ -83,10 +83,10 @@ public class LetterPairSimilarity {
 				   double currentMatchPercentageThisSearch = LetterPairSimilarity.compareStrings(anKeyItem, searchRecord.getKey(), false);
 				   if(currentMatchPercentageThisSearch > matchPercentageForThisKey) {
 					   matchPercentageForThisKey = currentMatchPercentageThisSearch;
-					   matchingRecordForThisKey = searchRecord.getKey() + "," + searchRecord.getValue();
+					   matchingRecordForThisKey = searchRecord.getKey() + "\",\"" + searchRecord.getValue();
 				   }
 			   }
-			   String mostMatchingRecord = anKeyItem + "," + matchingRecordForThisKey + "," + matchPercentageForThisKey*100;
+			   String mostMatchingRecord = "\"" + anKeyItem + "\",\"" + matchingRecordForThisKey + "\",\"" + matchPercentageForThisKey*100 + "\"";
 			   System.out.println(mostMatchingRecord);
 			   TextFileWriterUtils.writeString(mostMatchingRecord, "C:\\data\\matchlist.txt", true, true);
 		   }

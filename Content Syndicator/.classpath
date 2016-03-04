@@ -20,12 +20,12 @@
 	<classpathentry kind="lib" path="lib/Java Mail/mail.jar"/>
 	<classpathentry kind="lib" path="lib/guava-13.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/jsoup-1.6.3.jar"/>
-	<classpathentry kind="lib" path="lib/Selenium/selenium-server-standalone-2.45.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
 		<attributes>
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/captcha/DBC.jar"/>
+	<classpathentry kind="lib" path="lib/Selenium/selenium-server-standalone-2.52.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

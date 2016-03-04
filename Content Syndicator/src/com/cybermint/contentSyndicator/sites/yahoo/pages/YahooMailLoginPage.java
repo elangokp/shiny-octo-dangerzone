@@ -32,9 +32,9 @@ public class YahooMailLoginPage extends Page{
     }
 
     public static void main(String args[]) {
-//        FirefoxDriver driver = new FirefoxDriver();
-        HtmlUnitDriver driver = new HtmlUnitDriver(BrowserVersion.INTERNET_EXPLORER_11);
-        driver.setJavascriptEnabled(true);
+        FirefoxDriver driver = new FirefoxDriver();
+//        HtmlUnitDriver driver = new HtmlUnitDriver(BrowserVersion.INTERNET_EXPLORER_11);
+       // driver.setJavascriptEnabled(true);
         driver.get("http://mail.yahoo.com");
         YahooMailLoginPage thisPage = new YahooMailLoginPage(driver);
         thisPage.waitForElementToLoad("id", "signUpBtn");
