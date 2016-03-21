@@ -52,6 +52,7 @@ import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriverService;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.PageFactory;
 
@@ -265,6 +266,48 @@ public class Page {
 			e.printStackTrace();
 		}
     	return screen;
+    }
+    
+    public static WebDriver constructDriverWithProxy(String driverType, String proxyip, String binaryPath) {
+    	@SuppressWarnings("all") WebDriver driver;
+    	if("firefox".equalsIgnoreCase(driverType)) {
+    		            
+            if(binaryPath == null) {
+            	binaryPath = "C:/Program Files (x86)/Mozilla Firefox/firefox.exe";
+            }
+            FirefoxBinary fb = new FirefoxBinary(new File(binaryPath));
+        	FirefoxProfile profile = new FirefoxProfile();
+        	if(null != proxyip) {
+        		org.openqa.selenium.Proxy proxy = new org.openqa.selenium.Proxy();
+                proxy.setHttpProxy(proxyip)
+                     .setFtpProxy(proxyip)
+                     .setSslProxy(proxyip);
+                DesiredCapabilities cap = new DesiredCapabilities();
+                cap.setCapability(CapabilityType.PROXY, proxy);
+                driver = new FirefoxDriver(fb,profile,cap);
+        	} else {
+        		driver = new FirefoxDriver(fb,profile);
+        	}
+            
+    	} else {
+            if(binaryPath == null) {
+            	binaryPath = "C:/Program Files (x86)/Mozilla Firefox/firefox.exe";
+            }
+            FirefoxBinary fb = new FirefoxBinary(new File(binaryPath));
+        	FirefoxProfile profile = new FirefoxProfile();
+        	if(null != proxyip) {
+        		org.openqa.selenium.Proxy proxy = new org.openqa.selenium.Proxy();
+                proxy.setHttpProxy(proxyip)
+                     .setFtpProxy(proxyip)
+                     .setSslProxy(proxyip);
+                DesiredCapabilities cap = new DesiredCapabilities();
+                cap.setCapability(CapabilityType.PROXY, proxy);
+                driver = new FirefoxDriver(fb,profile,cap);
+        	} else {
+        		driver = new FirefoxDriver(fb,profile);
+        	}
+    	}
+    	return driver;
     }
 
     public static WebDriver constructDriver(String driverType) {

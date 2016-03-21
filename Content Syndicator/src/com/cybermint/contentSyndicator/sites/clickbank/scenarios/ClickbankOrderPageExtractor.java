@@ -1,7 +1,6 @@
 package com.cybermint.contentSyndicator.sites.clickbank.scenarios;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.pool.ObjectPool;

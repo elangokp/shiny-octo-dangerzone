@@ -6,8 +6,10 @@ package com.cybermint.utils;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
@@ -106,4 +108,34 @@ public class TextFileWriterUtils {
         }
 
     }
+    
+    public synchronized static void writeString(String givenString, String fileLocation, Boolean isAppend, Boolean isAppendInNewLine, String characterEncoding, Boolean includeBOM) {
+        BufferedWriter writer = null;
+        File givenFile = null;
+        try {
+            givenFile = new File(fileLocation);
+            if (!givenFile.exists()) {
+            	givenFile.getParentFile().mkdirs();
+                givenFile.createNewFile();                
+            }            
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(givenFile, isAppend), characterEncoding));
+            if(includeBOM) {
+            	writer.write("\uFEFF");
+            }
+            if(isAppendInNewLine) {
+            	writer.newLine();
+            }
+            writer.append(givenString);
+            writer.close();
+        } catch (IOException ex) {
+            try {
+            	Logger.getLogger(TextFileWriterUtils.class.getName()).log(Level.SEVERE, null, ex);
+                writer.close();
+            } catch (IOException ex1) {
+                Logger.getLogger(TextFileWriterUtils.class.getName()).log(Level.SEVERE, null, ex1);
+            }
+        }
+
+    }
+    
 }

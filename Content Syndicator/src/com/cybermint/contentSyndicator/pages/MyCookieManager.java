@@ -73,7 +73,6 @@ public class MyCookieManager extends CookieManager {
      * @param url the URL on which to filter the returned cookies
      * @return the currently configured cookies applicable to the specified URL, in an unmodifiable set
      */
-    @Override
     public synchronized Set<Cookie> getCookies(final URL url) {
         final String host = url.getHost();
         final String path = url.getPath();

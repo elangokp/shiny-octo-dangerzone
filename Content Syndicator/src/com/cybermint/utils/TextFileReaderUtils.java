@@ -54,6 +54,33 @@ public class TextFileReaderUtils {
         }
         return linesList;
     }
+    
+    public static List<String> readLinesAsList(String fileReadLocation, Boolean omitEmptyLines, String characterEncoding) {
+        List<String> linesList = new ArrayList<String>();//List used to store all the contents from given file
+        try {
+            File givenFile = new File(fileReadLocation);
+            FileInputStream fis = new FileInputStream(givenFile);
+            BufferedInputStream bis = new BufferedInputStream(fis);
+            DataInputStream dis = new DataInputStream(bis);
+            BufferedReader br = new BufferedReader(new InputStreamReader(dis, characterEncoding));
+            String strLine = new String(); //temporary storage of each line read
+            while ((strLine = br.readLine()) != null) {
+            	if(strLine.length()>0 && !strLine.matches("\\s+")) {
+            		linesList.add(strLine);
+            	} else if( ( strLine.length()==0 || strLine.matches("\\s+") ) && !omitEmptyLines) {
+            		linesList.add(strLine);
+            	}
+            }
+            fis.close();
+            bis.close();
+            dis.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return linesList;
+    }
 
     public static List<String> readLinesAsList(String fileReadLocation, String separator) {
         List<String> linesList = new ArrayList<String>();//List used to store all the contents from given file
@@ -64,6 +91,41 @@ public class TextFileReaderUtils {
             BufferedInputStream bis = new BufferedInputStream(fis);
             DataInputStream dis = new DataInputStream(bis);
             BufferedReader br = new BufferedReader(new InputStreamReader(dis));
+            Pattern p = Pattern.compile("[\\p{Alnum}\\p{Space}]++");
+            String strLine = new String(); //temporary storage of each line read
+            while ((strLine = br.readLine()) != null) {
+                tokenizer = new StringTokenizer(strLine, separator);
+                while (tokenizer.hasMoreTokens()) {
+                    String s = tokenizer.nextToken();
+                    s = s.replaceAll(",", "");
+                    s = s.replaceAll("_", " ");
+                    //s = removeDiacriticalMarks(s);
+                    Matcher m = p.matcher(s);
+                    if(m.matches()) {
+                        linesList.add(s);
+                    }
+                }
+            }
+            fis.close();
+            bis.close();
+            dis.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return linesList;
+    }
+    
+    public static List<String> readLinesAsList(String fileReadLocation, String separator, String characterEncoding) {
+        List<String> linesList = new ArrayList<String>();//List used to store all the contents from given file
+        try {
+            StringTokenizer tokenizer = null;
+            File givenFile = new File(fileReadLocation);
+            FileInputStream fis = new FileInputStream(givenFile);
+            BufferedInputStream bis = new BufferedInputStream(fis);
+            DataInputStream dis = new DataInputStream(bis);
+            BufferedReader br = new BufferedReader(new InputStreamReader(dis,characterEncoding));
             Pattern p = Pattern.compile("[\\p{Alnum}\\p{Space}]++");
             String strLine = new String(); //temporary storage of each line read
             while ((strLine = br.readLine()) != null) {
@@ -161,6 +223,31 @@ public class TextFileReaderUtils {
             BufferedInputStream bis = new BufferedInputStream(fis);
             DataInputStream dis = new DataInputStream(bis);
             BufferedReader br = new BufferedReader(new InputStreamReader(dis));
+            String strLine=new String();
+            while ((strLine = br.readLine()) != null) {
+               strBuffer.append(strLine);
+               strBuffer.append(System.getProperty("line.separator"));
+            }
+            fis.close();
+            bis.close();
+            dis.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return strBuffer.toString();
+    }
+    
+    public static String readFileAsString(String fileReadLocation, String characterEncoding) {
+        
+        StringBuffer strBuffer=new StringBuffer();
+        try {
+            File givenFile = new File(fileReadLocation);
+            FileInputStream fis = new FileInputStream(givenFile);
+            BufferedInputStream bis = new BufferedInputStream(fis);
+            DataInputStream dis = new DataInputStream(bis);
+            BufferedReader br = new BufferedReader(new InputStreamReader(dis, characterEncoding));
             String strLine=new String();
             while ((strLine = br.readLine()) != null) {
                strBuffer.append(strLine);

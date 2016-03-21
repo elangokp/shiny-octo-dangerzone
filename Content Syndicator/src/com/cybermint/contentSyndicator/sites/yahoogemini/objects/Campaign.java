@@ -10,9 +10,19 @@ public class Campaign {
 	
 	public final static String today = "today";
 	
+	public final static String yesterday = "yesterday";
+	
 	public final static String oneMonth = "oneMonth";
 	
 	public final static String oneWeek = "oneWeek";
+	
+	public final static String shouldBePaused = "Should be Paused";
+	
+	public final static String shouldNotBePaused = "Should not be Paused";
+	
+	public final static String overLimit = "Over Limit";
+	
+	public final static String withinLimit = "Within Limit";
 	
 	private String campaignName;
 	
@@ -50,7 +60,17 @@ public class Campaign {
 	
 	private String ctrOutlierType;
 	
+	private String ctrLimitType;
+	
 	private String statsDuration;
+	
+	private String statsDurationDates;
+	
+	private String pauseDecision;
+	
+	private boolean shouldPause;
+	
+	
 	
 	
 	public Campaign() {
@@ -62,22 +82,47 @@ public class Campaign {
 		return "campaignName,budget,campaignStatus,campaignObjective,clicks"
 				+ ",impressions,ctr,spend,conversions,campaignRandomPrefix,campaignAccountName"
 				+ ",campaignOfferDomain,campaignAdName,campaignAdImageName,campaignGender"
-				+ ",campaignAge,impressionOutlierType,ctrOutlierType,statsDuration";
+				+ ",campaignAge,impressionOutlierType,ctrOutlierType,ctrLimitType,statsDuration,statsDurationDates,pauseDecision";
 	}
 	
 	public String toString() {
 		return campaignName + "," + budget + "," + campaignStatus + "," + campaignObjective + "," + clicks
 				+ "," + impressions + "," + ctr + "," + spend + "," + conversions + "," + campaignRandomPrefix + "," + campaignAccountName
 				+ "," + campaignOfferDomain + "," + campaignAdName + "," + campaignAdImageName + "," + campaignGender
-				+ "," + campaignAge+ "," + impressionOutlierType+ "," + ctrOutlierType+ "," + statsDuration;
+				+ "," + campaignAge+ "," + impressionOutlierType+ "," + ctrOutlierType+ "," + ctrLimitType+ "," + statsDuration
+				+ "," + statsDurationDates+ "," + pauseDecision;
 	}
 	
-	public boolean shouldBePaused() {
-		boolean shouldPause = false;
-		if(this.getImpressionOutlierType().equalsIgnoreCase(Campaign.majorOutlier) && this.impressions > 200) {
-			shouldPause = true;
+	public void makePauseDecision() {
+		if((this.getClicks()>1 && this.getCtr()>1)) {
+			this.ctrLimitType = Campaign.overLimit;
+		} else {
+			this.ctrLimitType = Campaign.withinLimit;
 		}
-		return shouldPause;
+		if((this.getImpressionOutlierType().equalsIgnoreCase(Campaign.majorOutlier) && this.impressions > 200)
+				|| this.ctrLimitType == Campaign.overLimit) {
+			this.shouldPause = true;
+			this.pauseDecision = Campaign.shouldBePaused;
+		} else {
+			this.shouldPause = false;
+			this.pauseDecision = Campaign.shouldNotBePaused;
+		}
+	}
+	
+	public boolean shouldPauseThisCampaign() {
+		if(this.shouldPause == true && this.campaignStatus.contains("Active")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public boolean shouldActivateThisCampaign() {
+		if(this.shouldPause == false && this.campaignStatus.contains("Pause") && this.getImpressions()<10) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 
@@ -88,14 +133,14 @@ public class Campaign {
 
 	public void setCampaignName(String campaignName) {
 		this.campaignName = campaignName;
-		String[] nameSplit = this.campaignName.split("_");
+		/*String[] nameSplit = this.campaignName.split("_");
 		this.campaignRandomPrefix = nameSplit[0];
 		this.campaignAccountName = nameSplit[1];
 		this.campaignOfferDomain = nameSplit[2];
 		this.campaignAdName = nameSplit[3];
 		this.campaignAdImageName = nameSplit[4];
 		this.campaignGender = nameSplit[5];
-		this.campaignAge = nameSplit[6];
+		this.campaignAge = nameSplit[6];*/
 	}
 
 
@@ -189,6 +234,10 @@ public class Campaign {
 	}
 
 
+	public void setCampaignAccountName(String campaignAccountName) {
+		this.campaignAccountName = campaignAccountName;
+	}
+
 	public String getCampaignOfferDomain() {
 		return campaignOfferDomain;
 	}
@@ -235,6 +284,22 @@ public class Campaign {
 
 	public void setStatsDuration(String statsDuration) {
 		this.statsDuration = statsDuration;
+	}
+
+	public String getPauseDecision() {
+		return pauseDecision;
+	}
+
+	public void setPauseDecision(String pauseDecision) {
+		this.pauseDecision = pauseDecision;
+	}
+
+	public String getStatsDurationDates() {
+		return statsDurationDates;
+	}
+
+	public void setStatsDurationDates(String statsDurationDates) {
+		this.statsDurationDates = statsDurationDates;
 	}
 
 }
