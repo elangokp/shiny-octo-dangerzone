@@ -40,6 +40,7 @@ import org.openqa.jetty.log.LogFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
@@ -86,6 +87,34 @@ public class Page {
         for (Entry anElementIdentifier : elementIdentifierEntries) {
         }
         return isLoaded;
+    }
+    
+    public boolean screenShotThisElement(WebElement element, String FileLocation) throws Exception {
+    	try {
+			// Get entire page screenshot
+			File screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+			BufferedImage  fullImg = ImageIO.read(screenshot);
+
+			// Get the location of element on the page
+			Point point = element.getLocation();
+
+			// Get width and height of the element
+			int eleWidth = element.getSize().getWidth();
+			int eleHeight = element.getSize().getHeight();
+
+			// Crop the entire page screenshot to get only element screenshot
+			BufferedImage eleScreenshot= fullImg.getSubimage(point.getX(), point.getY(),
+			    eleWidth, eleHeight);
+			ImageIO.write(eleScreenshot, "png", screenshot);
+
+			// Copy the element screenshot to disk
+			File screenshotLocation = new File(FileLocation);
+			FileUtils.copyFile(screenshot, screenshotLocation);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+    	return true;
     }
 
     public boolean waitForElementToLoad(String by, String identifier) {
@@ -289,6 +318,22 @@ public class Page {
         		driver = new FirefoxDriver(fb,profile);
         	}
             
+    	} else if ("chrome".equalsIgnoreCase(driverType)) {
+    		if(binaryPath != null) {
+            	System.setProperty("webdriver.chrome.driver", binaryPath);
+            }
+    		if(null != proxyip) {
+        		org.openqa.selenium.Proxy proxy = new org.openqa.selenium.Proxy();
+                proxy.setHttpProxy(proxyip)
+                     .setFtpProxy(proxyip)
+                     .setSslProxy(proxyip);
+                DesiredCapabilities cap = new DesiredCapabilities();
+                cap.setCapability(CapabilityType.PROXY, proxy);
+                driver = new ChromeDriver(cap);
+        	} else {
+        		driver = new ChromeDriver();
+        	}
+            
     	} else {
             if(binaryPath == null) {
             	binaryPath = "C:/Program Files (x86)/Mozilla Firefox/firefox.exe";
@@ -459,7 +504,7 @@ public class Page {
             //htmldriver.setProxy("proxy.tcs.com", 8080);
             driver = htmldriver;
         } else if ("chrome".equalsIgnoreCase(driverType)) {
-            System.setProperty("webdriver.chrome.driver", "D:/setups/Open Source Apps/chromedriver_win_16.0.902.0/chromedriver.exe");
+            System.setProperty("webdriver.chrome.driver", "C:/Users/elangokp.AHC.000/Documents/Projects/chromedriver.exe");
             driver = new ChromeDriver();
         } else if ("phantomjs".equalsIgnoreCase(driverType)) {
         	DesiredCapabilities sCaps = new DesiredCapabilities();

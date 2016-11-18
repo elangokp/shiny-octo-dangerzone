@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.cybermint.contentSyndicator.sites.yahoogemini.objects.Campaign;
+
 /**
  *
  * @author Elango
@@ -137,5 +139,15 @@ public class TextFileWriterUtils {
         }
 
     }
+    
+    public synchronized static void saveObjectsAsCSVToFile(List<? extends WritableAsCSV> objectList, String givenFilePath) {
+		if(!TextFileWriterUtils.doesFileExist(givenFilePath)) {
+			TextFileWriterUtils.writeString(objectList.get(0).titleString(), givenFilePath, true, false);
+		}
+		TextFileWriterUtils writer = new TextFileWriterUtils(givenFilePath);
+		for(WritableAsCSV anObject : objectList) {
+			writer.writeContentToFile(anObject.toString());
+		}
+	}
     
 }

@@ -5,15 +5,15 @@
 
 package com.cybermint.contentSyndicator.sites.yahoo.pages;
 
-import com.cybermint.contentSyndicator.sites.yahoogemini.pages.YahooGeminiDashboardPage;
-import com.cybermint.pages.Page;
-import com.gargoylesoftware.htmlunit.BrowserVersion;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+
+import com.cybermint.contentSyndicator.sites.yahoogemini.pages.YahooGeminiDashboardPage;
+import com.cybermint.pages.Page;
 
 /**
  *
@@ -78,6 +78,13 @@ public class YahooMailLoginPage extends Page{
 				this.signInAs(username, password);
 			}*/
 			Thread.sleep(3000);
+			if(driver.getCurrentUrl().contains("comm-channel")) {
+				super.waitForElementToLoad("css", "div.refresh-cta-container button");
+				driver.findElement(By.cssSelector("div.refresh-cta-container button")).click();
+			}
+			if(super.waitForElementToLoad("id", "skipbtn",10)) {
+				((JavascriptExecutor) driver).executeScript("document.getElementById('skipbtn').click();");
+			}
 			super.waitForElementToLoad("id", "toolbar");			
 		} catch (Exception e) {
 			e.printStackTrace();

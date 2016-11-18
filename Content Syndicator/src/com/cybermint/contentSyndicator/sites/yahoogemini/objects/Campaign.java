@@ -24,6 +24,8 @@ public class Campaign {
 	
 	public final static String withinLimit = "Within Limit";
 	
+	private String groupName;
+	
 	private String campaignName;
 	
 	private String budget;
@@ -42,9 +44,13 @@ public class Campaign {
 	
 	private int conversions;
 	
+	private String campaignId;
+	
 	private String campaignRandomPrefix;
 	
 	private String campaignAccountName;
+	
+	private String campaignSubAccountID;
 	
 	private String campaignOfferDomain;
 	
@@ -70,7 +76,7 @@ public class Campaign {
 	
 	private boolean shouldPause;
 	
-	
+	private Double impressionPercentageOfMean;
 	
 	
 	public Campaign() {
@@ -79,22 +85,23 @@ public class Campaign {
 	}
 	
 	public static String titleString() {
-		return "campaignName,budget,campaignStatus,campaignObjective,clicks"
-				+ ",impressions,ctr,spend,conversions,campaignRandomPrefix,campaignAccountName"
+		return "campaignId,groupName,campaignName,budget,campaignStatus,campaignObjective,clicks"
+				+ ",impressions,ctr,spend,conversions,campaignRandomPrefix,campaignAccountName,campaignSubAccountID"
 				+ ",campaignOfferDomain,campaignAdName,campaignAdImageName,campaignGender"
-				+ ",campaignAge,impressionOutlierType,ctrOutlierType,ctrLimitType,statsDuration,statsDurationDates,pauseDecision";
+				+ ",campaignAge,impressionOutlierType,ctrOutlierType,ctrLimitType,impressionPercentageOfMean"
+				+ ",statsDuration,statsDurationDates,pauseDecision";
 	}
 	
 	public String toString() {
-		return campaignName + "," + budget + "," + campaignStatus + "," + campaignObjective + "," + clicks
+		return campaignId + "," + groupName + "," + campaignName + "," + budget + "," + campaignStatus + "," + campaignObjective + "," + clicks
 				+ "," + impressions + "," + ctr + "," + spend + "," + conversions + "," + campaignRandomPrefix + "," + campaignAccountName
-				+ "," + campaignOfferDomain + "," + campaignAdName + "," + campaignAdImageName + "," + campaignGender
-				+ "," + campaignAge+ "," + impressionOutlierType+ "," + ctrOutlierType+ "," + ctrLimitType+ "," + statsDuration
-				+ "," + statsDurationDates+ "," + pauseDecision;
+				 + "," + campaignSubAccountID + "," + campaignOfferDomain + "," + campaignAdName + "," + campaignAdImageName + "," + campaignGender
+				+ "," + campaignAge+ "," + impressionOutlierType+ "," + ctrOutlierType+ "," + ctrLimitType+ "," + impressionPercentageOfMean
+				+ "," + statsDuration + "," + statsDurationDates+ "," + pauseDecision;
 	}
 	
 	public void makePauseDecision() {
-		if((this.getClicks()>1 && this.getCtr()>1)) {
+		if((this.getClicks()>2 && this.getCtr()>0.75)) {
 			this.ctrLimitType = Campaign.overLimit;
 		} else {
 			this.ctrLimitType = Campaign.withinLimit;
@@ -133,8 +140,13 @@ public class Campaign {
 
 	public void setCampaignName(String campaignName) {
 		this.campaignName = campaignName;
-		/*String[] nameSplit = this.campaignName.split("_");
-		this.campaignRandomPrefix = nameSplit[0];
+		String[] nameSplit = this.campaignName.split("_");
+		if(nameSplit.length>3) {
+			this.groupName = nameSplit[4];
+		} else {
+			this.groupName = "G00";
+		}
+		/*this.campaignRandomPrefix = nameSplit[0];
 		this.campaignAccountName = nameSplit[1];
 		this.campaignOfferDomain = nameSplit[2];
 		this.campaignAdName = nameSplit[3];
@@ -224,6 +236,14 @@ public class Campaign {
 	}
 
 
+	public String getCampaignId() {
+		return campaignId;
+	}
+
+	public void setCampaignId(String campaignId) {
+		this.campaignId = campaignId;
+	}
+
 	public String getCampaignRandomPrefix() {
 		return campaignRandomPrefix;
 	}
@@ -300,6 +320,30 @@ public class Campaign {
 
 	public void setStatsDurationDates(String statsDurationDates) {
 		this.statsDurationDates = statsDurationDates;
+	}
+
+	public Double getImpressionPercentageOfMean() {
+		return impressionPercentageOfMean;
+	}
+
+	public void setImpressionPercentageOfMean(Double impressionPercentageOfMean) {
+		this.impressionPercentageOfMean = impressionPercentageOfMean;
+	}
+
+	public String getCampaignSubAccountID() {
+		return campaignSubAccountID;
+	}
+
+	public void setCampaignSubAccountID(String campaignSubAccountID) {
+		this.campaignSubAccountID = campaignSubAccountID;
+	}
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
 	}
 
 }

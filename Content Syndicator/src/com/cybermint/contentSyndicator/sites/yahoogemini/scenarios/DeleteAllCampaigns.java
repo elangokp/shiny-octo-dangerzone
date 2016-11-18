@@ -39,10 +39,14 @@ public class DeleteAllCampaigns implements Runnable {
 			driver.manage().window().maximize();
 			YahooGeminiHomePage aYahooGeminiHomePage = new YahooGeminiHomePage(driver);
 			YahooGeminiDashboardPage aYahooGeminiDashboardPage = aYahooGeminiHomePage.clickSignInLink().signInAs(username, password);
-			aYahooGeminiDashboardPage.deleteAllCampaigns();
-			//aYahooGeminiDashboardPage.deleteAllAdgroups();
-			//aYahooGeminiDashboardPage.deleteAllAds();
-			//aYahooGeminiDashboardPage.enableAllCampaigns();
+			aYahooGeminiDashboardPage.clickGotIt();
+			aYahooGeminiDashboardPage.markAllNotificationsAsRead();
+			if(aYahooGeminiDashboardPage.areCampaignsAvailable()) {
+				aYahooGeminiDashboardPage.deleteAllCampaigns();
+				//aYahooGeminiDashboardPage.deleteAllAdgroups();
+				//aYahooGeminiDashboardPage.deleteAllAds();
+				//aYahooGeminiDashboardPage.enableAllCampaigns();
+			}			
 			aYahooGeminiDashboardPage.logout();
 			//System.out.println("After Logout - " + new Date() + "\n");
 		} catch (Exception e) {

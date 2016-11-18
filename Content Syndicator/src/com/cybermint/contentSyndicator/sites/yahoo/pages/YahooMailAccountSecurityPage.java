@@ -18,6 +18,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
 
+import com.cybermint.contentSyndicator.sites.yahoogemini.pages.YahooGeminiDashboardPage;
 import com.cybermint.pages.Page;
 
 public class YahooMailAccountSecurityPage extends Page{
@@ -26,28 +27,42 @@ public class YahooMailAccountSecurityPage extends Page{
 		super(driver);
 	}
 	
+	public YahooMailAccountSecurityPage getAccountSecurityPage() {
+		driver.get("https://login.yahoo.com/account/security");
+		super.waitForElementToLoad("id", "comm-channel");
+		return PageFactory.initElements(driver, YahooMailAccountSecurityPage.class);
+	}
+	
 	public void logout() {
 		((JavascriptExecutor) driver).executeScript("document.getElementById('yucs-signout').click();");
 		super.waitForElementToLoad("id", "uh-signin");
 	}
 	
 	public YahooMailAccountSecurityPage changePasswordTo(String givenPassword) {
-		WebElement changepasswordLink =  driver.findElement(By.xpath("//a[contains(@href,\"change_pw\")][2]"));
+		WebElement changepasswordLink =  driver.findElement(By.xpath("//a[contains(@href,\"change-password\")][2]"));
 		changepasswordLink.click();
-		super.waitForElementToLoad("id", "password");
-		WebElement passwordTextbox =  driver.findElement(By.id("password"));
+		super.waitForElementToLoad("id", "cpwd-password");
+		WebElement passwordTextbox =  driver.findElement(By.id("cpwd-password"));
 		super.clearAndType(passwordTextbox, givenPassword);
-		WebElement confirmPasswordTextbox =  driver.findElement(By.id("password-confirm"));
+		WebElement confirmPasswordTextbox =  driver.findElement(By.id("cpwd-confirm-password"));
 		super.clearAndType(confirmPasswordTextbox, givenPassword);
-		WebElement continueButton =  driver.findElement(By.id("primary-cta"));
-		continueButton.click();
-		super.waitForElementToLoad("id", "skipbtn",10);
+		WebElement submitButton =  driver.findElement(By.cssSelector(".cpwd-submit-button"));
+		submitButton.click();
+		/*super.waitForElementToLoad("css", ".cpwd-success-button a");
+		WebElement continueButton =  driver.findElement(By.cssSelector(".cpwd-success-button a"));
+		continueButton.click();*/
+		//super.waitForElementToLoad("id", "skipbtn",10);
 		//WebElement skipLink =  driver.findElement(By.id("skipbtn"));
 		//skipLink.click();
-		((JavascriptExecutor) driver).executeScript("document.getElementById('skipbtn').click();");
+		//((JavascriptExecutor) driver).executeScript("document.getElementById('skipbtn').click();");
 		//driver.get("https://login.yahoo.com/account/security");
-		super.waitForElementToLoad("id", "comm-channel");
-		return PageFactory.initElements(driver, YahooMailAccountSecurityPage.class);
+		//super.waitForElementToLoad("id", "comm-channel");
+		/*if(driver.getCurrentUrl().contains("comm-channel")) {
+			super.waitForElementToLoad("css", "div.refresh-cta-container button");
+			driver.findElement(By.cssSelector("div.refresh-cta-container button")).click();
+		}*/
+		return this.getAccountSecurityPage();
+		//return PageFactory.initElements(driver, YahooMailAccountSecurityPage.class);
 	}
 	
 	public YahooMailAccountSecurityPage deleteRecoveryMobileNumber() {
@@ -103,7 +118,7 @@ public class YahooMailAccountSecurityPage extends Page{
 	private String getVerificationLink() {
 		String verificationLink = "";
 		try {
-		  String host = "hybrid9.beyondhosting.net";// change accordingly
+		  String host = "c20272.sgvps.net";// change accordingly
 	      //String mailStoreType = "pop3";
 	      String username = "yahooverify@affilialogy.com";// change accordingly
 	      String password = "123yv!@#";// change accordingly
@@ -133,13 +148,14 @@ public class YahooMailAccountSecurityPage extends Page{
 	          System.out.println("Subject: " + message.getSubject());
 	          System.out.println("From: " + message.getFrom()[0]);
 	          System.out.println("Text: " + message.getContent().toString());*/
-	          if(message.getSubject().contains("alternate email address") && message.getFrom()[0].toString().contains("yahoo")) {
+	          if(message.getSubject().contains("email address") && message.getFrom()[0].toString().contains("yahoo")) {
 	         	 Pattern pattern = Pattern.compile("'https://login.yahoo.com/account/action/verify(.*?)'");
 	         	 Matcher matcher = pattern.matcher(message.getContent().toString());
 	         	 if (matcher.find())
 	         	 {
 	         	    //System.out.println(matcher.group(0).replaceAll("'", ""));
 	         	    verificationLink = matcher.group(0).replaceAll("'", "");
+	         	   System.out.println("verificationLink : " + verificationLink);
 	         	 }
 	         	 
 	          }

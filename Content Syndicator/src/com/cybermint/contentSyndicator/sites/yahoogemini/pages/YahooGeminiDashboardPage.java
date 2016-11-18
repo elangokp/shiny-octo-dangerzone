@@ -1,10 +1,6 @@
 package com.cybermint.contentSyndicator.sites.yahoogemini.pages;
 
-import java.awt.AWTException;
-import java.awt.Robot;
-import java.awt.Toolkit;
-import java.awt.datatransfer.StringSelection;
-import java.awt.event.KeyEvent;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -15,11 +11,15 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
 
 import com.cybermint.contentSyndicator.sites.yahoogemini.objects.Campaign;
 import com.cybermint.pages.Page;
-import com.cybermint.utils.TextFileReaderUtils;
+import com.jacob.com.LibraryLoader;
+
+import autoitx4java.AutoItX;
 
 public class YahooGeminiDashboardPage extends Page {
 
@@ -35,24 +35,96 @@ public class YahooGeminiDashboardPage extends Page {
 	public YahooGeminiDashboardPage(WebDriver driver) {
 		super(driver);
 		((JavascriptExecutor) driver).executeScript("document.querySelector('#header').style.position = 'absolute';");
+		((JavascriptExecutor) driver).executeScript("document.querySelector('footer').style.display = 'none';");
 		if(super.waitForElementToLoad("css", "div.message-shown",2)) {
 			try {
 				((JavascriptExecutor) driver).executeScript("document.querySelector('div.message-shown').style.position = 'absolute';");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}		
+		}
+		
+		if(super.waitForElementToLoad("css", "#system-message",2)) {
+			try {
+				((JavascriptExecutor) driver).executeScript("document.querySelector('#system-message').style.visibility='hidden';");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		
 	}
 	
+	public boolean isAccountsPage() {
+		if(driver.getCurrentUrl().contains("account")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public List<String> getSubAccountURLs() {
+		List<String> subAccountURLs = new ArrayList<String>();
+		String jsstmt = "var nodesSnapshot = document.evaluate('//table[@ng-class=\"{ fetching: fetching }\"]/tbody/tr/td[@column-id=\"advertiserName\"]//a', document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null );";
+		jsstmt += "var accountURLs = [];";
+		jsstmt += "for ( var i=0 ; i < nodesSnapshot.snapshotLength; i++ )";
+		jsstmt += "{";
+		jsstmt += "accountURLs.push(nodesSnapshot.snapshotItem(i).getAttribute(\"href\"));";		
+		jsstmt += "}";
+		jsstmt += "return accountURLs;";
+		super.waitForElementToLoad("xpath", "//table[@ng-class=\"{ fetching: fetching }\"]/tbody/tr/td[@column-id=\"advertiserName\"]//a");
+		subAccountURLs = (List<String>) ((JavascriptExecutor) driver).executeScript(jsstmt);
+		return subAccountURLs;
+	}
+	
+	public String getAccountName() {
+		return driver.findElement(By.cssSelector("#accountSelector span:nth-child(2)")).getText().trim();
+	}
+	
+	public void dismissSplash() {
+		System.out.println("Inside dismissSplash");
+		if(super.waitForElementToLoad("css", "#remindLater",2)) {
+			System.out.println("Inside remindLater");
+			WebElement remindLaterCheckBox = driver.findElement(By.id("remindLater"));
+			remindLaterCheckBox.click();
+			System.out.println("After remindLater click");
+			if(super.waitForElementToLoad("css", "div#feature-splash a.dismiss",2)) {
+				try {
+					((JavascriptExecutor) driver).executeScript("document.querySelector('div#feature-splash a.dismiss').click();");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			//WebElement dismissButton = driver.findElement(By.cssSelector("div#feature-splash a.dismiss"));
+			//dismissButton.click();
+			System.out.println("After dismissButton click");
+		}		
+	}
+	
 	public void clickGotIt() {
-		if(super.waitForElementToLoad("css", "div.finished button",2)) {
+		System.out.println("Inside clickGotIt");
+		if(super.waitForElementToLoad("id", "div.finished button",2)) {
 			WebElement gotitElement = driver.findElement(By.cssSelector("div.finished button"));
 			gotitElement.click();
 		}		
 	}
 	
-	private void markAllNotificationsAsRead() {
+	public YahooGeminiBillingPage goToBilling() {
+		/*
+		WebElement settingsIcon = driver.findElement(By.cssSelector("span.icon-settings-filled"));
+		settingsIcon.click();
+		System.out.println("After Settings Icon Click");
+		WebElement billingLink = driver.findElement(By.linkText("Billing"));
+		billingLink.click();
+		System.out.println("After Billing Icon Click");
+		*/
+		String baseAdvertiserURL = driver.getCurrentUrl().replaceAll("campaigns.*", "");
+		String billingURL = baseAdvertiserURL + "billing";
+		driver.get(billingURL);
+		super.waitForElementToLoad("id", "yahooPaymentWidgetFrame");
+		return PageFactory.initElements(driver, YahooGeminiBillingPage.class);
+	}
+	
+	public void markAllNotificationsAsRead() {
 		notificationsIcon.click();
 		super.waitForElementToLoad("xpath", "//a[@ng-show=\"notifications\"]");
 		driver.findElement(By.xpath("//a[@ng-show=\"notifications\"]")).click();
@@ -95,8 +167,8 @@ public class YahooGeminiDashboardPage extends Page {
 		datePicker.click();
 		WebElement todayRangeLabel = driver.findElement(By.xpath("//div[@class=\"date-range\"]//li[contains(text(),\"Today\")]"));
 		todayRangeLabel.click();
-		WebElement applyButton = driver.findElement(By.cssSelector("div.date-range-options div.apply-btn"));
-		applyButton.click();
+		//WebElement applyButton = driver.findElement(By.cssSelector("div.date-range-options div.apply-btn"));
+		//applyButton.click();
 		super.waitForElementToLoad("xpath", "//h1[text()=\"All campaigns\"]");
 		WebElement allCampaignsHeader = driver.findElement(By.xpath("//h1[text()=\"All campaigns\"]"));
 		allCampaignsHeader.click();
@@ -128,27 +200,36 @@ public class YahooGeminiDashboardPage extends Page {
 	}
 	
 	private void select200ResultsPerPage() {
-		resultsPerPageDropdown = driver.findElement(By.cssSelector("div.ui-table-pagination div.combobox i"));
-		resultsPerPageDropdown.click();
+		System.out.println("Inside select200ResultsPerPage");
+		//resultsPerPageDropdown = driver.findElement(By.cssSelector("div.ui-table-pagination div.combobox i"));
+		//System.out.println("1");
+		//resultsPerPageDropdown.click();
+		//System.out.println("2");
+		((JavascriptExecutor) driver).executeScript("document.querySelector('div.ui-table-pagination div.menu').style.display = 'block';");
 		WebElement perPageMenuElement = driver.findElement(By.cssSelector("div.ui-table-pagination div.menu"));
+		System.out.println("3");
 		super.waitForElementToBeEnabled(perPageMenuElement);
-		WebElement perPage200MenuItem = driver.findElement(By.xpath("//div[@class=\"ui-table-pagination\"]//div[@class=\"menu\"]//div[contains(text(),\"200\")]"));
+		System.out.println("4");
+		WebElement perPage200MenuItem = driver.findElement(By.xpath("//div[@class=\"ui-table-pagination\"]//div[@class=\"menu\"]//div[contains(text(),\"500\")]"));
+		System.out.println("5");
 		perPage200MenuItem.click();
+		System.out.println("6");
 		//System.out.println("Waiting for loader to disappear start: " + new Date());
 		super.waitForElementToBeDisappear("css", "div.ui-table div.loader", 30); //The loading element while table refresh
 		//System.out.println("Waiting for loader to disappear end: " + new Date());
+		System.out.println("7");
 	}
 	
 	private void selectAllCampaigns() {
-		super.waitForElementToLoad("xpath", "//table[@ng-class=\"{ fetching: fetching }\"]/thead/tr/th[@ng-show=\"checkboxColumn\"]/label");
-		WebElement selectAll = driver.findElement(By.xpath("//table[@ng-class=\"{ fetching: fetching }\"]/thead/tr/th[@ng-show=\"checkboxColumn\"]/label"));
+		super.waitForElementToLoad("xpath", "//table[@ng-class=\"{ fetching: fetching }\"]/thead/tr/th/label");
+		WebElement selectAll = driver.findElement(By.xpath("//table[@ng-class=\"{ fetching: fetching }\"]/thead/tr/th/label"));
 		selectAll.click();
-		super.waitForElementToLoad("xpath", "//table[@ng-class=\"{ fetching: fetching }\"]/thead/tr/th[@ng-show=\"checkboxColumn\"]/input[@checked=\"checked\"]/../label");
+		super.waitForElementToLoad("xpath", "//table[@ng-class=\"{ fetching: fetching }\"]/thead/tr/th/input[@checked=\"checked\"]/../label");
 	}
 	
 	private void selectCampaign(String campaignName) {
-		String givenCampaignXpath = "//table[@ng-class=\"{ fetching: fetching }\"]/tbody/tr/td[@column-id=\"campaign_name\"]//a[text()=\"" + campaignName + "\"]/../../../td[@class=\"skinny\"]/label";
-		String givenCampaignXpathAfterSelect = "//table[@ng-class=\"{ fetching: fetching }\"]/tbody/tr/td[@column-id=\"campaign_name\"]//a[text()=\"" + campaignName + "\"]/../../../td[@class=\"skinny\"]/input[@checked=\"checked\"]/../label";
+		String givenCampaignXpath = "//table[@ng-class=\"{ fetching: fetching }\"]/tbody/tr/td[@column-id=\"campaign_name\"]//a[text()=\"" + campaignName + "\"]/../../../td/label";
+		String givenCampaignXpathAfterSelect = "//table[@ng-class=\"{ fetching: fetching }\"]/tbody/tr/td[@column-id=\"campaign_name\"]//a[text()=\"" + campaignName + "\"]/../../../td/input[@checked=\"checked\"]/../label";
 		super.waitForElementToLoad("xpath", givenCampaignXpath);
 		WebElement selectCampaign = driver.findElement(By.xpath(givenCampaignXpath));		
 		selectCampaign.click();
@@ -156,9 +237,9 @@ public class YahooGeminiDashboardPage extends Page {
 	}
 	
 	private void deselectAllCampaigns() {
-		WebElement deselectAll = driver.findElement(By.xpath("//table[@ng-class=\"{ fetching: fetching }\"]/thead/tr/th[@ng-show=\"checkboxColumn\"]/input[@checked=\"checked\"]/../label"));
+		WebElement deselectAll = driver.findElement(By.xpath("//table[@ng-class=\"{ fetching: fetching }\"]/thead/tr/th/input[@checked=\"checked\"]/../label"));
 		deselectAll.click();
-		super.waitForElementToLoad("xpath", "//table[@ng-class=\"{ fetching: fetching }\"]/thead/tr/th[@ng-show=\"checkboxColumn\"]/label");
+		super.waitForElementToLoad("xpath", "//table[@ng-class=\"{ fetching: fetching }\"]/thead/tr/th/label");
 	}
 	
 	public void clearAllCampaignSelection() {
@@ -166,13 +247,17 @@ public class YahooGeminiDashboardPage extends Page {
 		deselectAllCampaigns();
 	}
 	
+	public boolean areCampaignsAvailable() {
+		return super.waitForElementToLoad("css", "div.ui-table-pagination div.combobox i", 2);
+	}
+	
 	public void enableAllCampaigns() {
 		this.select200ResultsPerPage();
 		this.selectAllCampaigns();
 		WebElement actionsButton = driver.findElement(By.xpath("//button[contains(text(),\"Actions\")]"));
 		actionsButton.click();
-		super.waitForElementToLoad("xpath", "//button[contains(text(),\"Actions\")]/../ul[@class=\"dropdown-menu\"]/li/a[contains(text(),\"Enable\")]");
-		WebElement enableButton = driver.findElement(By.xpath("//button[contains(text(),\"Actions\")]/../ul[@class=\"dropdown-menu\"]/li/a[contains(text(),\"Enable\")]"));
+		super.waitForElementToLoad("xpath", "//button[contains(text(),\"Actions\")]/../ul[1]/li/a[contains(text(),\"Enable\")]");
+		WebElement enableButton = driver.findElement(By.xpath("//button[contains(text(),\"Actions\")]/../ul[1]/li/a[contains(text(),\"Enable\")]"));
 		enableButton.click();
 		super.waitForElementToLoad("xpath", "//banners/div[contains(@class,\"in\")]/span[contains(text(),\"saved\")]");
 		deselectAllCampaigns();
@@ -186,10 +271,10 @@ public class YahooGeminiDashboardPage extends Page {
 		//WebElement actionsButton = driver.findElement(By.xpath("//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]"));
 		WebElement actionsButton = driver.findElement(By.xpath("//button[contains(text(),\"Actions\")]"));
 		actionsButton.click();
-		//super.waitForElementToLoad("xpath", "//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[@class=\"dropdown-menu\"]/li/a[contains(text(),\"Delete\")]");
-		super.waitForElementToLoad("xpath", "//button[contains(text(),\"Actions\")]/../ul[@class=\"dropdown-menu\"]/li/a[contains(text(),\"Delete\")]");
-		//WebElement deleteButton = driver.findElement(By.xpath("//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[@class=\"dropdown-menu\"]/li/a[contains(text(),\"Delete\")]"));
-		WebElement deleteButton = driver.findElement(By.xpath("//button[contains(text(),\"Actions\")]/../ul[@class=\"dropdown-menu\"]/li/a[contains(text(),\"Delete\")]"));
+		//super.waitForElementToLoad("xpath", "//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[1]/li/a[contains(text(),\"Delete\")]");
+		super.waitForElementToLoad("xpath", "//button[contains(text(),\"Actions\")]/../ul[1]/li/a[contains(text(),\"Delete\")]");
+		//WebElement deleteButton = driver.findElement(By.xpath("//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[1]/li/a[contains(text(),\"Delete\")]"));
+		WebElement deleteButton = driver.findElement(By.xpath("//button[contains(text(),\"Actions\")]/../ul[1]/li/a[contains(text(),\"Delete\")]"));
 		deleteButton.click();
 		super.waitForElementToLoad("xpath", "//div[@class=\"modal-footer\"]//button[text()=\"Yes\"]");
 		WebElement deleteConfirmButton = driver.findElement(By.xpath("//div[@class=\"modal-footer\"]//button[text()=\"Yes\"]"));
@@ -214,8 +299,8 @@ public class YahooGeminiDashboardPage extends Page {
 		this.selectAllCampaigns();
 		WebElement actionsButton = driver.findElement(By.xpath("//button[contains(text(),\"Actions\")]"));
 		actionsButton.click();
-		super.waitForElementToLoad("xpath", "//button[contains(text(),\"Actions\")]/../ul[@class=\"dropdown-menu\"]/li/a[contains(text(),\"Edit native bid\")]");
-		WebElement editNativeBidButton = driver.findElement(By.xpath("//button[contains(text(),\"Actions\")]/../ul[@class=\"dropdown-menu\"]/li/a[contains(text(),\"Edit native bid\")]"));
+		super.waitForElementToLoad("xpath", "//button[contains(text(),\"Actions\")]/../ul[1]/li/a[contains(text(),\"Edit native bid\")]");
+		WebElement editNativeBidButton = driver.findElement(By.xpath("//button[contains(text(),\"Actions\")]/../ul[1]/li/a[contains(text(),\"Edit native bid\")]"));
 		editNativeBidButton.click();
 		super.waitForElementToLoad("xpath", "//div[@ng-if=\"bulkEdit.useNumberInput\"]//input");
 		WebElement bidAmountInput = driver.findElement(By.xpath("//div[@ng-if=\"bulkEdit.useNumberInput\"]//input"));
@@ -243,8 +328,8 @@ public class YahooGeminiDashboardPage extends Page {
 	private void pauseSelectedCampaigns() {
 		WebElement actionsButton = driver.findElement(By.xpath("//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]"));
 		actionsButton.click();
-		super.waitForElementToLoad("xpath", "//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[@class=\"dropdown-menu\"]/li/a[contains(text(),\"Pause\")]");
-		WebElement pauseButton = driver.findElement(By.xpath("//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[@class=\"dropdown-menu\"]/li/a[contains(text(),\"Pause\")]"));
+		super.waitForElementToLoad("xpath", "//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[1]/li/a[contains(text(),\"Pause\")]");
+		WebElement pauseButton = driver.findElement(By.xpath("//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[1]/li/a[contains(text(),\"Pause\")]"));
 		pauseButton.click();
 		super.waitForElementToLoad("xpath", "//banners/div[contains(@class,\"in\")]/span[contains(text(),\"saved\")]");	
 		super.waitForElementToBeDisappear("xpath", "//banners/div[contains(@class,\"in\")]/span[contains(text(),\"saved\")]", 5);
@@ -253,11 +338,24 @@ public class YahooGeminiDashboardPage extends Page {
 	private void activateSelectedCampaigns() {
 		WebElement actionsButton = driver.findElement(By.xpath("//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]"));
 		actionsButton.click();
-		super.waitForElementToLoad("xpath", "//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[@class=\"dropdown-menu\"]/li/a[contains(text(),\"Enable\")]");
-		WebElement enableButton = driver.findElement(By.xpath("//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[@class=\"dropdown-menu\"]/li/a[contains(text(),\"Enable\")]"));
+		super.waitForElementToLoad("xpath", "//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[1]/li/a[contains(text(),\"Enable\")]");
+		WebElement enableButton = driver.findElement(By.xpath("//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[1]/li/a[contains(text(),\"Enable\")]"));
 		enableButton.click();
 		super.waitForElementToLoad("xpath", "//banners/div[contains(@class,\"in\")]/span[contains(text(),\"saved\")]");	
 		super.waitForElementToBeDisappear("xpath", "//banners/div[contains(@class,\"in\")]/span[contains(text(),\"saved\")]", 5);
+	}
+	
+	private void deleteSelectedCampaigns() {
+		WebElement actionsButton = driver.findElement(By.xpath("//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]"));
+		actionsButton.click();
+		super.waitForElementToLoad("xpath", "//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[1]/li/a[contains(text(),\"Delete\")]");
+		WebElement deleteButton = driver.findElement(By.xpath("//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[1]/li/a[contains(text(),\"Delete\")]"));
+		deleteButton.click();
+		super.waitForElementToLoad("xpath", "//div[@class=\"modal-footer\"]//button[text()=\"Yes\"]");
+		WebElement deleteConfirmButton = driver.findElement(By.xpath("//div[@class=\"modal-footer\"]//button[text()=\"Yes\"]"));
+		deleteConfirmButton.click();
+		super.waitForElementToLoad("css", "div.ui-table div.loader");
+		super.waitForElementToBeDisappear("css", "div.ui-table div.loader", 30);
 	}
 	
 	public void pauseOutlierCampaigns(List<Campaign> campaignList) {
@@ -288,25 +386,48 @@ public class YahooGeminiDashboardPage extends Page {
 		
 	}
 	
+	public void deletePausedCampaigns(List<Campaign> campaignList) {
+		int toBeDeleted = 0;
+		for(Campaign aCampaign : campaignList) {
+			if(aCampaign.getCampaignStatus().equalsIgnoreCase("Paused")) {
+				selectCampaign(aCampaign.getCampaignName());
+				toBeDeleted++;
+			}
+		}
+		if(toBeDeleted>0) {
+			deleteSelectedCampaigns();
+		}
+		
+	}
+	
 	public List<Campaign> getCampaignStats(String durationRange) {
 		String jsstmt = "var nodesSnapshot = document.evaluate('//table[@ng-class=\"{ fetching: fetching }\"]/tbody/tr', document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null );";
 		jsstmt += "var campaigns = [];";
 		jsstmt += "for ( var i=0 ; i < nodesSnapshot.snapshotLength; i++ )";
 		jsstmt += "{";
 		jsstmt += "var columns = nodesSnapshot.snapshotItem(i).childNodes;";
-		jsstmt += "var txt=\"\";";
+		jsstmt += "var txt='';";
+		jsstmt += "var campaignId='';";
 		jsstmt += "for (j = 2; j < columns.length; j++) { ";
+		jsstmt += "if(j == 2) {";
+		jsstmt += "campaignId = document.evaluate('.//a/@href', columns[j], null, XPathResult.FIRST_ORDERED_NODE_TYPE, null ).singleNodeValue.nodeValue;";
+		jsstmt += "}";
 		jsstmt += "if(j == columns.length - 1) {";
 		jsstmt += "txt += columns[j].textContent;";
 		jsstmt += "} else {";
-		jsstmt += "txt += columns[j].textContent+\"||\";";
+		jsstmt += "txt += columns[j].textContent+'||';";
 		jsstmt += "}";
 		jsstmt += "}";
+		jsstmt += "txt += '||'+campaignId;";
 		jsstmt += "campaigns.push(txt);";
 		jsstmt += "}";
 		jsstmt += "return campaigns;";
-		this.clickGotIt();
 		this.markAllNotificationsAsRead();
+		List<Campaign> campaigns = new ArrayList<Campaign>();
+		//Check if the account is empty. No campaigns
+		if(super.waitForElementToLoad("xpath", "//upload-selected//span", 1)) {
+			return campaigns;
+		}
 		if(durationRange.equalsIgnoreCase(Campaign.today)) {
 			//System.out.println("In Select today if start: " + new Date());
 			this.selectToday();
@@ -327,8 +448,7 @@ public class YahooGeminiDashboardPage extends Page {
 		} 
 		System.out.println(campaignextractjsFilePath);*/
 		//String jsstmt = TextFileReaderUtils.readFileAsString("./metadata/campaignextractjs.txt");
-		List<String> allCampaignData = (List<String>) ((JavascriptExecutor) driver).executeScript(jsstmt);
-		List<Campaign> campaigns = new ArrayList<Campaign>();
+		List<String> allCampaignData = (List<String>) ((JavascriptExecutor) driver).executeScript(jsstmt);		
 		for(String aCampaignData : allCampaignData) {
 			Campaign aCampaign = new Campaign();
 			String[] aCampaignDataFields = aCampaignData.split("\\|\\|");
@@ -336,11 +456,13 @@ public class YahooGeminiDashboardPage extends Page {
 			aCampaign.setBudget(aCampaignDataFields[1]);
 			aCampaign.setCampaignStatus(aCampaignDataFields[2]);
 			aCampaign.setCampaignObjective(aCampaignDataFields[3]);
-			aCampaign.setClicks(new Double(aCampaignDataFields[4].replaceAll(",", "")));
-			aCampaign.setImpressions(new Double(aCampaignDataFields[5].replaceAll(",", "")));
-			aCampaign.setCtr(new Double(aCampaignDataFields[6].replaceAll("%", "").replaceAll("—", "0")));
+			aCampaign.setClicks(new Double(aCampaignDataFields[4].replaceAll(",", "").replaceAll("—", "0")));
+			aCampaign.setImpressions(new Double(aCampaignDataFields[5].replaceAll(",", "").replaceAll("—", "0")));
+			aCampaign.setCtr((aCampaign.getImpressions()>0 ? (aCampaign.getClicks()/aCampaign.getImpressions()) : 0)*100);
 			aCampaign.setSpend(new Double(aCampaignDataFields[7].replaceAll("\\$", "").replaceAll("—", "0")));
-			aCampaign.setConversions(new Integer(aCampaignDataFields[8].replaceAll(",", "")));
+			aCampaign.setConversions(new Integer(aCampaignDataFields[8].replaceAll(",", "").replaceAll("—", "0")));
+			String campaignId = aCampaignDataFields[9].split("/")[2];
+			aCampaign.setCampaignId(campaignId);
 			aCampaign.setStatsDuration(durationRange);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			if(durationRange.equalsIgnoreCase(Campaign.today)) {
@@ -395,14 +517,37 @@ public class YahooGeminiDashboardPage extends Page {
 		return campaigns;
 	}
 	
+	public boolean uploadBulkCampaignsOnEmptyAccount(String bulkCampaignsFilePath) {
+		try {
+			if(super.waitForElementToLoad("xpath", "//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]", 3)) {
+				return uploadAdditionalBulkCampaigns(bulkCampaignsFilePath);
+			} else {
+				super.waitForElementToLoad("xpath", "//upload-selected/div");
+				WebElement uploadFileLinkParent = driver.findElement(By.xpath("//upload-selected/../.."));
+				uploadFileLinkParent.click();
+				Thread.sleep(1000);
+				WebElement uploadFileLink = driver.findElement(By.xpath("//upload-selected/div"));
+				uploadFileLink.click();
+				return uploadBulkCampaignsAndVerify(bulkCampaignsFilePath);
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;			
+		}
+	}
 	
-	public void uploadBulkCampaigns(String bulkCampaignsFilePath) {
+	public boolean uploadAdditionalBulkCampaigns(String bulkCampaignsFilePath) {
 		WebElement actionsButton = driver.findElement(By.xpath("//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]"));
 		actionsButton.click();
-		super.waitForElementToLoad("xpath", "//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[@class=\"dropdown-menu\"]/li/a//span[contains(text(),\"Upload\")]");
-		WebElement uploadFileButton = driver.findElement(By.xpath("//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[@class=\"dropdown-menu\"]/li/a//span[contains(text(),\"Upload\")]"));
+		super.waitForElementToLoad("xpath", "//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[1]/li/upload-selected/div");
+		WebElement uploadFileButton = driver.findElement(By.xpath("//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[1]/li/upload-selected/div"));
 		uploadFileButton.click();
-		StringSelection ss = new StringSelection(bulkCampaignsFilePath);
+		return uploadBulkCampaignsAndVerify(bulkCampaignsFilePath);		
+	}
+	
+	private boolean uploadBulkCampaignsAndVerify(String bulkCampaignsFilePath) {
+		/*StringSelection ss = new StringSelection(bulkCampaignsFilePath);
 		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
 		Robot robot;
 		try {
@@ -413,14 +558,77 @@ public class YahooGeminiDashboardPage extends Page {
 			robot.keyRelease(KeyEvent.VK_CONTROL);
 			robot.keyPress(KeyEvent.VK_ENTER);
 			robot.keyRelease(KeyEvent.VK_ENTER);
+			robot.keyPress(KeyEvent.VK_ENTER);
+			robot.keyRelease(KeyEvent.VK_ENTER);
 		} catch (AWTException e) {
 			e.printStackTrace();
+		}*/
+		try {			
+			String jacobDllVersionToUse;
+			if (System.getProperty("sun.arch.data.model").contains("32")){
+				jacobDllVersionToUse = "jacob-1.18-x86.dll";
+			}
+			else {
+				jacobDllVersionToUse = "jacob-1.18-x64.dll";
+			}
+	
+			File file = new File("lib\\autoit", jacobDllVersionToUse);
+			if(!file.exists()) {
+				file = new File("dll", jacobDllVersionToUse);
+			}
+			System.setProperty(LibraryLoader.JACOB_DLL_PATH, file.getAbsolutePath());
+	
+			AutoItX x = new AutoItX();
+			String screenName = "Open";
+			x.winActivate(screenName);
+			//Thread.sleep(1000);			
+			x.winWaitActive(screenName);
+			System.out.println(bulkCampaignsFilePath);
+			boolean settingText = x.ControlSetText(screenName, "", "1148", bulkCampaignsFilePath);
+			System.out.println("Text was Set : " + settingText);
+			//Thread.sleep(30000);
+			boolean clickingOpen = x.controlClick(screenName, "", "1") ;
+			//Thread.sleep(30000);
+			System.out.println("Open was clicked : " + clickingOpen);
+			/*
+			int timeSpentWaitingForDialog = 0;
+			int recheckDelayForDialog = 1;
+			boolean foundWindow = x.winExists(screenName);
+			while(!foundWindow && timeSpentWaitingForDialog < 5/recheckDelayForDialog) {
+				Thread.sleep(recheckDelayForDialog*1000);
+				timeSpentWaitingForDialog = timeSpentWaitingForDialog + recheckDelayForDialog;
+				foundWindow = x.winExists(screenName);
+			}
+			if(!foundWindow) {
+				return false;
+			}
+			x.controlFocus(screenName, "", "1148");
+			x.controlSend(screenName, "", "1148", bulkCampaignsFilePath);
+			x.controlFocus(screenName, "", "1");
+			x.controlSend(screenName, "", "1", "{ENTER}");
+			*/
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		boolean wasFileProcessed = false;
+		int timeSpentWaiting = 0;
+		int recheckDelay = 5;
+		while(wasFileProcessed == false && timeSpentWaiting < (10*60)) {
+			try {
+				Thread.sleep(recheckDelay*1000);
+				timeSpentWaiting = timeSpentWaiting + recheckDelay;
+				String notificationAlertText =  driver.findElement(By.cssSelector("span.notifications-alert")).getText().trim();
+				notificationAlertText = notificationAlertText.length() == 0 ? "0":notificationAlertText;
+				if(Integer.parseInt(notificationAlertText)>0) {
+					wasFileProcessed = true;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}			
 		}
 		
-		/*
-		super.waitForElementToLoad("xpath", "//banners/div[contains(@class,\"in\")]/span[contains(text(),\"saved\")]");	
-		super.waitForElementToBeDisappear("xpath", "//banners/div[contains(@class,\"in\")]/span[contains(text(),\"saved\")]", 5);
-		*/
+		return wasFileProcessed;
+		
 	}
 	
 	public void logout() {

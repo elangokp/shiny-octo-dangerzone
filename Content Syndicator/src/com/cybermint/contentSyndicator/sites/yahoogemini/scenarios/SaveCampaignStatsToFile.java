@@ -22,8 +22,13 @@ public class SaveCampaignStatsToFile implements Runnable{
 		try {
 			YahooGeminiUtils anYahooGeminiUtils = new YahooGeminiUtils();
 			List<Campaign> returnedCampaigns = campaigns.get();			
-			System.out.println("this user saving started : " + returnedCampaigns.get(0).getCampaignAccountName() + "\n");
-			anYahooGeminiUtils.saveCampaignsToFile(returnedCampaigns, fileURL);
+			if(returnedCampaigns.size()>0){
+				System.out.println("this user saving started : " + returnedCampaigns.get(0).getCampaignAccountName() + "\n");
+				anYahooGeminiUtils.saveCampaignsToFile(returnedCampaigns, fileURL);
+			} else {
+				System.out.println("this user has no campaigns \n");
+			}
+			
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
