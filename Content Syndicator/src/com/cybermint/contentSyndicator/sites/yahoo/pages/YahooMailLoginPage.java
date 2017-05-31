@@ -42,7 +42,8 @@ public class YahooMailLoginPage extends Page{
 		}
 	}
 	
-	public YahooMailInboxPage signInAs(String username, String password) {
+	public YahooMailInboxPage signInAs(String username, String password) throws Exception {
+		boolean stop = false;
 		try {
 			super.waitForElementToLoad("id", "login-username");	
 			usernameTextBox.clear();
@@ -81,7 +82,12 @@ public class YahooMailLoginPage extends Page{
 			if(driver.getCurrentUrl().contains("comm-channel")) {
 				super.waitForElementToLoad("css", "div.refresh-cta-container button");
 				driver.findElement(By.cssSelector("div.refresh-cta-container button")).click();
+			} else if(driver.getCurrentUrl().contains("challenge-selector")) {
+				super.waitForElementToLoad("xpath", "//button[@value=400]");
+				driver.findElement(By.xpath("//button[@value=400]")).click();
+				stop = true;
 			}
+			
 			if(super.waitForElementToLoad("id", "skipbtn",10)) {
 				((JavascriptExecutor) driver).executeScript("document.getElementById('skipbtn').click();");
 			}
@@ -89,6 +95,9 @@ public class YahooMailLoginPage extends Page{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		if(stop) {
+			throw new Exception();
+		}		
 		return PageFactory.initElements(driver, YahooMailInboxPage.class);
     }
 

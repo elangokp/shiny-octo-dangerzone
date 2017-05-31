@@ -84,13 +84,27 @@ public class YahooMailAccountSecurityPage extends Page{
 	}
 	
 	public YahooMailAccountSecurityPage updateRecoveryEmailAddress(String givenEmail) {
-		WebElement addRecoveryEmailLink =  driver.findElement(By.xpath("//a[contains(@title,\"recovery\")]"));
+		WebElement addRecoveryEmailLink =  driver.findElement(By.xpath("//a[contains(@title,\"recovery\") or contains(@title,\"Email\")]"));
 		addRecoveryEmailLink.click();
-		super.waitForElementToLoad("xpath", "//input[@name=\"email\"]");
-		WebElement emailTextBox =  driver.findElement(By.xpath("//input[@name=\"email\"]"));
-		super.clearAndType(emailTextBox, givenEmail);
-		WebElement sendVerificationEmailButton =  driver.findElement(By.xpath("//input[@name=\"add-email\"]"));
-		sendVerificationEmailButton.click();
+		super.waitForElementToLoad("xpath", "//a[contains(@title,\"Email\")]", 5);
+		if(super.waitForElementToLoad("xpath", "//input[@name=\"add-email\"]",1)) {
+			WebElement emailTextBox =  driver.findElement(By.xpath("//input[@name=\"email\"]"));
+			super.clearAndType(emailTextBox, givenEmail);
+			WebElement sendVerificationEmailButton =  driver.findElement(By.xpath("//input[@name=\"add-email\"]"));
+			sendVerificationEmailButton.click();
+		} else {
+			WebElement deleteEmailIcon = driver.findElement(By.xpath("//input[@name=\"delete\"]"));
+			deleteEmailIcon.click();
+			super.waitForElementToLoad("xpath", "//a[@id=\"add-email\"]");
+			WebElement addEmailLink = driver.findElement(By.xpath("//a[contains(@title,\"Email\")]")); 
+			addEmailLink.click();
+			super.waitForElementToLoad("xpath", "//input[@name=\"email\"]");
+			WebElement emailTextBox =  driver.findElement(By.xpath("//input[@name=\"email\"]"));
+			super.clearAndType(emailTextBox, givenEmail);
+			WebElement sendVerificationEmailButton =  driver.findElement(By.xpath("//input[@name=\"add-email\"]"));
+			sendVerificationEmailButton.click();
+		}
+		
 		int maxRetries = 3;
 		int retryInterval = 60;
 		String verificationLink = "";

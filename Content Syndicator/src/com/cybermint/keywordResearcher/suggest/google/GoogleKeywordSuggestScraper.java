@@ -135,7 +135,7 @@ public class GoogleKeywordSuggestScraper {
         	keywordsWithSuggestions.add(sb.toString());
         	System.out.println(sb.toString());*/
         }
-        TextFileWriterUtils.writeListAsLines(allWithoutDuplicates, "C:/Users/elangokp.AHC.000/Dropbox/Projects/PPV/American SSD/keywords-with-suggestions.txt");
+        TextFileWriterUtils.writeListAsLines(allWithoutDuplicates, "C:/Users/elangokp.AHC.000/Dropbox/Projects/PPV/American SSD/keywords-with-suggestions.txt", false);
     	//tempFun();
     }
     
@@ -158,6 +158,6 @@ public class GoogleKeywordSuggestScraper {
     		urlKeywordList.add(line);
     		urlKeywordList.add(sb.toString());
     	}
-    	TextFileWriterUtils.writeListAsLines(urlKeywordList, "E:\\Dropbox\\Website Campaigns\\Camouflaged URLs\\teens-urlKeywords.txt");
+    	TextFileWriterUtils.writeListAsLines(urlKeywordList, "E:\\Dropbox\\Website Campaigns\\Camouflaged URLs\\teens-urlKeywords.txt", false);
     }
 }

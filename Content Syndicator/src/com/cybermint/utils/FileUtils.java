@@ -5,9 +5,14 @@ package com.cybermint.utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,8 +29,16 @@ public class FileUtils {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public Boolean move(File sourceFile, File destinationFile) {
-		return false;
+	public Boolean moveToDir(String sourceFilePath, String destinationFilePath) {
+		try {
+			Path sourcePath = Paths.get(sourceFilePath);
+			Path destPath = Paths.get(destinationFilePath);
+			Files.move(sourcePath, destPath, StandardCopyOption.ATOMIC_MOVE);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 	
 	public Boolean saveFileFromURL(String URL, String destinationFilePath) {

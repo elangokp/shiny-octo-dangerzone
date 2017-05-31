@@ -96,7 +96,7 @@ public class GetGoogleRelatedSearches implements Callable {
         	keywordsWithRelatedSearches.add(sb.toString());
         	System.out.println(sb.toString());
 		}
-		TextFileWriterUtils.writeListAsLines(keywordsWithRelatedSearches, "G:/Dropbox/Website Campaigns/Metadata/get-ex-back-keywords-related.csv");
+		TextFileWriterUtils.writeListAsLines(keywordsWithRelatedSearches, "G:/Dropbox/Website Campaigns/Metadata/get-ex-back-keywords-related.csv", false);
 		es.shutdown();
 	}
 

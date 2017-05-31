@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="lib/common utils/commons-lang3-3.1.jar"/>
 	<classpathentry kind="lib" path="lib/common utils/commons-pool-1.5.7.jar"/>
 	<classpathentry kind="lib" path="lib/Embedded DB/h2-1.2.142.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate-3.5.4/antlr-2.7.6.jar"/>
@@ -37,5 +36,10 @@
 	<classpathentry kind="lib" path="lib/captcha/com.DeathByCaptcha.jar"/>
 	<classpathentry kind="lib" path="lib/captcha/org.base64.jar"/>
 	<classpathentry kind="lib" path="lib/captcha/org.json.jar"/>
+	<classpathentry kind="lib" path="lib/zip4j/zip4j_1.3.2.jar"/>
+	<classpathentry kind="lib" path="lib/opencsv/opencsv-3.9.jar"/>
+	<classpathentry kind="lib" path="lib/common utils/commons-lang3-3.5.jar"/>
+	<classpathentry kind="lib" path="lib/common utils/commons-beanutils-1.9.3.jar"/>
+	<classpathentry kind="lib" path="lib/SQL Driver/sqljdbc42.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

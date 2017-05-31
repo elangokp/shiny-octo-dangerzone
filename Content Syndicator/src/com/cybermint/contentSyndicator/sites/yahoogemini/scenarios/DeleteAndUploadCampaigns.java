@@ -2,9 +2,8 @@ package com.cybermint.contentSyndicator.sites.yahoogemini.scenarios;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,6 +38,8 @@ public class DeleteAndUploadCampaigns implements Runnable {
 	private ObjectPool driverPool;
 	private String username;
 	private String password;
+	private String displayUrl;
+	private String sponsoredBy;
 	private String bulkCampaignsFolderPath;
 	private String uploadResultsFilePath;
 	private String templateFilePath;
@@ -49,10 +50,13 @@ public class DeleteAndUploadCampaigns implements Runnable {
 	private List<String> subAccountIDs;
 	private List<String> subAccountStatus = new ArrayList<String>();
 	
-	public DeleteAndUploadCampaigns(ObjectPool driverPool, String username, String password, String bulkCampaignsFolderPath, String uploadResultsFilePath
+	public DeleteAndUploadCampaigns(ObjectPool driverPool, String username, String password, String displayUrl, String sponsoredBy, String bulkCampaignsFolderPath, String uploadResultsFilePath
 			, String templateFilePath, String randomNamesFilePath, String domainRandomsFilePath, String deleteType, int noOfCampaignsToBeMaintained, List<String> subAccountIDs ) {
 		this.driverPool = driverPool;
 		this.username = username;
+		this.password = password;
+		this.displayUrl = displayUrl;
+		this.sponsoredBy = sponsoredBy;
 		this.password = password;
 		this.bulkCampaignsFolderPath = bulkCampaignsFolderPath;
 		this.uploadResultsFilePath = uploadResultsFilePath;
@@ -104,9 +108,9 @@ public class DeleteAndUploadCampaigns implements Runnable {
 			String accountName = this.username + "-" + aYahooGeminiDashboardPage.getAccountName();
 			String bulkCampaignsFilePath = "";
 			if(DeleteAndUploadCampaigns.updateCampaigns.equalsIgnoreCase(this.deleteType)) {	
-				bulkCampaignsFilePath = YahooGeminiUtils.generateBulkUpdateFileForSingleAccount(campaigns,accountName, bulkCampaignsFolderPath, templateFilePath);
+				bulkCampaignsFilePath = YahooGeminiUtils.generateBulkUpdateFileForSingleAccount(campaigns,accountName, displayUrl, sponsoredBy, bulkCampaignsFolderPath, templateFilePath);
 			} else {
-				bulkCampaignsFilePath = YahooGeminiUtils.generateBulkFileForSingleAccount(noOfCampaignsToUpload,accountName, randomNamesFilePath, domainRandomsFilePath, bulkCampaignsFolderPath, templateFilePath);
+				bulkCampaignsFilePath = YahooGeminiUtils.generateBulkFileForSingleAccount(noOfCampaignsToUpload,accountName, displayUrl, sponsoredBy, randomNamesFilePath, domainRandomsFilePath, bulkCampaignsFolderPath, templateFilePath);
 			}
 					
 			bulkCampaignsFilePath = bulkCampaignsFilePath.replaceAll("/", "\\\\");
@@ -182,7 +186,21 @@ public class DeleteAndUploadCampaigns implements Runnable {
 				for(String aSubAccountStatus : subAccountStatus){
 					subAccountStatusesString = subAccountStatusesString + aSubAccountStatus + "~";
 				}
-				TextFileWriterUtils.writeString(username+","+password+","+subAccountStatusesString, uploadResultsFilePath, true, true);
+				
+				if(uploadResultsFilePath.equalsIgnoreCase("todb")) {
+					try {
+						if(subAccountStatusesString.contains("successful")) {
+							YahooGeminiUtils.updateCampaignUploadStatus(username, YahooGeminiUtils.UPL_CAMP_SUCCESS);
+						} else {
+							YahooGeminiUtils.updateCampaignUploadStatus(username, YahooGeminiUtils.UPL_CAMP_FAILURE);
+						}		
+					} catch (ClassNotFoundException | SQLException e) {
+						e.printStackTrace();
+					}
+				} else {
+					TextFileWriterUtils.writeString(username+","+password+","+subAccountStatusesString, uploadResultsFilePath, true, true);
+				}				
+				
 				driverPool.returnObject(driver);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -191,7 +209,7 @@ public class DeleteAndUploadCampaigns implements Runnable {
 		
 	}
 	
-	public static void main(String[] args) throws InterruptedException {	
+	public static void main(String[] args) throws InterruptedException, ClassNotFoundException, SQLException {
 		String userLoginsFilePath = args[0]; //"C:/Users/elangokp.AHC.000/Dropbox/Projects/Solar/FakeProfiles/users.txt"
 		String ReportsFilePath = args[1]; //"C:/Users/elangokp.AHC.000/Dropbox/Projects/Solar/Reports"
 		String binaryPath = args[2]; //"C:/Program Files (x86)/Mozilla Firefox/firefox.exe"
@@ -206,19 +224,31 @@ public class DeleteAndUploadCampaigns implements Runnable {
 		int campaignsToMaintain = Integer.parseInt(args[10]);
 		int accountsPerRun = Integer.parseInt(args[11]);
 		String userLoginsLoopFilePath = args[12];
-		List<String> userLoginsThisLoop = TextFileReaderUtils.readLinesAsList(userLoginsLoopFilePath, true);
-		
+		List<String> userLoginsThisLoop = new ArrayList<String>();
+		List<String> userLoginsForThisRun = new ArrayList<String>();
 		/*if(userLoginsThisLoop.size() == 0  && campaignDeleteType.equalsIgnoreCase("paused")) {
 			List<String> userLogins = TextFileReaderUtils.readLinesAsList(userLoginsFilePath, true);
 			TextFileWriterUtils.writeListAsLines(userLogins, userLoginsLoopFilePath);
 			userLoginsThisLoop = TextFileReaderUtils.readLinesAsList(userLoginsLoopFilePath, true);
 		}*/
 		
-		List<String> userLoginsForThisRun = new ArrayList<String>();
-		for(int i=0; i<userLoginsThisLoop.size() && i < accountsPerRun ; i++) {
-			userLoginsForThisRun.add(userLoginsThisLoop.get(i));
-			userLoginsThisLoop.remove(i);
+		if(userLoginsFilePath.equalsIgnoreCase("fromdb")) {
+			for(int i=0; i < accountsPerRun ; i++) {
+				String userLogin = YahooGeminiUtils.getAccountForUploadingCampaigns();
+				if(userLogin.length()>0) {
+					userLoginsForThisRun.add(userLogin);
+				}				
+			}
+		} else {
+			userLoginsThisLoop = TextFileReaderUtils.readLinesAsList(userLoginsLoopFilePath, true);
+			for(int i=0; i<userLoginsThisLoop.size() && i < accountsPerRun ; i++) {
+				userLoginsForThisRun.add(userLoginsThisLoop.get(i));
+				userLoginsThisLoop.remove(i);
+			}			
 		}
+		
+		
+		
 		//SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		//String uploadResultsFilePath = ReportsFolderPath + "/uploadStats-" +sdf.format(new Date()) +".csv";
 		String uploadResultsFilePath = ReportsFilePath;
@@ -234,10 +264,12 @@ public class DeleteAndUploadCampaigns implements Runnable {
 			String password = userLogin.split(",")[1];
 			String templateFilePath = templateFolderPath + userLogin.split(",")[2] + ".csv";
 			//bulkCampaignsFolderPath = bulkCampaignsFolderPath +  userLogin.split(",")[2];
+			String displayUrl = userLogin.split(",")[3];
+			String sponsoredBy = userLogin.split(",")[4];
 			List<String> subAccountIDs = new ArrayList<String>();
 			boolean hasAnSuccessfulSubAccount = false;
-			if(userLogin.split(",").length>3 && userLogin.split(",")[3].length()>0) {
-				String subAccounts = userLogin.split(",")[3];
+			if(userLogin.split(",").length>5 && userLogin.split(",")[5].length()>0) {
+				String subAccounts = userLogin.split(",")[5];
 				for(String aSubAccount : subAccounts.split("~")) {
 					String subAccountID = aSubAccount.split(":")[0];
 					if(subAccountID.length() > 0) {
@@ -257,17 +289,25 @@ public class DeleteAndUploadCampaigns implements Runnable {
 				}
 			}
 			
-			if(subAccountIDs.size() > 0 || (subAccountIDs.size() == 0 && hasAnSuccessfulSubAccount == false)) {				
-				extractors.execute(new DeleteAndUploadCampaigns(driverPool, username, password, bulkCampaignsFolderPath
-						, uploadResultsFilePath, templateFilePath, randomNamesFilePath
-						, domainRandomsFilePath, campaignDeleteType, campaignsToMaintain, subAccountIDs));
+			if(subAccountIDs.size() > 0 || (subAccountIDs.size() == 0 && hasAnSuccessfulSubAccount == false)) {		
+				if(userLoginsFilePath.equalsIgnoreCase("fromdb")) {
+					extractors.execute(new DeleteAndUploadCampaigns(driverPool, username, password, displayUrl, sponsoredBy
+							, bulkCampaignsFolderPath, "todb", templateFilePath, randomNamesFilePath
+							, domainRandomsFilePath, campaignDeleteType, campaignsToMaintain, subAccountIDs));
+				} else {
+					extractors.execute(new DeleteAndUploadCampaigns(driverPool, username, password, displayUrl, sponsoredBy
+							, bulkCampaignsFolderPath, uploadResultsFilePath, templateFilePath, randomNamesFilePath
+							, domainRandomsFilePath, campaignDeleteType, campaignsToMaintain, subAccountIDs));
+				}
+				
 			}
-			
 			
 		}
 		extractors.shutdown();
 		extractors.awaitTermination(2, TimeUnit.HOURS);
-		TextFileWriterUtils.writeListAsLines(userLoginsThisLoop, userLoginsLoopFilePath);
+		if(!userLoginsFilePath.equalsIgnoreCase("fromdb")) {
+			TextFileWriterUtils.writeListAsLines(userLoginsThisLoop, userLoginsLoopFilePath, false);
+		}		
 		driverPool.clear();
 		try {
 			driverPool.close();

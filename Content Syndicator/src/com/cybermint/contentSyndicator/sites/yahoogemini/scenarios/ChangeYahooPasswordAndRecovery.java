@@ -1,6 +1,7 @@
 package com.cybermint.contentSyndicator.sites.yahoogemini.scenarios;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -22,6 +23,7 @@ import org.openqa.selenium.WebDriver;
 import com.cybermint.contentSyndicator.sites.yahoo.pages.YahooMailAccountSecurityPage;
 import com.cybermint.contentSyndicator.sites.yahoo.pages.YahooMailInboxPage;
 import com.cybermint.contentSyndicator.sites.yahoo.pages.YahooMailLoginPage;
+import com.cybermint.contentSyndicator.sites.yahoogemini.utils.YahooGeminiUtils;
 import com.cybermint.factories.webdrivers.PoolableWebDriverFactory;
 import com.cybermint.utils.CyclicIterator;
 import com.cybermint.utils.TextFileReaderUtils;
@@ -49,23 +51,23 @@ public class ChangeYahooPasswordAndRecovery implements Runnable{
 	public void run() {
 		WebDriver driver = null;
 		String status = "";
-		try {			
+		try {
 			driver = (WebDriver) driverPool.borrowObject();
 			driver.manage().window().maximize();
-			status = "Starting";
+			status = YahooGeminiUtils.CH_PASS_STARTING;
 			YahooMailLoginPage aYahooMailLoginPage = new YahooMailLoginPage(driver);			
 			YahooMailInboxPage aYahooMailInboxPage = aYahooMailLoginPage.signInAs(username, password);
-			status = "Signed in";
+			status = YahooGeminiUtils.CH_PASS_SIGNED_IN;
 			YahooMailAccountSecurityPage aYahooMailAccountSecurityPage = aYahooMailInboxPage.getAccountSecurityPage();
-			status = "Got Account Security Page";
+			status = YahooGeminiUtils.CH_PASS_GOT_ACCOUNT_SECURITY_PAGE;
 			aYahooMailAccountSecurityPage = aYahooMailAccountSecurityPage.updateRecoveryEmailAddress(recoveryEmailAddress);
-			status = "Updated Recovery Email";
+			status = YahooGeminiUtils.CH_PASS_UPDATED_RECOVERY_EMAIL;
 			aYahooMailAccountSecurityPage = aYahooMailAccountSecurityPage.deleteRecoveryMobileNumber();
-			status = "Deleted Recovery Number";
+			status = YahooGeminiUtils.CH_PASS_DELETED_RECOVERY_NUMBER;
 			aYahooMailAccountSecurityPage = aYahooMailAccountSecurityPage.changePasswordTo(newPassword);
-			status = "Changed Password";
+			status = YahooGeminiUtils.CH_PASS_CHANGED_PASSWORD;
 			aYahooMailAccountSecurityPage.logout();
-			status = "Done - Logged Out";
+			status = YahooGeminiUtils.CH_PASS_DONE;
 			System.out.println(username + " Passed");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -83,16 +85,31 @@ public class ChangeYahooPasswordAndRecovery implements Runnable{
 		} finally {
 			try {
 				if(null != driver) {
-					driverPool.returnObject(driver);
+					driverPool.invalidateObject(driver);
+					//driverPool.returnObject(driver);
 				}	
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		TextFileWriterUtils.writeString(username+","+status, reportsFilepath, true, true);
+		
+		if(reportsFilepath.equalsIgnoreCase("todb")) {
+			try {
+				if(YahooGeminiUtils.CH_PASS_DONE.equalsIgnoreCase(status)) {
+					YahooGeminiUtils.updateAccountStatusAndPassword(username, newPassword, status);
+				} else {
+					YahooGeminiUtils.updateAccountStatus(username, status);
+				}				
+			} catch (ClassNotFoundException | SQLException e) {
+				e.printStackTrace();
+			}
+		} else {
+			TextFileWriterUtils.writeString(username+","+status, reportsFilepath, true, true);
+		}
+		
 	}
 	
-	public static void main(String[] args) throws InterruptedException, ExecutionException {
+	public static void main(String[] args) throws InterruptedException, ExecutionException, ClassNotFoundException, SQLException {
 		String userLoginsFilePath = args[0]; //"C:/Users/elangokp.AHC.000/Dropbox/Projects/Solar/FakeProfiles/users-change.txt";
 		int noOfThreads = Integer.parseInt(args[1]);
 		String proxiesFilePath = args[2]; //"C:/Users/elangokp.AHC.000/Dropbox/Projects/Solar/FakeProfiles/proxies.txt";
@@ -104,24 +121,37 @@ public class ChangeYahooPasswordAndRecovery implements Runnable{
 		List<String> recoveryEmails = TextFileReaderUtils.readLinesAsList(recoveryEmailsFilePath, true);
 		Collections.shuffle(recoveryEmails);
 		CyclicIterator<String> recoveryEmailIterator = new CyclicIterator<String>(recoveryEmails);
-		List<String> userLogins = TextFileReaderUtils.readLinesAsList(userLoginsFilePath, true);
 		PoolableWebDriverFactory aPoolableWebDriverFactory = new PoolableWebDriverFactory("chrome", proxiesFilePath, binaryPath);
 		GenericObjectPool driverPool = new GenericObjectPool(aPoolableWebDriverFactory);
 		driverPool.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_BLOCK);
 		driverPool.setMaxActive(noOfThreads);
 		driverPool.setLifo(false); //To make it behave a FIFO
 		driverPool.setMaxWait(45000);
-		ExecutorService extractors = Executors.newFixedThreadPool(noOfThreads);		
-		ListIterator<String> userLoginsIterator = userLogins.listIterator();
-		while(userLoginsIterator.hasNext()) {
-			String userLogin = userLoginsIterator.next();
-			String username = userLogin.split(",")[0];
-			String password = userLogin.split(",")[1];
-			Future f = extractors.submit(new ChangeYahooPasswordAndRecovery(driverPool, username, password, "123gemini!@#", recoveryEmailIterator.next(), reportsFilepath));
-			f.get();
-			userLoginsIterator.remove();
-			TextFileWriterUtils.writeListAsLines(userLogins, userLoginsFilePath);
+		ExecutorService extractors = Executors.newFixedThreadPool(noOfThreads);
+		
+		if(userLoginsFilePath.equalsIgnoreCase("fromdb")) {
+			String userLogin = YahooGeminiUtils.getAccountForPasswordChange();
+			while(userLogin.length()>0) {
+				String username = userLogin.split(",")[0];
+				String password = userLogin.split(",")[1];
+				Future f = extractors.submit(new ChangeYahooPasswordAndRecovery(driverPool, username, password, "123gemini!@#", recoveryEmailIterator.next(), "todb"));
+				f.get();
+				userLogin = YahooGeminiUtils.getAccountForPasswordChange();
+			}
+		} else {
+			List<String> userLogins = TextFileReaderUtils.readLinesAsList(userLoginsFilePath, true);
+			ListIterator<String> userLoginsIterator = userLogins.listIterator();
+			while(userLoginsIterator.hasNext()) {
+				String userLogin = userLoginsIterator.next();
+				String username = userLogin.split(",")[0];
+				String password = userLogin.split(",")[1];
+				Future f = extractors.submit(new ChangeYahooPasswordAndRecovery(driverPool, username, password, "123gemini!@#", recoveryEmailIterator.next(), reportsFilepath));
+				f.get();
+				userLoginsIterator.remove();
+				TextFileWriterUtils.writeListAsLines(userLogins, userLoginsFilePath, false);
+			}
 		}
+		
 		extractors.shutdown();
 		extractors.awaitTermination(2, TimeUnit.HOURS);
 		driverPool.clear();

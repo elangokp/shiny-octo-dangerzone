@@ -59,7 +59,7 @@ public class TextFileWriterUtils {
 		return givenFile.exists();
 	}
 
-    public synchronized static void writeListAsLines(Collection<String> givenList, String fileLocation) {
+    public synchronized static void writeListAsLines(Collection<String> givenList, String fileLocation, Boolean isAppend) {
         BufferedWriter writer = null;
         File givenFile = null;
         try {
@@ -68,7 +68,7 @@ public class TextFileWriterUtils {
             	givenFile.getParentFile().mkdirs();
                 givenFile.createNewFile();
             }
-            writer = new BufferedWriter(new FileWriter(givenFile));
+            writer = new BufferedWriter(new FileWriter(givenFile, isAppend));
             for(String aLine:givenList) {
                 writer.append(aLine);
                 writer.newLine();

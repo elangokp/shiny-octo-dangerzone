@@ -42,6 +42,10 @@ public class Campaign {
 	
 	private Double spend;
 	
+	private Double avgCPC;
+	
+	private Double avgCPA;
+	
 	private int conversions;
 	
 	private String campaignId;
@@ -225,6 +229,22 @@ public class Campaign {
 		this.spend = spend;
 	}
 
+
+	public Double getAvgCPC() {
+		return avgCPC;
+	}
+
+	public void setAvgCPC(Double avgCPC) {
+		this.avgCPC = avgCPC;
+	}
+
+	public Double getAvgCPA() {
+		return avgCPA;
+	}
+
+	public void setAvgCPA(Double avgCPA) {
+		this.avgCPA = avgCPA;
+	}
 
 	public int getConversions() {
 		return conversions;

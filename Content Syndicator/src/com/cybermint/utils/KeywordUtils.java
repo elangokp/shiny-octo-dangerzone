@@ -46,7 +46,7 @@ public class KeywordUtils {
 
     public static void splitAndWrite(List<String> givenList, String folderLocation, Integer splitSize, String prefix) {
         for(int i = 0, j = 0; i<=(givenList.size()-splitSize); j++) {
-            TextFileWriterUtils.writeListAsLines(givenList.subList(i, i+splitSize), folderLocation+"Split List " + prefix + "-" + j +".txt");
+            TextFileWriterUtils.writeListAsLines(givenList.subList(i, i+splitSize), folderLocation+"Split List " + prefix + "-" + j +".txt", false);
             i = i+splitSize;
         }
     }

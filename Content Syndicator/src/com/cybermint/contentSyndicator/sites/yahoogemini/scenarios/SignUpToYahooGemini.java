@@ -2,12 +2,14 @@ package com.cybermint.contentSyndicator.sites.yahoogemini.scenarios;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
@@ -22,6 +24,7 @@ import com.cybermint.contentSyndicator.sites.yahoogemini.pages.YahooGeminiBillin
 import com.cybermint.contentSyndicator.sites.yahoogemini.pages.YahooGeminiDashboardPage;
 import com.cybermint.contentSyndicator.sites.yahoogemini.pages.YahooGeminiHomePage;
 import com.cybermint.contentSyndicator.sites.yahoogemini.pages.YahooGeminiSignUpPage;
+import com.cybermint.contentSyndicator.sites.yahoogemini.utils.YahooGeminiUtils;
 import com.cybermint.factories.webdrivers.PoolableWebDriverFactory;
 import com.cybermint.utils.TextFileReaderUtils;
 import com.cybermint.utils.TextFileWriterUtils;
@@ -76,7 +79,7 @@ public class SignUpToYahooGemini implements Runnable{
 		List<String> failureLog = new ArrayList<String>();
 		//failureLog.add("this user started : " + username + " - " + new Date());
 		//System.out.println("Started - " + new Date() + "\n");
-		String status = "started";
+		String status = YahooGeminiUtils.SU_ACCT_STARTING;
 		try {
 			driver = (WebDriver) driverPool.borrowObject();
 			//driver.manage().timeouts().implicitlyWait(45, TimeUnit.SECONDS);
@@ -85,13 +88,13 @@ public class SignUpToYahooGemini implements Runnable{
 			YahooGeminiHomePage aYahooGeminiHomePage = new YahooGeminiHomePage(driver);
 			YahooGeminiSignUpPage aYahooGeminiSignUpPage = null;
 			YahooGeminiDashboardPage aYahooGeminiDashboardPage = null;
-			if(null == this.lastStatus ||  this.lastStatus.length() == 0 || this.lastStatus.equalsIgnoreCase("started")
-					|| this.lastStatus.equalsIgnoreCase("signed in")) {
+			if(null == this.lastStatus ||  this.lastStatus.length() == 0 || this.lastStatus.equalsIgnoreCase(YahooGeminiUtils.SU_ACCT_STARTING)
+					|| this.lastStatus.equalsIgnoreCase(YahooGeminiUtils.SU_ACCT_SIGNED_IN)|| this.lastStatus.equalsIgnoreCase(YahooGeminiUtils.CH_PASS_DONE)) {
 				aYahooGeminiSignUpPage = aYahooGeminiHomePage.clickSignInLink().signInAndGetSignUpPage(username, password);
-				status = "signed in";
+				status = YahooGeminiUtils.SU_ACCT_SIGNED_IN;
 				System.out.println(status);
 				aYahooGeminiDashboardPage = aYahooGeminiSignUpPage.signup(companyName, companyWebsite, email, phoneNumber);
-				status = "signed up";
+				status = YahooGeminiUtils.SU_ACCT_SIGNED_UP;
 				System.out.println(status);
 			} else {
 				aYahooGeminiDashboardPage = aYahooGeminiHomePage.clickSignInLink().signInAs(username, password);
@@ -102,15 +105,15 @@ public class SignUpToYahooGemini implements Runnable{
 			aYahooGeminiDashboardPage.clickGotIt();
 			aYahooGeminiDashboardPage.dismissSplash();
 			YahooGeminiBillingPage aYahooGeminiBillingPage = aYahooGeminiDashboardPage.goToBilling();
-			status = "Opened Billing";
+			status = YahooGeminiUtils.SU_ACCT_OPENED_BILLING;
 			System.out.println(status);
 			Boolean billingSuccess = aYahooGeminiBillingPage.submitCCInfo(cardNumber, cardExpiry, cardCVV, cardHolderName, zipCode
 																			,address1, address2, city, state, false);
 			
 			if(billingSuccess) {
-				status = "Billing Success";
+				status = YahooGeminiUtils.ACTIVE;
 			} else {
-				status = "Billing Failure";
+				status = YahooGeminiUtils.SU_ACCT_BILLING_FAILURE;
 			}
 			System.out.println(status);
 			
@@ -132,7 +135,17 @@ public class SignUpToYahooGemini implements Runnable{
 				e.printStackTrace();
 			}
 		}
-		TextFileWriterUtils.writeString(username+"-"+companyName+","+status, signupStatsFilepath, true, true);
+		
+		if(signupStatsFilepath.equalsIgnoreCase("todb")) {
+			try {
+				YahooGeminiUtils.updateAccountStatus(username, status);			
+			} catch (ClassNotFoundException | SQLException e) {
+				e.printStackTrace();
+			}
+		} else {
+			TextFileWriterUtils.writeString(username+"-"+companyName+","+status, signupStatsFilepath, true, true);
+		}
+		
 		//System.out.println("Completed - " + new Date() + "\n");		
 	}
 	
@@ -204,14 +217,13 @@ public class SignUpToYahooGemini implements Runnable{
 		return cardDetails;
 	}
 
-	public static void main(String[] args) throws InterruptedException {	
+	public static void main(String[] args) throws InterruptedException, ClassNotFoundException, SQLException {	
 		String userLoginsFilePath = args[0]; //"C:/Users/elangokp.AHC.000/Dropbox/Projects/Solar/FakeProfiles/users.txt"
 		String reportsFolderPath = args[1]; //"C:/Users/elangokp.AHC.000/Dropbox/Projects/Solar/Reports"
 		String binaryPath = args[2]; //"C:/Program Files (x86)/Mozilla Firefox/firefox.exe"
 		int noOfThreads = Integer.parseInt(args[3]);
 		String proxiesFilePath = args[4]; //"C:/Users/elangokp.AHC.000/Dropbox/Projects/Solar/FakeProfiles/proxies.txt"
 		int accountsPerRun = Integer.parseInt(args[5]);
-		List<String> userLogins = TextFileReaderUtils.readLinesAsList(userLoginsFilePath, true);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		String signupStatsFilepath = reportsFolderPath + "/signupStat-" +sdf.format(new Date()) +".csv";
 		PoolableWebDriverFactory aPoolableWebDriverFactory = new PoolableWebDriverFactory("chrome", proxiesFilePath, binaryPath);
@@ -220,12 +232,24 @@ public class SignUpToYahooGemini implements Runnable{
 		driverPool.setMaxActive(noOfThreads);
 		driverPool.setLifo(false); //To make it behave a FIFO
 		driverPool.setMaxWait(45000);
-		ExecutorService extractors = Executors.newFixedThreadPool(noOfThreads);		
-		
+		ExecutorService extractors = Executors.newFixedThreadPool(noOfThreads);	
+		List<String> userLogins = null;
 		List<String> userLoginsForThisRun = new ArrayList<String>();
-		for(int i=0; i<userLogins.size() && i < accountsPerRun ; i++) {
-			userLoginsForThisRun.add(userLogins.get(i));
-			userLogins.remove(i);
+		
+		if(userLoginsFilePath.equalsIgnoreCase("fromdb")) {
+			for(int i=0; i < accountsPerRun ; i++) {
+				String userLogin = YahooGeminiUtils.getAccountForGeminiSignup();
+				if(userLogin.length()>0) {
+					userLoginsForThisRun.add(userLogin);
+				}				
+			}
+		} else {
+			userLogins = TextFileReaderUtils.readLinesAsList(userLoginsFilePath, true);
+			for(int i=0; i<userLogins.size() && i < accountsPerRun ; i++) {
+				userLoginsForThisRun.add(userLogins.get(i));
+				userLogins.remove(i);
+			}
+			
 		}
 		
 		for(String userLogin : userLoginsForThisRun) {
@@ -250,14 +274,26 @@ public class SignUpToYahooGemini implements Runnable{
 			String address2 = cardDetails.get(6);
 			String city = cardDetails.get(7);
 			String state = cardDetails.get(8);
-			extractors.execute(new SignUpToYahooGemini(driverPool, username, password, companyName
-					, companyWebsite, email, phoneNumber, cardNumber, cardExpiry
-					, cardCVV, cardHolderName, zipCode, signupStatsFilepath
-					,address1, address2, city, state, lastStatus));
+			
+			if(userLoginsFilePath.equalsIgnoreCase("fromdb")) {
+				extractors.execute(new SignUpToYahooGemini(driverPool, username, password, companyName
+						, companyWebsite, email, phoneNumber, cardNumber, cardExpiry
+						, cardCVV, cardHolderName, zipCode, "todb"
+						,address1, address2, city, state, lastStatus));
+			} else {
+				extractors.execute(new SignUpToYahooGemini(driverPool, username, password, companyName
+						, companyWebsite, email, phoneNumber, cardNumber, cardExpiry
+						, cardCVV, cardHolderName, zipCode, signupStatsFilepath
+						,address1, address2, city, state, lastStatus));
+			}
+			
 		}
+		
 		extractors.shutdown();
 		extractors.awaitTermination(2, TimeUnit.HOURS);
-		TextFileWriterUtils.writeListAsLines(userLogins, userLoginsFilePath);
+		if(!userLoginsFilePath.equalsIgnoreCase("fromdb")) {
+			TextFileWriterUtils.writeListAsLines(userLogins, userLoginsFilePath, false);
+		}		
 		driverPool.clear();
 		try {
 			driverPool.close();

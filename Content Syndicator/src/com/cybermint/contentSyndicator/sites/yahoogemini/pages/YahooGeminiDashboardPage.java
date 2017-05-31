@@ -34,7 +34,7 @@ public class YahooGeminiDashboardPage extends Page {
 	
 	public YahooGeminiDashboardPage(WebDriver driver) {
 		super(driver);
-		((JavascriptExecutor) driver).executeScript("document.querySelector('#header').style.position = 'absolute';");
+		((JavascriptExecutor) driver).executeScript("document.querySelector('#header').style.position = 'static';");
 		((JavascriptExecutor) driver).executeScript("document.querySelector('footer').style.display = 'none';");
 		if(super.waitForElementToLoad("css", "div.message-shown",2)) {
 			try {
@@ -122,6 +122,22 @@ public class YahooGeminiDashboardPage extends Page {
 		driver.get(billingURL);
 		super.waitForElementToLoad("id", "yahooPaymentWidgetFrame");
 		return PageFactory.initElements(driver, YahooGeminiBillingPage.class);
+	}
+	
+	public YahooGeminiReportsPage goToReportspage() {
+		String baseAdvertiserURL = driver.getCurrentUrl().replaceAll("campaigns.*", "");
+		String reportsURL = baseAdvertiserURL + "reportBuilder";
+		driver.get(reportsURL);
+		super.waitForElementToLoad("css", "a[href*=\"reportBuilder/create\"]");
+		return PageFactory.initElements(driver, YahooGeminiReportsPage.class);
+	}
+	
+	public YahooGeminiReportsCreatePage goToReportsCreatepage() {
+		String baseAdvertiserURL = driver.getCurrentUrl().replaceAll("campaigns.*", "");
+		String reportsBuilderURL = baseAdvertiserURL + "reportBuilder/create";
+		driver.get(reportsBuilderURL);
+		super.waitForElementToLoad("css", "button[ng-click*=\"onScheduleClick\"]");
+		return PageFactory.initElements(driver, YahooGeminiReportsCreatePage.class);
 	}
 	
 	public void markAllNotificationsAsRead() {
@@ -372,6 +388,14 @@ public class YahooGeminiDashboardPage extends Page {
 		
 	}
 	
+	public void pauseAllCampaigns(List<Campaign> campaignList) {
+		if(campaignList.size()>0) {
+			this.selectAllCampaigns();
+			pauseSelectedCampaigns();
+		}
+		
+	}
+	
 	public void activateNormalCampaigns(List<Campaign> campaignList) {
 		int toBeActivated = 0;
 		for(Campaign aCampaign : campaignList) {
@@ -460,8 +484,10 @@ public class YahooGeminiDashboardPage extends Page {
 			aCampaign.setImpressions(new Double(aCampaignDataFields[5].replaceAll(",", "").replaceAll("—", "0")));
 			aCampaign.setCtr((aCampaign.getImpressions()>0 ? (aCampaign.getClicks()/aCampaign.getImpressions()) : 0)*100);
 			aCampaign.setSpend(new Double(aCampaignDataFields[7].replaceAll("\\$", "").replaceAll("—", "0")));
-			aCampaign.setConversions(new Integer(aCampaignDataFields[8].replaceAll(",", "").replaceAll("—", "0")));
-			String campaignId = aCampaignDataFields[9].split("/")[2];
+			aCampaign.setAvgCPC(new Double(aCampaignDataFields[8].replaceAll("\\$", "").replaceAll("—", "0")));
+			aCampaign.setAvgCPA(new Double(aCampaignDataFields[9].replaceAll("\\$", "").replaceAll("—", "0")));
+			aCampaign.setConversions(new Integer(aCampaignDataFields[10].replaceAll(",", "").replaceAll("—", "0")));
+			String campaignId = aCampaignDataFields[11].split("/")[2];
 			aCampaign.setCampaignId(campaignId);
 			aCampaign.setStatsDuration(durationRange);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
