@@ -321,14 +321,18 @@ public class YahooGeminiStats {
 	}*/
 	
 	public static void main(String[] args) throws MessagingException, ClassNotFoundException, SQLException, IOException {
-		// TODO Auto-generated method stub
+		/*
 		String downloadsFolderPath = "C:/Users/elangokp.AHC.000/Google Drive/Analysis/Reports/Gemini/";
 		String extractsFolderPath = "C:/Users/elangokp.AHC.000/Google Drive/Analysis/Reports/Gemini/extracts/";
 		String archiveFolderPath = "C:/Users/elangokp.AHC.000/Google Drive/Analysis/Reports/Gemini/extracts/Done/";
 		String combinedFileFolderPath = "C:/Users/elangokp.AHC.000/Google Drive/Analysis/Reports/Gemini/combined/";
+		*/
 		
+		String downloadsFolderPath = args[0];
+		String extractsFolderPath = args[1];
+		String archiveFolderPath = args[2];
 		
-		
+		//String combinedFileFolderPath = args[3];
 		//Date date = new Date();
 		//String modifiedDate= new SimpleDateFormat("yyyy-MM-dd").format(date);
 		
@@ -336,6 +340,13 @@ public class YahooGeminiStats {
 		
 		//YahooGeminiStats.getReportsFromGmail("ramon.goings56@gmail.com", "123gemini!@#", downloadsFolderPath);
 		
+		List<String> accounts = TextFileReaderUtils.readLinesAsList(args[3], true);
+		for(String account : accounts) {
+			YahooGeminiStats.getReportsFromGmailUsingImap(account.split(",")[0], account.split(",")[1], downloadsFolderPath);
+			System.out.println(account.split(",")[0]+" - Done");
+		}
+		
+		/*
 		YahooGeminiStats.getReportsFromGmailUsingImap("ramon.goings56@gmail.com", "123gemini!@#", downloadsFolderPath);
 		System.out.println("ramon.goings56@gmail.com - Done");
 		YahooGeminiStats.getReportsFromGmailUsingImap("josephcornell28@gmail.com", "123gemini!@#", downloadsFolderPath);
@@ -344,6 +355,7 @@ public class YahooGeminiStats {
 		System.out.println("nicker.ruby@gmail.com - Done");
 		YahooGeminiStats.getReportsFromGmailUsingImap("elango@cybermint.com", "123cybermint!@#", downloadsFolderPath);
 		System.out.println("elango@cybermint.com - Done");
+		*/
 		
 		YahooGeminiStats.unzipAndDeleteFilesInFolder(downloadsFolderPath, extractsFolderPath);
 		YahooGeminiStats.updateDB(extractsFolderPath, archiveFolderPath);

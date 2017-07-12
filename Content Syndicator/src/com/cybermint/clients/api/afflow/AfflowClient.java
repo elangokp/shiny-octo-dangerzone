@@ -265,10 +265,13 @@ public class AfflowClient {
 
 	public static void main(String[] args) {
 		AfflowClient anAfflowClient =  new AfflowClient();
+		anAfflowClient.getRegions("1", "336");
+		/*
 		ArrayList<String> stats = new ArrayList<String>();
 		stats.add("Duration,campaignName,keyword,clicks,filtered_clicks,offer_clicks,bot_clicks,leads,revenue,ctr,ltc,cr,epc,epm");
 		stats.addAll(anAfflowClient.getCampaignStats("7396", "AF_US_WIFI_ADL-o514a7a_POP_0eacbf90-3fcc-11e7-bc40-0e06c6fba698", "clicks", "desc", "sid", 1, "America/Los_Angeles"));
 		TextFileWriterUtils.writeListAsLines(stats, "C:/Users/elangokp.AHC.000/Google Drive/Analysis/Afflow/CampaignStats.csv", false);
+		*/
 		/*System.out.println(anAfflowClient.getTimeZoneForTheHour(1));
 		System.out.println(anAfflowClient.getTimeZoneForTheHour(2));
 		System.out.println(anAfflowClient.getTimeZoneForTheHour(3));

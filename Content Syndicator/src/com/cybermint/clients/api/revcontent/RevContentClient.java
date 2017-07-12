@@ -29,8 +29,8 @@ public class RevContentClient {
 	public static final MediaType JSON	= MediaType.parse("application/json; charset=utf-8");
 	public static final MediaType FORM	= MediaType.parse("application/x-www-form-urlencoded");
 	
-	public static final String clientId = "elangokp";
-	public static final String clientSecret = "a79a13875f39f160732be983df4a6c2a9804a1ef";
+	private static final String clientId = "elangokp";
+	private static final String clientSecret = "a79a13875f39f160732be983df4a6c2a9804a1ef";
 	
 	private static RevContentClient instance = null;
 	

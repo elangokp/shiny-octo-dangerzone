@@ -49,9 +49,9 @@ public class GetAfflowStats implements Runnable {
 			reporters.execute(new GetAfflowStats("0",vertical,"clicks","desc","carrier","today",3,stats));
 			reporters.execute(new GetAfflowStats("1",vertical,"clicks","desc","carrier","yesterday",1,stats));
 			reporters.execute(new GetAfflowStats("1",vertical,"clicks","desc","carrier","three",1,stats));
-			reporters.execute(new GetAfflowStats("1",vertical,"clicks","desc","carrier","seven",1,stats));
-			reporters.execute(new GetAfflowStats("1",vertical,"clicks","desc","carrier","fourteen",1,stats));
-			reporters.execute(new GetAfflowStats("1",vertical,"clicks","desc","carrier","thirty",1,stats));
+			//reporters.execute(new GetAfflowStats("1",vertical,"clicks","desc","carrier","seven",1,stats));
+			//reporters.execute(new GetAfflowStats("1",vertical,"clicks","desc","carrier","fourteen",1,stats));
+			//reporters.execute(new GetAfflowStats("1",vertical,"clicks","desc","carrier","thirty",1,stats));
 		}
 		reporters.shutdown();
 		reporters.awaitTermination(2, TimeUnit.HOURS);		
