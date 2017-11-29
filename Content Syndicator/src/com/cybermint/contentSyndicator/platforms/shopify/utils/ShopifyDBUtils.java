@@ -151,6 +151,70 @@ public class ShopifyDBUtils {
 		return shopifyProductDetailsTable;
 	}
 	
+	private SQLServerDataTable getSitesAsDataTable(List<ShopifySite> sites) throws SQLServerException {
+		SQLServerDataTable shopifySiteDetailsTable = new SQLServerDataTable();
+		shopifySiteDetailsTable.addColumnMetadata("SiteId" ,java.sql.Types.INTEGER);
+		shopifySiteDetailsTable.addColumnMetadata("useTrackify" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("usePixelPerfect" ,java.sql.Types.BIT); 
+		shopifySiteDetailsTable.addColumnMetadata("useHextomShippingBar" ,java.sql.Types.BIT); 
+		shopifySiteDetailsTable.addColumnMetadata("useKlaviyo" ,java.sql.Types.BIT); 
+		shopifySiteDetailsTable.addColumnMetadata("useWheelio" ,java.sql.Types.BIT);   
+		shopifySiteDetailsTable.addColumnMetadata("useTrust" ,java.sql.Types.BIT); 
+		shopifySiteDetailsTable.addColumnMetadata("useCartHook" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useCriteo" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useHurrify" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useBestCurrencyConverter" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useFomo" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useBeketing" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useHextomMCC" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useRetargetApp" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("usePersonalizerLimespot" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useCoin" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useRecart" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useOneClickUpsell" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useZipifyPages" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useAdroll" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useQuantityBreaks" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useSimplifiProgrammatic" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useCurrencyConverterPlus" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useHextomQuickAnnouncement" ,java.sql.Types.BIT);
+					
+		for(ShopifySite site : sites) {
+			int siteID = null == site.getSiteID() ? 0 : site.getSiteID();
+			boolean useTrackify = site.isUseTrackify();
+			boolean usePixelPerfect = site.isUsePixelPerfect();
+			boolean useHextomShippingBar = site.isUseHextomShippingBar();
+			boolean useKlaviyo = site.isUseKlaviyo();
+			boolean useWheelio = site.isUseWheelio();
+			boolean useTrust = site.isUseTrust();
+			boolean useCartHook = site.isUseCartHook();
+			boolean useCriteo = site.isUseCriteo();
+			boolean useHurrify = site.isUseHurrify();
+			boolean useBestCurrencyConverter = site.isUseBestCurrencyConverter();
+			boolean useFomo = site.isUseFomo();
+			boolean useBeketing = site.isUseBeketing();
+			boolean useHextomMCC = site.isUseHextomMCC();
+			boolean useRetargetApp = site.isUseRetargetApp();
+			boolean usePersonalizerLimespot = site.isUsePersonalizerLimespot();
+			boolean useCoin = site.isUseCoin();
+			boolean useRecart = site.isUseRecart();
+			boolean useOneClickUpsell = site.isUseOneClickUpsell();
+			boolean useZipifyPages = site.isUseZipifyPages();
+			boolean useAdroll = site.isUseAdroll();
+			boolean useQuantityBreaks = site.isUseQuantityBreaks();
+			boolean useSimplifiProgrammatic = site.isUseSimplifiProgrammatic();
+			boolean useCurrencyConverterPlus = site.isUseCurrencyConverterPlus();
+			boolean useHextomQuickAnnouncement = site.isUseHextomQuickAnnouncement();
+			
+			shopifySiteDetailsTable.addRow(siteID,useTrackify,usePixelPerfect,useHextomShippingBar,useKlaviyo,useWheelio,useTrust,useCartHook,useCriteo,useHurrify,
+					useBestCurrencyConverter,useFomo,useBeketing,useHextomMCC,useRetargetApp,usePersonalizerLimespot,
+					useCoin,useRecart,useOneClickUpsell,useZipifyPages,useAdroll,useQuantityBreaks,useSimplifiProgrammatic,
+					useCurrencyConverterPlus,useHextomQuickAnnouncement);
+		}
+		
+		return shopifySiteDetailsTable;
+	}
+	
 	public void insertProductRankings(List<ShopifyProduct> products) {
 		Connection connection = null;
 		SQLServerCallableStatement stmt = null;
@@ -204,6 +268,29 @@ public class ShopifyDBUtils {
 			connection = CampaignStatsDBConnectionPool.getInstance().getConnection();
 			stmt = connection.prepareCall("{call [UpdateProductDetails] (?)}").unwrap(SQLServerCallableStatement.class);
 			stmt.setStructured(1, "dbo.ShopifyProductTableType", shopifyProductDetailsTable);
+			stmt.execute();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				stmt.close();
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			
+		}
+	}
+	
+	public void updateSiteTechDetails(List<ShopifySite> sites) {
+		Connection connection = null;
+		SQLServerCallableStatement stmt = null;		
+		try {
+			SQLServerDataTable shopifySiteDetailsTable = this.getSitesAsDataTable(sites);
+			connection = CampaignStatsDBConnectionPool.getInstance().getConnection();
+			stmt = connection.prepareCall("{call [UpdateShopifySitesTechDetermination] (?)}").unwrap(SQLServerCallableStatement.class);
+			stmt.setStructured(1, "dbo.ShopifySiteTableType", shopifySiteDetailsTable);
 			stmt.execute();
 			
 		} catch (Exception e) {
