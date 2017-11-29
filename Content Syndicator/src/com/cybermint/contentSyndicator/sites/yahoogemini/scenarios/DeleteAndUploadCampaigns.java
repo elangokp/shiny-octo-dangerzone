@@ -35,6 +35,8 @@ public class DeleteAndUploadCampaigns implements Runnable {
 	
 	public final static String updateCampaigns = "update";
 	
+	public final static String deleteOnly = "deleteOnly";
+	
 	private ObjectPool driverPool;
 	private String username;
 	private String password;
@@ -75,6 +77,7 @@ public class DeleteAndUploadCampaigns implements Runnable {
 		try {
 			subAccountID = (null != subAccountURL ? subAccountURL.replaceAll("/campaigns", "") : "");
 			status = "started";
+			System.out.println(status);
 			String baseURL = "https://gemini.yahoo.com/advertiser/";
 			String subAccountCampaignsPageURL;
 			if(null != subAccountURL) {
@@ -89,46 +92,61 @@ public class DeleteAndUploadCampaigns implements Runnable {
 			if(!DeleteAndUploadCampaigns.noCampaigns.equalsIgnoreCase(this.deleteType) && !DeleteAndUploadCampaigns.updateCampaigns.equalsIgnoreCase(this.deleteType)) {	
 				campaigns = aYahooGeminiDashboardPage.getCampaignStats(Campaign.today);
 				if(aYahooGeminiDashboardPage.areCampaignsAvailable()) {
-					if(DeleteAndUploadCampaigns.allCampaigns.equalsIgnoreCase(this.deleteType)) {					
-						aYahooGeminiDashboardPage.deleteAllCampaigns();
+					if(DeleteAndUploadCampaigns.allCampaigns.equalsIgnoreCase(this.deleteType) 
+							|| DeleteAndUploadCampaigns.deleteOnly.equalsIgnoreCase(this.deleteType)) {					
+						System.out.println("Delete All");
+						aYahooGeminiDashboardPage.deleteAllCampaigns();						
 						status = "deleted";
 					} else if(DeleteAndUploadCampaigns.pausedCampaigns.equalsIgnoreCase(this.deleteType)) {
-						aYahooGeminiDashboardPage.deletePausedCampaigns(campaigns);
+						aYahooGeminiDashboardPage.deletePausedCampaigns(campaigns);					
 						status = "deleted";
 					}
-				}	
+				} else {
+					status = "deleted";
+				}
 								
 			}
-			
 			Thread.sleep(5000);
 			aYahooGeminiDashboardPage.dismissSplash();
-			campaigns = aYahooGeminiDashboardPage.getCampaignStats(Campaign.today);
-			int noOfCampaignsToUpload = this.noOfCampaignsToBeMaintained - campaigns.size();
-			noOfCampaignsToUpload = noOfCampaignsToUpload < 0 ? 0 : noOfCampaignsToUpload;
-			String accountName = this.username + "-" + aYahooGeminiDashboardPage.getAccountName();
-			String bulkCampaignsFilePath = "";
-			if(DeleteAndUploadCampaigns.updateCampaigns.equalsIgnoreCase(this.deleteType)) {	
-				bulkCampaignsFilePath = YahooGeminiUtils.generateBulkUpdateFileForSingleAccount(campaigns,accountName, displayUrl, sponsoredBy, bulkCampaignsFolderPath, templateFilePath);
+			System.out.println(status);
+			
+			if(!DeleteAndUploadCampaigns.deleteOnly.equalsIgnoreCase(this.deleteType)) {				
+				campaigns = aYahooGeminiDashboardPage.getCampaignStats(Campaign.today);
+				int noOfCampaignsToUpload = this.noOfCampaignsToBeMaintained - campaigns.size();
+				noOfCampaignsToUpload = noOfCampaignsToUpload < 0 ? 0 : noOfCampaignsToUpload;
+				String accountName = this.username + "-" + aYahooGeminiDashboardPage.getAccountName();
+				String bulkCampaignsFilePath = "";
+				if(DeleteAndUploadCampaigns.updateCampaigns.equalsIgnoreCase(this.deleteType)) {	
+					bulkCampaignsFilePath = YahooGeminiUtils.generateBulkUpdateFileForSingleAccount(campaigns,accountName, displayUrl, sponsoredBy, bulkCampaignsFolderPath, templateFilePath);
+				} else {
+					bulkCampaignsFilePath = YahooGeminiUtils.generateBulkFileForSingleAccount(noOfCampaignsToUpload,accountName, displayUrl, sponsoredBy, randomNamesFilePath, domainRandomsFilePath, bulkCampaignsFolderPath, templateFilePath);
+				}
+						
+				bulkCampaignsFilePath = bulkCampaignsFilePath.replaceAll("/", "\\\\");
+				//System.out.println(bulkCampaignsFilePath);
+				Boolean uploadStatus = false;
+				if(campaigns.size()>0) {
+					uploadStatus = aYahooGeminiDashboardPage.uploadAdditionalBulkCampaigns(bulkCampaignsFilePath);				
+				} else {
+					uploadStatus = aYahooGeminiDashboardPage.uploadBulkCampaignsOnEmptyAccount(bulkCampaignsFilePath);
+				}
+				if(uploadStatus == true) {
+					status = "upload successful";
+				} else {
+					status = "upload failed";
+				}
 			} else {
-				bulkCampaignsFilePath = YahooGeminiUtils.generateBulkFileForSingleAccount(noOfCampaignsToUpload,accountName, displayUrl, sponsoredBy, randomNamesFilePath, domainRandomsFilePath, bulkCampaignsFolderPath, templateFilePath);
+				if(status.equalsIgnoreCase("deleted")) {
+					status = "upload successful";
+				} else {
+					status = "upload failed";
+				}
 			}
-					
-			bulkCampaignsFilePath = bulkCampaignsFilePath.replaceAll("/", "\\\\");
-			//System.out.println(bulkCampaignsFilePath);
-			Boolean uploadStatus = false;
-			if(campaigns.size()>0) {
-				uploadStatus = aYahooGeminiDashboardPage.uploadAdditionalBulkCampaigns(bulkCampaignsFilePath);				
-			} else {
-				uploadStatus = aYahooGeminiDashboardPage.uploadBulkCampaignsOnEmptyAccount(bulkCampaignsFilePath);
-			}
-			if(uploadStatus == true) {
-				status = "upload successful";
-			} else {
-				status = "upload failed";
-			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.out.println(status);
 		subAccountStatus.add(subAccountID+":"+status);		
 	}
 
@@ -258,8 +276,10 @@ public class DeleteAndUploadCampaigns implements Runnable {
 		driverPool.setMaxActive(noOfThreads);
 		driverPool.setLifo(false); //To make it behave a FIFO
 		driverPool.setMaxWait(45000);
-		ExecutorService extractors = Executors.newFixedThreadPool(noOfThreads);			
+		ExecutorService extractors = Executors.newFixedThreadPool(noOfThreads);		
+		
 		for(String userLogin : userLoginsForThisRun) {
+			System.out.println(userLogin);
 			String username = userLogin.split(",")[0];
 			String password = userLogin.split(",")[1];
 			String templateFilePath = templateFolderPath + userLogin.split(",")[2] + ".csv";

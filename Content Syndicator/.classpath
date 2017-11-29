@@ -1,45 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="lib/common utils/commons-pool-1.5.7.jar"/>
-	<classpathentry kind="lib" path="lib/Embedded DB/h2-1.2.142.jar"/>
-	<classpathentry kind="lib" path="lib/hibernate-3.5.4/antlr-2.7.6.jar"/>
-	<classpathentry kind="lib" path="lib/hibernate-3.5.4/commons-collections-3.1.jar"/>
-	<classpathentry kind="lib" path="lib/hibernate-3.5.4/dom4j-1.6.1.jar"/>
-	<classpathentry kind="lib" path="lib/hibernate-3.5.4/hibernate-jpa-2.0-api-1.0.0.Final.jar"/>
-	<classpathentry kind="lib" path="lib/hibernate-3.5.4/hibernate3.jar"/>
-	<classpathentry kind="lib" path="lib/hibernate-3.5.4/javassist-3.9.0.GA.jar"/>
-	<classpathentry kind="lib" path="lib/hibernate-3.5.4/jta-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/hibernate-3.5.4/mysql-connector-java-5.1.15-bin.jar"/>
-	<classpathentry kind="lib" path="lib/hibernate-3.5.4/slf4j-api-1.5.8.jar"/>
-	<classpathentry kind="lib" path="lib/hibernate-3.5.4/slf4j-simple-1.5.6.jar"/>
-	<classpathentry kind="lib" path="lib/Jackson-JSON/jackson-annotations-2.0.4.jar"/>
-	<classpathentry kind="lib" path="lib/Jackson-JSON/jackson-core-2.0.4.jar"/>
-	<classpathentry kind="lib" path="lib/Jackson-JSON/jackson-databind-2.0.4.jar"/>
-	<classpathentry kind="lib" path="lib/Java Mail/mail.jar"/>
-	<classpathentry kind="lib" path="lib/guava-13.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/jsoup-1.6.3.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+	<classpathentry including="**/*.java" kind="src" output="target/classes" path="src">
 		<attributes>
-			<attribute name="owner.project.facets" value="java"/>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/autoit/AutoItX4Java.jar"/>
-	<classpathentry kind="lib" path="lib/autoit/jacob.jar"/>
-	<classpathentry kind="lib" path="lib/Selenium/selenium-server-standalone-2.52.0.jar"/>
-	<classpathentry kind="lib" path="lib/scribe/scribejava-apis-2.5.2.jar"/>
-	<classpathentry kind="lib" path="lib/scribe/scribejava-core-2.5.2.jar"/>
-	<classpathentry kind="lib" path="lib/okhttp/okhttp-3.3.1.jar"/>
-	<classpathentry kind="lib" path="lib/okhttp/okio-1.8.0.jar"/>
-	<classpathentry kind="lib" path="lib/log4j/log4j-core-2.6.2.jar"/>
-	<classpathentry kind="lib" path="lib/log4j/log4j-api-2.6.2.jar"/>
-	<classpathentry kind="lib" path="lib/captcha/com.DeathByCaptcha.jar"/>
-	<classpathentry kind="lib" path="lib/captcha/org.base64.jar"/>
-	<classpathentry kind="lib" path="lib/captcha/org.json.jar"/>
-	<classpathentry kind="lib" path="lib/zip4j/zip4j_1.3.2.jar"/>
-	<classpathentry kind="lib" path="lib/opencsv/opencsv-3.9.jar"/>
-	<classpathentry kind="lib" path="lib/common utils/commons-lang3-3.5.jar"/>
-	<classpathentry kind="lib" path="lib/common utils/commons-beanutils-1.9.3.jar"/>
-	<classpathentry kind="lib" path="lib/SQL Driver/sqljdbc42.jar"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry exported="true" kind="lib" path="lib/common utils/commons-pool-1.5.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/Embedded DB/h2-1.2.142.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hibernate-3.5.4/antlr-2.7.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hibernate-3.5.4/commons-collections-3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hibernate-3.5.4/dom4j-1.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hibernate-3.5.4/hibernate-jpa-2.0-api-1.0.0.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hibernate-3.5.4/hibernate3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hibernate-3.5.4/javassist-3.9.0.GA.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hibernate-3.5.4/jta-1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hibernate-3.5.4/mysql-connector-java-5.1.15-bin.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hibernate-3.5.4/slf4j-api-1.5.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hibernate-3.5.4/slf4j-simple-1.5.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/Jackson-JSON/jackson-annotations-2.0.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/Jackson-JSON/jackson-core-2.0.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/Jackson-JSON/jackson-databind-2.0.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/Java Mail/mail.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/guava-13.0.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="lib/autoit/AutoItX4Java.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/autoit/jacob.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/Selenium/selenium-server-standalone-2.52.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/scribe/scribejava-apis-2.5.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/scribe/scribejava-core-2.5.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/log4j/log4j-core-2.6.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/log4j/log4j-api-2.6.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/captcha/com.DeathByCaptcha.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/captcha/org.base64.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/captcha/org.json.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/zip4j/zip4j_1.3.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/opencsv/opencsv-3.9.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/common utils/commons-lang3-3.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/common utils/commons-beanutils-1.9.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/SQL Driver/sqljdbc42.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/DBPooling/HikariCP-2.7.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jsoup/jsoup-1.10.3.jar"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/okhttp/okhttp-3.9.0.jar"/>
+	<classpathentry kind="lib" path="lib/okhttp/okio-1.13.0.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>

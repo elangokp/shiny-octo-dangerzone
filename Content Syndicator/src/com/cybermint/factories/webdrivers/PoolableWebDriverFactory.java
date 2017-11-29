@@ -116,7 +116,7 @@ public class PoolableWebDriverFactory extends BasePoolableObjectFactory {
 	protected WebDriver constructDriver() {
 		WebDriver driver = null;
 		if(this.proxyIterator == null) {			
-			driver = Page.constructDriver(this.driverType);
+			driver = Page.constructDriverWithProxy(this.driverType, null, this.binaryFilePath);
 			return driver;
 		} else {
 			Boolean hasProxyError = true;

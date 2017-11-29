@@ -216,8 +216,8 @@ public class YahooGeminiDashboardPage extends Page {
 	}
 	
 	private void select200ResultsPerPage() {
-		System.out.println("Inside select200ResultsPerPage");
-		//resultsPerPageDropdown = driver.findElement(By.cssSelector("div.ui-table-pagination div.combobox i"));
+		//System.out.println("Inside select200ResultsPerPage");
+		//resultsPerPageDropdown = driver.findElement(By.cssSelector("div.ui-table-pagination div.combobox"));
 		//System.out.println("1");
 		//resultsPerPageDropdown.click();
 		//System.out.println("2");
@@ -226,9 +226,12 @@ public class YahooGeminiDashboardPage extends Page {
 		System.out.println("3");
 		super.waitForElementToBeEnabled(perPageMenuElement);
 		System.out.println("4");
-		WebElement perPage200MenuItem = driver.findElement(By.xpath("//div[@class=\"ui-table-pagination\"]//div[@class=\"menu\"]//div[contains(text(),\"500\")]"));
+		WebElement perPage200MenuItem = driver.findElement(By.xpath("//div[@class=\"ui-table-pagination\"]//div[contains(@class,\"menu\")]//div[contains(text(),\"500\")]"));
 		System.out.println("5");
-		perPage200MenuItem.click();
+		super.waitForElementToBeEnabled(perPage200MenuItem);
+		System.out.println("5.5");
+		((JavascriptExecutor) driver).executeScript("document.evaluate('//div[@class=\"ui-table-pagination\"]//div[contains(@class,\"menu\")]//div[contains(text(),\"500\")]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();");
+		//perPage200MenuItem.click();
 		System.out.println("6");
 		//System.out.println("Waiting for loader to disappear start: " + new Date());
 		super.waitForElementToBeDisappear("css", "div.ui-table div.loader", 30); //The loading element while table refresh
@@ -292,8 +295,8 @@ public class YahooGeminiDashboardPage extends Page {
 		//WebElement deleteButton = driver.findElement(By.xpath("//div[@class=\"table-header-container\"]/div/button[contains(text(),\"Actions\")]/../ul[1]/li/a[contains(text(),\"Delete\")]"));
 		WebElement deleteButton = driver.findElement(By.xpath("//button[contains(text(),\"Actions\")]/../ul[1]/li/a[contains(text(),\"Delete\")]"));
 		deleteButton.click();
-		super.waitForElementToLoad("xpath", "//div[@class=\"modal-footer\"]//button[text()=\"Yes\"]");
-		WebElement deleteConfirmButton = driver.findElement(By.xpath("//div[@class=\"modal-footer\"]//button[text()=\"Yes\"]"));
+		super.waitForElementToLoad("xpath", "//div[@class=\"modal-footer\"]//button[contains(text(),\"Yes\")]");
+		WebElement deleteConfirmButton = driver.findElement(By.xpath("//div[@class=\"modal-footer\"]//button[contains(text(),\"Yes\")]"));
 		deleteConfirmButton.click();
 		super.waitForElementToLoad("css", "div.ui-table div.loader");
 		super.waitForElementToBeDisappear("css", "div.ui-table div.loader", 30);
@@ -661,6 +664,9 @@ public class YahooGeminiDashboardPage extends Page {
 		settingsIcon.click();
 		super.waitForElementToLoad("xpath", "//ul[@list-tree=\"gearMenuOptions\"]/li/a[text()=\"Log out\"]");
 		driver.findElement(By.xpath("//ul[@list-tree=\"gearMenuOptions\"]/li/a[text()=\"Log out\"]")).click();
+		if(super.waitForElementToLoad("xpath", "//a[contains(@href,\"logout\")]", 5)) {
+			driver.findElement(By.xpath("//a[contains(@href,\"logout\")]")).click();
+		}
 		super.waitForElementToLoad("xpath", "//a[contains(text(), \"Sign in\")]");
 	}
 

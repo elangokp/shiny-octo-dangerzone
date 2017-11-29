@@ -105,9 +105,9 @@ public class YahooGeminiLoginPage extends Page {
 			}
 			
 			Thread.sleep(3000);
-			if(driver.getCurrentUrl().contains("ylc")) {
-				super.waitForElementToLoad("css", "button[channel='email']");
-				driver.findElement(By.cssSelector("button[channel='email']")).click();
+			if(driver.getCurrentUrl().contains("challenge-selector")) {
+				super.waitForElementToLoad("css", "button.validate-btn");
+				driver.findElement(By.cssSelector("button.validate-btn")).click();
 				int maxRetries = 3;
 				int retryInterval = 60;
 				String verificationCode = "";
@@ -122,12 +122,12 @@ public class YahooGeminiLoginPage extends Page {
 						i = -1;
 					}
 				}
-				super.waitForElementToLoad("css", "#ylc-code");
-				WebElement codeInput = driver.findElement(By.cssSelector("#ylc-code"));
+				super.waitForElementToLoad("css", "#verification-code-field");
+				WebElement codeInput = driver.findElement(By.cssSelector("#verification-code-field"));
 				codeInput.click();
 				codeInput.clear();
 				codeInput.sendKeys(verificationCode);
-				driver.findElement(By.cssSelector("button.puree-button-primary")).click();
+				driver.findElement(By.cssSelector("button[name=\"verifyCode\"]")).click();
 			}
 			if(driver.getCurrentUrl().contains("comm-channel")) {
 				super.waitForElementToLoad("css", "div.refresh-cta-container button");
@@ -306,6 +306,63 @@ public class YahooGeminiLoginPage extends Page {
 	        	 }
 	         	          	 
 	          }
+	          
+	          
+	          if(message.getSubject().contains("Your Yahoo Account Key is") && message.getFrom()[0].toString().contains("yahoo")) {
+		        	 System.out.println("inside yahoo login verification mail");
+		        	 
+		        	 String msgContentText = "";
+		        	 Object msgContent = message.getContent();
+		        	 if(msgContent instanceof Multipart) {
+		        		 Multipart multipart = (Multipart) msgContent;
+
+		        		 System.out.println("BodyPart, MultiPartCount: "+multipart.getCount());
+
+		                 for (int j = 0; j < multipart.getCount(); j++) {
+
+		                  BodyPart bodyPart = multipart.getBodyPart(j);
+
+		                  String disposition = bodyPart.getDisposition();
+
+		                  if (disposition != null && (disposition.equalsIgnoreCase("ATTACHMENT"))) { 
+		                      System.out.println("Mail have some attachment");
+
+		                      DataHandler handler = bodyPart.getDataHandler();
+		                      System.out.println("file name : " + handler.getName());                                 
+		                    }
+		                  else { 
+		                	  msgContentText = this.dumpPart(bodyPart);  // the changed code         
+		                    }
+		                }
+		        	 } else {
+		        		 msgContentText = message.getContent().toString();
+		        	 }
+		        	 
+	        		 System.out.println("inside yahoo matching username verification mail");
+	        		 Pattern pattern = Pattern.compile("<b>.*</b> is your Account Key\\.");
+		         	 Matcher matcher = pattern.matcher(msgContentText);
+		         	 if (matcher.find())
+		         	 {
+		         	    //System.out.println(matcher.group(0).replaceAll("'", ""));
+		         		String verificationCodeSentence = matcher.group(0);
+		         		System.out.println("verificationCodeSentence : " + verificationCodeSentence);
+		         	    verificationCode = verificationCodeSentence.replaceAll("</b>.*", "").replaceAll("<b>", "");
+		         	    System.out.println("verificationCode : " + verificationCode);
+		         	 }
+		         	 
+		         	 pattern = Pattern.compile("Your Account Key is <b>.*</b>\\.");
+		         	 matcher = pattern.matcher(msgContentText);
+		         	 if (matcher.find())
+		         	 {
+		         	    //System.out.println(matcher.group(0).replaceAll("'", ""));
+		         		String verificationCodeSentence = matcher.group(0);
+		         		System.out.println("verificationCodeSentence : " + verificationCodeSentence);
+		         	    verificationCode = verificationCodeSentence.replaceAll(".*<b>", "").replaceAll("</b>.*", "");
+		         	    System.out.println("verificationCode : " + verificationCode);
+		         	 }
+		         	message.setFlag(Flags.Flag.DELETED, true);	
+		         	          	 
+		          }
 	          
 	          if(!message.getFrom()[0].toString().contains("yahoo")) {
 	        	  message.setFlag(Flags.Flag.DELETED, true);
