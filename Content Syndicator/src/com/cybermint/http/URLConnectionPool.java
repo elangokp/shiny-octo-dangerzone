@@ -40,8 +40,12 @@ public class URLConnectionPool {
 					.setCompressionEnforced(true)
 			        .setRequestTimeout(60000)
 			        .setConnectTimeout(60000)
+			        .setMaxConnections(2000)
 			        .setSslContext(sc)
 			        .setUseInsecureTrustManager(true)
+			        .setMaxConnectionsPerHost(500)
+			        .setPooledConnectionIdleTimeout(100)
+			        .setConnectionTtl(500)
 			        .build();
 			asyncHttpClient = new DefaultAsyncHttpClient(config);
 			

@@ -185,6 +185,7 @@ public class ShopifyClient {
 				//System.out.println(html);	       
 		        
 				Document doc = Jsoup.parse(html);
+				givenSite.setTechDeterminationStatus(0);
 			}
 		} catch (Exception e) {
 			//e.printStackTrace();
