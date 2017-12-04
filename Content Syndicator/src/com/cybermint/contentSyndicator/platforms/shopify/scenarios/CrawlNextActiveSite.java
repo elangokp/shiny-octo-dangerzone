@@ -43,9 +43,9 @@ public class CrawlNextActiveSite implements Runnable {
 	}
 
 	public static void main(String[] args) {		
-		int noOfCrawlThreads = new Integer(args[0]);
-		int noOfDBUpdateThreads = new Integer(args[1]);
-		int recordsPerDBBatchUpdate = new Integer(args[2]);
+		int noOfCrawlThreads = Integer.parseInt(args[0]);
+		int noOfDBUpdateThreads = Integer.parseInt(args[1]);
+		int recordsPerDBBatchUpdate = Integer.parseInt(args[2]);
 		
 		BlockingQueue<ShopifyProduct> productRankingsQueue = new LinkedBlockingQueue<ShopifyProduct>();
 		BlockingQueue<ShopifySite> pendingSitesQueue = new LinkedBlockingQueue<ShopifySite>(noOfCrawlThreads*3);

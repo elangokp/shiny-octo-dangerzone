@@ -9,19 +9,20 @@ public class ShopifySite {
 	private String storeURL;
 	private Future<org.asynchttpclient.Response> futureResponse;
 	
-	private int TechDeterminationStatus;
+	private int techDeterminationStatus;
 	private boolean useTrackify;
 	private boolean usePixelPerfect;
 	private boolean useHextomShippingBar;
 	private boolean useKlaviyo;
 	private boolean useWheelio;
 	private boolean useTrust;
+	private boolean useTrustHero;
 	private boolean useCartHook;
 	private boolean useCriteo;
 	private boolean useHurrify;
 	private boolean useBestCurrencyConverter;
 	private boolean useFomo;
-	private boolean useBeketing;
+	private boolean useBeeketing;
 	private boolean useHextomMCC;
 	private boolean useRetargetApp;
 	private boolean usePersonalizerLimespot;
@@ -34,6 +35,24 @@ public class ShopifySite {
 	private boolean useSimplifiProgrammatic;
 	private boolean useCurrencyConverterPlus;
 	private boolean useHextomQuickAnnouncement;
+	private boolean useLastSecondCoupon;
+	private boolean useExpressReviews;
+	private boolean useAliReviews;
+	private boolean useWeglot;
+	private boolean useLooxReviews;
+	private boolean useSmar7BundleUpsell;
+	private boolean useAutoCurrencySwitcher;
+	private boolean useSmar7CountdownTimer;
+	private boolean useFrequentlyBoughtTogether;
+	private boolean useAlsoBought;
+	private boolean useBoldUpsell;
+	private boolean useBoldBrain;
+	private boolean useBoldMultiCurrency;
+	private boolean useBoldSalesMotivator;
+	private boolean useBoldProductBundles;
+	private boolean useShopifyProductReviews;
+	private boolean useBoosterDiscountedUpsells;
+	private boolean useBoosterBundleUpsell;
 	
 	public static final int STATUS_COMPLETED = 0; 
 	public static final int STATUS_INPROGRESS = -1; 
@@ -64,10 +83,10 @@ public class ShopifySite {
 		this.futureResponse = futureResponse;
 	}
 	public int getTechDeterminationStatus() {
-		return TechDeterminationStatus;
+		return techDeterminationStatus;
 	}
 	public void setTechDeterminationStatus(int techDeterminationStatus) {
-		TechDeterminationStatus = techDeterminationStatus;
+		this.techDeterminationStatus = techDeterminationStatus;
 	}
 	public boolean isUseTrackify() {
 		return useTrackify;
@@ -135,11 +154,11 @@ public class ShopifySite {
 	public void setUseFomo(boolean useFomo) {
 		this.useFomo = useFomo;
 	}
-	public boolean isUseBeketing() {
-		return useBeketing;
+	public boolean isUseBeeketing() {
+		return useBeeketing;
 	}
-	public void setUseBeketing(boolean useBeketing) {
-		this.useBeketing = useBeketing;
+	public void setUseBeeketing(boolean useBeeketing) {
+		this.useBeeketing = useBeeketing;
 	}
 	public boolean isUseHextomMCC() {
 		return useHextomMCC;
@@ -212,6 +231,120 @@ public class ShopifySite {
 	}
 	public void setUseHextomQuickAnnouncement(boolean useHextomQuickAnnouncement) {
 		this.useHextomQuickAnnouncement = useHextomQuickAnnouncement;
+	}
+	public boolean isUseLastSecondCoupon() {
+		return useLastSecondCoupon;
+	}
+	public void setUseLastSecondCoupon(boolean useLastSecondCoupon) {
+		this.useLastSecondCoupon = useLastSecondCoupon;
+	}
+	public boolean isUseTrustHero() {
+		return useTrustHero;
+	}
+	public void setUseTrustHero(boolean useTrustHero) {
+		this.useTrustHero = useTrustHero;
+	}
+	public boolean isUseExpressReviews() {
+		return useExpressReviews;
+	}
+	public void setUseExpressReviews(boolean useExpressReviews) {
+		this.useExpressReviews = useExpressReviews;
+	}
+	public boolean isUseAliReviews() {
+		return useAliReviews;
+	}
+	public void setUseAliReviews(boolean useAliReviews) {
+		this.useAliReviews = useAliReviews;
+	}
+	public boolean isUseWeglot() {
+		return useWeglot;
+	}
+	public void setUseWeglot(boolean useWeglot) {
+		this.useWeglot = useWeglot;
+	}
+	public boolean isUseLooxReviews() {
+		return useLooxReviews;
+	}
+	public void setUseLooxReviews(boolean useLooxReviews) {
+		this.useLooxReviews = useLooxReviews;
+	}
+	public boolean isUseSmar7BundleUpsell() {
+		return useSmar7BundleUpsell;
+	}
+	public void setUseSmar7BundleUpsell(boolean useSmar7BundleUpsell) {
+		this.useSmar7BundleUpsell = useSmar7BundleUpsell;
+	}
+	public boolean isUseAutoCurrencySwitcher() {
+		return useAutoCurrencySwitcher;
+	}
+	public void setUseAutoCurrencySwitcher(boolean useAutoCurrencySwitcher) {
+		this.useAutoCurrencySwitcher = useAutoCurrencySwitcher;
+	}
+	public boolean isUseSmar7CountdownTimer() {
+		return useSmar7CountdownTimer;
+	}
+	public void setUseSmar7CountdownTimer(boolean useSmar7CountdownTimer) {
+		this.useSmar7CountdownTimer = useSmar7CountdownTimer;
+	}
+	public boolean isUseFrequentlyBoughtTogether() {
+		return useFrequentlyBoughtTogether;
+	}
+	public void setUseFrequentlyBoughtTogether(boolean useFrequentlyBoughtTogether) {
+		this.useFrequentlyBoughtTogether = useFrequentlyBoughtTogether;
+	}
+	public boolean isUseAlsoBought() {
+		return useAlsoBought;
+	}
+	public void setUseAlsoBought(boolean useAlsoBought) {
+		this.useAlsoBought = useAlsoBought;
+	}
+	public boolean isUseBoldUpsell() {
+		return useBoldUpsell;
+	}
+	public void setUseBoldUpsell(boolean useBoldUpsell) {
+		this.useBoldUpsell = useBoldUpsell;
+	}
+	public boolean isUseBoldBrain() {
+		return useBoldBrain;
+	}
+	public void setUseBoldBrain(boolean useBoldBrain) {
+		this.useBoldBrain = useBoldBrain;
+	}
+	public boolean isUseBoldMultiCurrency() {
+		return useBoldMultiCurrency;
+	}
+	public void setUseBoldMultiCurrency(boolean useBoldMultiCurrency) {
+		this.useBoldMultiCurrency = useBoldMultiCurrency;
+	}
+	public boolean isUseBoldSalesMotivator() {
+		return useBoldSalesMotivator;
+	}
+	public void setUseBoldSalesMotivator(boolean useBoldSalesMotivator) {
+		this.useBoldSalesMotivator = useBoldSalesMotivator;
+	}
+	public boolean isUseBoldProductBundles() {
+		return useBoldProductBundles;
+	}
+	public void setUseBoldProductBundles(boolean useBoldProductBundles) {
+		this.useBoldProductBundles = useBoldProductBundles;
+	}
+	public boolean isUseShopifyProductReviews() {
+		return useShopifyProductReviews;
+	}
+	public void setUseShopifyProductReviews(boolean useShopifyProductReviews) {
+		this.useShopifyProductReviews = useShopifyProductReviews;
+	}
+	public boolean isUseBoosterDiscountedUpsells() {
+		return useBoosterDiscountedUpsells;
+	}
+	public void setUseBoosterDiscountedUpsells(boolean useBoosterDiscountedUpsells) {
+		this.useBoosterDiscountedUpsells = useBoosterDiscountedUpsells;
+	}
+	public boolean isUseBoosterBundleUpsell() {
+		return useBoosterBundleUpsell;
+	}
+	public void setUseBoosterBundleUpsell(boolean useBoosterBundleUpsell) {
+		this.useBoosterBundleUpsell = useBoosterBundleUpsell;
 	}
 	
 	

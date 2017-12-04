@@ -23,11 +23,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/Jackson-JSON/jackson-databind-2.0.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/Java Mail/mail.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/guava-13.0.1.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
-		<attributes>
-			<attribute name="maven.pomderived" value="true"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="lib/autoit/AutoItX4Java.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/autoit/jacob.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/Selenium/selenium-server-standalone-2.52.0.jar"/>
@@ -52,5 +47,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/okhttp/okhttp-3.9.0.jar"/>
 	<classpathentry kind="lib" path="lib/okhttp/okio-1.13.0.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre1.8.0_152"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

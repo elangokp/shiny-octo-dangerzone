@@ -184,7 +184,167 @@ public class ShopifyClient {
 				String html = givenSite.getFutureResponse().get().getResponseBody();
 				//System.out.println(html);	       
 		        
-				Document doc = Jsoup.parse(html);
+				//Document doc = Jsoup.parse(html);
+				if(html.contains("redretarget.com")) {
+					givenSite.setUseTrackify(true);
+				}
+				
+				if(html.contains("pixel-perfect.js")) {
+					givenSite.setUsePixelPerfect(true);
+				}
+				
+				if(html.contains("lastsecondcoupon.js")) {
+					givenSite.setUseLastSecondCoupon(true);
+				}
+				
+				if(html.contains("freeshippingbar.js")) {
+					givenSite.setUseHextomShippingBar(true);
+				}
+				
+				if(html.contains("multicurrencyconverter.js")) {
+					givenSite.setUseHextomMCC(true);
+				}
+				
+				if(html.contains("quickannouncementbar.js")) {
+					givenSite.setUseHextomQuickAnnouncement(true);
+				}
+				
+				if(html.contains("klaviyo.com")) {
+					givenSite.setUseKlaviyo(true);
+				}
+				
+				if(html.contains("wheelio-")) {
+					givenSite.setUseWheelio(true); 
+				}
+				
+				if(html.contains("varinode.com")) {
+					givenSite.setUseTrust(true);
+				}
+				
+				if(html.contains("trust_hero_")) {
+					givenSite.setUseTrustHero(true);
+				}
+				
+				if(html.contains("doubly.js")) {
+					givenSite.setUseBestCurrencyConverter(true);
+				}
+				
+				if(html.contains("reviews.appiversalapps.com")) {
+					givenSite.setUseExpressReviews(true);
+				}
+				
+				if(html.contains("alireviews.fireapps.io")) {
+					givenSite.setUseAliReviews(true);
+				}
+				
+				if(html.contains("smartercheckout.com")) {
+					givenSite.setUseCartHook(true);
+				}
+				
+				if(html.contains("criteo.com") || html.contains("criteo.net")) {
+					givenSite.setUseCriteo(true);
+				}
+				
+				if(html.contains("hurrifyme.com")) {
+					givenSite.setUseHurrify(true);
+				}
+				
+				if(html.contains("usefomo.com")) {
+					givenSite.setUseFomo(true);
+				}
+				
+				if(html.contains("beeketing.com")) {
+					givenSite.setUseBeeketing(true);
+				}
+				
+				if(html.contains("retargetapp.com")) {
+					givenSite.setUseRetargetApp(true);
+				}
+				
+				if(html.contains("ghostmonitor.com")) {
+					givenSite.setUseRecart(true);
+				}
+				
+				if(html.contains("personalizer.io")) {
+					givenSite.setUsePersonalizerLimespot(true);
+				}
+				
+				if(html.contains("coin.js")) {
+					givenSite.setUseCoin(true);
+				}
+				
+				if(html.contains("oneclickupsell.zipify.com")) {
+					givenSite.setUseOneClickUpsell(true);
+				}
+				
+				if(html.contains("weglot.com")) {
+					givenSite.setUseWeglot(true);
+				}
+				
+				if(html.contains("quantity_breaks.php")) {
+					givenSite.setUseQuantityBreaks(true);
+				}
+				
+				if(html.contains("/currency-converter-plus/")||html.contains("\\/currency-converter-plus\\/")) {
+					givenSite.setUseCurrencyConverterPlus(true);
+				}
+				
+				if(html.contains("loox.io")) {
+					givenSite.setUseLooxReviews(true);
+				}
+				
+				if(html.contains("bundle-upsell.smar7apps.com")) {
+					givenSite.setUseSmar7BundleUpsell(true);
+				}
+				
+				if(html.contains("mlveda.com/MultiCurrency")||html.contains("mlveda.com\\/MultiCurrency")) {
+					givenSite.setUseAutoCurrencySwitcher(true);
+				}
+				
+				if(html.contains("counter.smar7apps.com")) {
+					givenSite.setUseSmar7CountdownTimer(true);
+				}
+				
+				if(html.contains("/frequently-bought-together/")||html.contains("\\/frequently-bought-together\\/")) {
+					givenSite.setUseFrequentlyBoughtTogether(true);
+				}
+				
+				if(html.contains("/also-bought/")||html.contains("\\/also-bought\\/")) {
+					givenSite.setUseAlsoBought(true);
+				}
+				
+				if(html.contains("upsells.boldapps.net")) {
+					givenSite.setUseBoldUpsell(true);
+				}
+				
+				if(html.contains("brain.boldapps.net")) {
+					givenSite.setUseBoldBrain(true);
+				}
+				
+				if(html.contains("mc.boldapps.net")) {
+					givenSite.setUseBoldMultiCurrency(true);
+				}
+				
+				if(html.contains("shappify.com/apps/motivate/motivator.php")||html.contains("shappify.com\\/apps\\/motivate\\/motivator.php")) {
+					givenSite.setUseBoldSalesMotivator(true);
+				}
+				
+				if(html.contains("shappify.com/apps/bundle/generate_bundle.php")||html.contains("shappify.com\\/apps\\/bundle\\/generate_bundle.php")) {
+					givenSite.setUseBoldProductBundles(true);
+				}
+				
+				if(html.contains("productreviews.shopifycdn.com")) {
+					givenSite.setUseShopifyProductReviews(true);
+				}
+				
+				if(html.contains("id=\"ba-discount-tiers\"")) {
+					givenSite.setUseBoosterDiscountedUpsells(true);
+				}
+				
+				if(html.contains("id=\"ba-bundle\"")||html.contains("id=\"ba-upsell\"")) {
+					givenSite.setUseBoosterBundleUpsell(true);
+				}
+				
 				givenSite.setTechDeterminationStatus(0);
 			}
 		} catch (Exception e) {
@@ -235,14 +395,19 @@ public class ShopifyClient {
 	public static void main(String[] args) throws Exception {
 		
 		ShopifyClient aClient = new ShopifyClient();
-		
+		ShopifySite givenSite = new ShopifySite();
+		givenSite.setStoreURL("dudesgadget.com");
+		aClient.getSiteContent(givenSite);
+		aClient.processSite(givenSite);
+		System.out.println(givenSite.getStoreURL()+"-"+"UseTrackify:"+givenSite.isUseTrackify());
+		/*
 		List<ShopifyProduct> products = aClient.getProductLinks(1
 				, 1, "littleplayland.com"
 				, ShopifyClient.SORT_BY_BEST_SELLING, 1000);
 		for(ShopifyProduct aProduct : products) {
 			System.out.println(aProduct.getProductURL()+","+aProduct.getBestSellerRank());
 		}
-		
+		*/
 		/*
 		ShopifyProduct aProduct = new ShopifyProduct();
 		aProduct.setProductURL("https://www.foreverpassion.us/products/2017-baby-english-alphabet-jersey-puff-skirt");

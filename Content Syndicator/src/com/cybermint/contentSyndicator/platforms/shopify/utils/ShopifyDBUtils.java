@@ -4,8 +4,8 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList; 
 
 import com.cybermint.contentSyndicator.platforms.shopify.objects.ShopifyProduct;
 import com.cybermint.contentSyndicator.platforms.shopify.objects.ShopifySite;
@@ -56,16 +56,24 @@ public class ShopifyDBUtils {
 		CallableStatement stmt = null;
 		ResultSet rs = null;
 		try {
+			//System.out.println("Before Connection");
 			connection = CampaignStatsDBConnectionPool.getInstance().getConnection();
+			//System.out.println("After Connection");
 			stmt = connection.prepareCall("{call [GetNextSitesForTechDetermination] (?)}");
+			//System.out.println("After Prepare Call");
 			stmt.setInt(1, noOfSitesNeeded);
+			//System.out.println("After Setting Parameter");
 			stmt.execute();
+			//System.out.println("After Executing");
 			rs = stmt.getResultSet();
+			//System.out.println("After Retreiving result set");
 			while (rs.next()) {
+				//System.out.println("Inside WHile");
 				ShopifySite aShopifySite = new ShopifySite();
 				aShopifySite.setSiteID(rs.getInt("SiteID"));
 				aShopifySite.setStoreURL(rs.getString("StoreURL"));
 				sites.add(aShopifySite);
+				//System.out.println(aShopifySite.getSiteID()+","+aShopifySite.getStoreURL());
 			}
 			
 		} catch (Exception e) {
@@ -154,6 +162,7 @@ public class ShopifyDBUtils {
 	private SQLServerDataTable getSitesAsDataTable(List<ShopifySite> sites) throws SQLServerException {
 		SQLServerDataTable shopifySiteDetailsTable = new SQLServerDataTable();
 		shopifySiteDetailsTable.addColumnMetadata("SiteId" ,java.sql.Types.INTEGER);
+		shopifySiteDetailsTable.addColumnMetadata("TechDeterminationStatus" ,java.sql.Types.INTEGER);
 		shopifySiteDetailsTable.addColumnMetadata("useTrackify" ,java.sql.Types.BIT);
 		shopifySiteDetailsTable.addColumnMetadata("usePixelPerfect" ,java.sql.Types.BIT); 
 		shopifySiteDetailsTable.addColumnMetadata("useHextomShippingBar" ,java.sql.Types.BIT); 
@@ -178,9 +187,29 @@ public class ShopifyDBUtils {
 		shopifySiteDetailsTable.addColumnMetadata("useSimplifiProgrammatic" ,java.sql.Types.BIT);
 		shopifySiteDetailsTable.addColumnMetadata("useCurrencyConverterPlus" ,java.sql.Types.BIT);
 		shopifySiteDetailsTable.addColumnMetadata("useHextomQuickAnnouncement" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useLastSecondCoupon" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useTrustHero" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useExpressReviews" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useAliReviews" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useWeglot" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useLooxReviews" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useSmar7BundleUpsell" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useAutoCurrencySwitcher" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useSmar7CountdownTimer" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useFrequentlyBoughtTogether" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useAlsoBought" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useBoldUpsell" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useBoldBrain" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useBoldMultiCurrency" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useBoldSalesMotivator" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useBoldProductBundles" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useShopifyProductReviews" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useBoosterDiscountedUpsells" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("useBoosterBundleUpsell" ,java.sql.Types.BIT);
 					
 		for(ShopifySite site : sites) {
 			int siteID = null == site.getSiteID() ? 0 : site.getSiteID();
+			int techDeterminationStatus = site.getTechDeterminationStatus();
 			boolean useTrackify = site.isUseTrackify();
 			boolean usePixelPerfect = site.isUsePixelPerfect();
 			boolean useHextomShippingBar = site.isUseHextomShippingBar();
@@ -192,7 +221,7 @@ public class ShopifyDBUtils {
 			boolean useHurrify = site.isUseHurrify();
 			boolean useBestCurrencyConverter = site.isUseBestCurrencyConverter();
 			boolean useFomo = site.isUseFomo();
-			boolean useBeketing = site.isUseBeketing();
+			boolean useBeketing = site.isUseBeeketing();
 			boolean useHextomMCC = site.isUseHextomMCC();
 			boolean useRetargetApp = site.isUseRetargetApp();
 			boolean usePersonalizerLimespot = site.isUsePersonalizerLimespot();
@@ -205,11 +234,33 @@ public class ShopifyDBUtils {
 			boolean useSimplifiProgrammatic = site.isUseSimplifiProgrammatic();
 			boolean useCurrencyConverterPlus = site.isUseCurrencyConverterPlus();
 			boolean useHextomQuickAnnouncement = site.isUseHextomQuickAnnouncement();
+			boolean useLastSecondCoupon = site.isUseLastSecondCoupon();
+			boolean useTrustHero = site.isUseTrustHero();
+			boolean useExpressReviews = site.isUseExpressReviews();
+			boolean useAliReviews = site.isUseAliReviews();
+			boolean useWeglot = site.isUseWeglot();
+			boolean useLooxReviews = site.isUseLooxReviews();
+			boolean useSmar7BundleUpsell = site.isUseSmar7BundleUpsell();
+			boolean useAutoCurrencySwitcher = site.isUseAutoCurrencySwitcher();
+			boolean useSmar7CountdownTimer = site.isUseSmar7CountdownTimer();
+			boolean useFrequentlyBoughtTogether = site.isUseFrequentlyBoughtTogether();
+			boolean useAlsoBought = site.isUseAlsoBought();
+			boolean useBoldUpsell = site.isUseBoldUpsell();
+			boolean useBoldBrain = site.isUseBoldBrain();
+			boolean useBoldMultiCurrency = site.isUseBoldMultiCurrency();
+			boolean useBoldSalesMotivator = site.isUseBoldSalesMotivator();
+			boolean useBoldProductBundles = site.isUseBoldProductBundles();
+			boolean useShopifyProductReviews = site.isUseShopifyProductReviews();
+			boolean useBoosterDiscountedUpsells = site.isUseBoosterDiscountedUpsells();
+			boolean useBoosterBundleUpsell = site.isUseBoosterBundleUpsell();
 			
-			shopifySiteDetailsTable.addRow(siteID,useTrackify,usePixelPerfect,useHextomShippingBar,useKlaviyo,useWheelio,useTrust,useCartHook,useCriteo,useHurrify,
+			shopifySiteDetailsTable.addRow(siteID,techDeterminationStatus,useTrackify,usePixelPerfect,useHextomShippingBar,useKlaviyo,useWheelio,useTrust,useCartHook,useCriteo,useHurrify,
 					useBestCurrencyConverter,useFomo,useBeketing,useHextomMCC,useRetargetApp,usePersonalizerLimespot,
 					useCoin,useRecart,useOneClickUpsell,useZipifyPages,useAdroll,useQuantityBreaks,useSimplifiProgrammatic,
-					useCurrencyConverterPlus,useHextomQuickAnnouncement);
+					useCurrencyConverterPlus,useHextomQuickAnnouncement,useLastSecondCoupon,useTrustHero,useExpressReviews,
+					useAliReviews,useWeglot,useLooxReviews,useSmar7BundleUpsell,useAutoCurrencySwitcher,useSmar7CountdownTimer,
+					useFrequentlyBoughtTogether,useAlsoBought,useBoldUpsell,useBoldBrain,useBoldMultiCurrency,useBoldSalesMotivator,
+					useBoldProductBundles,useShopifyProductReviews,useBoosterDiscountedUpsells,useBoosterBundleUpsell);
 		}
 		
 		return shopifySiteDetailsTable;
