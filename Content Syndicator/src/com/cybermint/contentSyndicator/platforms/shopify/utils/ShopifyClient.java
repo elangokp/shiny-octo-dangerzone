@@ -183,6 +183,8 @@ public class ShopifyClient {
 				//System.out.println("Not Empty : " + productURL);
 				String html = givenSite.getFutureResponse().get().getResponseBody();
 				//System.out.println(html);	       
+				
+				givenSite.setHtml(html);
 		        
 				//Document doc = Jsoup.parse(html);
 				if(html.contains("redretarget.com")) {
@@ -345,10 +347,10 @@ public class ShopifyClient {
 					givenSite.setUseBoosterBundleUpsell(true);
 				}
 				
-				givenSite.setTechDeterminationStatus(0);
+				givenSite.setTechDeterminationStatus(ShopifySite.STATUS_COMPLETED);
 			}
 		} catch (Exception e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 		
 		return givenSite;
@@ -364,6 +366,7 @@ public class ShopifyClient {
 					.setRealm(new Realm.Builder("lum-customer-hl_8226f349-zone-zone1-country-US-session-glob_rand"+sessionId, "40or5h2qxicw")
 					.setScheme(Realm.AuthScheme.BASIC))
 					.build();	
+			
 			
 			response = asyncHttpClient
 														.prepareGet(url)
@@ -396,10 +399,11 @@ public class ShopifyClient {
 		
 		ShopifyClient aClient = new ShopifyClient();
 		ShopifySite givenSite = new ShopifySite();
-		givenSite.setStoreURL("dudesgadget.com");
+		givenSite.setStoreURL("usefuluniques.com");
 		aClient.getSiteContent(givenSite);
 		aClient.processSite(givenSite);
-		System.out.println(givenSite.getStoreURL()+"-"+"UseTrackify:"+givenSite.isUseTrackify());
+		System.out.println(givenSite.getStoreURL()+"-"+"UseTrackify:"+givenSite.isUseTrackify()
+		+"-"+"UseCoin:"+givenSite.isUseCoin());
 		/*
 		List<ShopifyProduct> products = aClient.getProductLinks(1
 				, 1, "littleplayland.com"

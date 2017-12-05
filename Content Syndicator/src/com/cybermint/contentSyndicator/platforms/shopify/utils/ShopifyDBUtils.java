@@ -72,6 +72,7 @@ public class ShopifyDBUtils {
 				ShopifySite aShopifySite = new ShopifySite();
 				aShopifySite.setSiteID(rs.getInt("SiteID"));
 				aShopifySite.setStoreURL(rs.getString("StoreURL"));
+				aShopifySite.setTechDeterminationStatus(ShopifySite.STATUS_INPROGRESS);
 				sites.add(aShopifySite);
 				//System.out.println(aShopifySite.getSiteID()+","+aShopifySite.getStoreURL());
 			}
@@ -206,6 +207,8 @@ public class ShopifyDBUtils {
 		shopifySiteDetailsTable.addColumnMetadata("useShopifyProductReviews" ,java.sql.Types.BIT);
 		shopifySiteDetailsTable.addColumnMetadata("useBoosterDiscountedUpsells" ,java.sql.Types.BIT);
 		shopifySiteDetailsTable.addColumnMetadata("useBoosterBundleUpsell" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("html" ,java.sql.Types.NVARCHAR);
+		shopifySiteDetailsTable.addColumnMetadata("useInCartUpsell" ,java.sql.Types.BIT);
 					
 		for(ShopifySite site : sites) {
 			int siteID = null == site.getSiteID() ? 0 : site.getSiteID();
@@ -253,6 +256,8 @@ public class ShopifyDBUtils {
 			boolean useShopifyProductReviews = site.isUseShopifyProductReviews();
 			boolean useBoosterDiscountedUpsells = site.isUseBoosterDiscountedUpsells();
 			boolean useBoosterBundleUpsell = site.isUseBoosterBundleUpsell();
+			String html = site.getHtml();
+			boolean useInCartUpsell = site.isUseInCartUpsell();
 			
 			shopifySiteDetailsTable.addRow(siteID,techDeterminationStatus,useTrackify,usePixelPerfect,useHextomShippingBar,useKlaviyo,useWheelio,useTrust,useCartHook,useCriteo,useHurrify,
 					useBestCurrencyConverter,useFomo,useBeketing,useHextomMCC,useRetargetApp,usePersonalizerLimespot,
@@ -260,7 +265,8 @@ public class ShopifyDBUtils {
 					useCurrencyConverterPlus,useHextomQuickAnnouncement,useLastSecondCoupon,useTrustHero,useExpressReviews,
 					useAliReviews,useWeglot,useLooxReviews,useSmar7BundleUpsell,useAutoCurrencySwitcher,useSmar7CountdownTimer,
 					useFrequentlyBoughtTogether,useAlsoBought,useBoldUpsell,useBoldBrain,useBoldMultiCurrency,useBoldSalesMotivator,
-					useBoldProductBundles,useShopifyProductReviews,useBoosterDiscountedUpsells,useBoosterBundleUpsell);
+					useBoldProductBundles,useShopifyProductReviews,useBoosterDiscountedUpsells,useBoosterBundleUpsell,html,
+					useInCartUpsell);
 		}
 		
 		return shopifySiteDetailsTable;

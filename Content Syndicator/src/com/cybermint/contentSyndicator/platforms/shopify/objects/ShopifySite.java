@@ -8,6 +8,7 @@ public class ShopifySite {
 	private Integer siteID;
 	private String storeURL;
 	private Future<org.asynchttpclient.Response> futureResponse;
+	private String html;
 	
 	private int techDeterminationStatus;
 	private boolean useTrackify;
@@ -53,6 +54,7 @@ public class ShopifySite {
 	private boolean useShopifyProductReviews;
 	private boolean useBoosterDiscountedUpsells;
 	private boolean useBoosterBundleUpsell;
+	private boolean useInCartUpsell;
 	
 	public static final int STATUS_COMPLETED = 0; 
 	public static final int STATUS_INPROGRESS = -1; 
@@ -345,6 +347,18 @@ public class ShopifySite {
 	}
 	public void setUseBoosterBundleUpsell(boolean useBoosterBundleUpsell) {
 		this.useBoosterBundleUpsell = useBoosterBundleUpsell;
+	}
+	public String getHtml() {
+		return html;
+	}
+	public void setHtml(String html) {
+		this.html = html;
+	}
+	public boolean isUseInCartUpsell() {
+		return useInCartUpsell;
+	}
+	public void setUseInCartUpsell(boolean useInCartUpsell) {
+		this.useInCartUpsell = useInCartUpsell;
 	}
 	
 	

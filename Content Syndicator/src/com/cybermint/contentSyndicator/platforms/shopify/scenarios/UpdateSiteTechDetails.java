@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import com.cybermint.contentSyndicator.platforms.shopify.objects.ShopifyProduct;
 import com.cybermint.contentSyndicator.platforms.shopify.objects.ShopifySite;
 import com.cybermint.contentSyndicator.platforms.shopify.utils.ShopifyDBUtils;
 
@@ -35,10 +34,7 @@ public class UpdateSiteTechDetails implements Runnable {
 				} else {
 					//System.out.println("Adding product to DB Queue");
 					ShopifySite site = this.siteDetailsQueue.poll(5, TimeUnit.SECONDS);
-					if(null != site 
-							&& 
-							(site.getTechDeterminationStatus() == 0
-							)) {
+					if(null != site) {
 						sites.add(site);
 					}	
 					
