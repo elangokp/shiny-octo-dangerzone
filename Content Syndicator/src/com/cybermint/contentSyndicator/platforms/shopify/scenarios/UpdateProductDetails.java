@@ -24,9 +24,9 @@ public class UpdateProductDetails implements Runnable {
 		List<ShopifyProduct> products = new ArrayList<ShopifyProduct>();
 		System.out.println("DB update Thread Initialized");
 		Boolean ignoreBatchMinimum = false;
-		while(products.size() <= this.recordsPerBatch || ignoreBatchMinimum) {
+		while(products.size() <= this.recordsPerBatch) {
 			try {
-				if(products.size() >= this.recordsPerBatch) {
+				if(products.size() >= this.recordsPerBatch || (ignoreBatchMinimum && products.size()>0)) {
 					System.out.println("Calling Update");
 					dbutils.updateProductDetails(products);
 					products.clear();
@@ -42,10 +42,12 @@ public class UpdateProductDetails implements Runnable {
 							|| product.getProductCurrency() != null
 							|| product.getPublishedOn() != null
 							)) {
+						//System.out.println("Product Not Null");
 						products.add(product);
 					}	
 					
 					if(null == product) {
+						//System.out.println("Product is Null");
 						ignoreBatchMinimum = true;
 					}
 					//System.out.println("Product taken from queue");

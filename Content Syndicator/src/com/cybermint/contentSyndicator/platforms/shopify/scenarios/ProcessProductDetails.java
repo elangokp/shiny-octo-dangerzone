@@ -8,18 +8,28 @@ import com.cybermint.contentSyndicator.platforms.shopify.utils.ShopifyClient;
 public class ProcessProductDetails implements Runnable {
 
 	private ShopifyClient client;
-	private BlockingQueue<ShopifyProduct> productProcessingQueue;
+	//private BlockingQueue<ShopifyProduct> productProcessingQueue;
 	private BlockingQueue<ShopifyProduct> productDetailsQueue;	
+	private ShopifyProduct givenProduct;
 	
+	/*
 	public ProcessProductDetails(BlockingQueue<ShopifyProduct> productProcessingQueue, BlockingQueue<ShopifyProduct> productDetailsQueue) {
 		this.client = new ShopifyClient();
 		this.productProcessingQueue = productProcessingQueue;
+		this.productDetailsQueue = productDetailsQueue;
+	}
+	*/
+	
+	public ProcessProductDetails(ShopifyProduct givenProduct, BlockingQueue<ShopifyProduct> productDetailsQueue) {
+		this.client = new ShopifyClient();
+		this.givenProduct = givenProduct;
 		this.productDetailsQueue = productDetailsQueue;
 	}
 
 
 	@Override
 	public void run() {
+		/*
 		while(1==1) {
 			try {
 				//System.out.println("Starting thread for : " + Thread.currentThread().getName());
@@ -34,6 +44,16 @@ public class ProcessProductDetails implements Runnable {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+		*/
+		try {
+			//System.out.println("Starting thread for : " + Thread.currentThread().getName());
+			//System.out.println("Before Product : " + givenProduct.getProductURL());
+			client.processProduct(givenProduct);
+			//System.out.println("After Product : " + givenProduct.getProductURL());
+			this.productDetailsQueue.put(givenProduct);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 
 	}

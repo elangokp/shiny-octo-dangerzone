@@ -9,6 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import com.cybermint.contentSyndicator.platforms.shopify.objects.ShopifyProduct;
 import com.cybermint.contentSyndicator.platforms.shopify.objects.ShopifySite;
 import com.cybermint.contentSyndicator.platforms.shopify.utils.ShopifyClient;
+import com.cybermint.http.URLConnectionPool;
 
 public class CrawlNextActiveSite implements Runnable {
 
@@ -30,7 +31,7 @@ public class CrawlNextActiveSite implements Runnable {
 				ShopifySite givenSite = this.pendingSitesQueue.take();
 				List<ShopifyProduct> products = client.getProductLinks(givenSite.getCrawlHeaderID()
 						, givenSite.getSiteID(), givenSite.getStoreURL()
-						, ShopifyClient.SORT_BY_BEST_SELLING, 200);
+						, ShopifyClient.SORT_BY_BEST_SELLING, 500);
 				for(ShopifyProduct aProduct : products) {
 					this.productRankingsQueue.put(aProduct);
 				}
@@ -43,9 +44,20 @@ public class CrawlNextActiveSite implements Runnable {
 	}
 
 	public static void main(String[] args) {		
+		System.setProperty("jsse.enableSNIExtension", "false");
+		
 		int noOfCrawlThreads = Integer.parseInt(args[0]);
 		int noOfDBUpdateThreads = Integer.parseInt(args[1]);
 		int recordsPerDBBatchUpdate = Integer.parseInt(args[2]);
+		int maxActiveConnections = Integer.parseInt(args[3]);
+		
+		if(args[4].equalsIgnoreCase("yes")) {
+			ShopifyClient.shouldUseProxy = true;
+		} else {
+			ShopifyClient.shouldUseProxy = false;
+		}
+		
+		URLConnectionPool.setMaxActiveConnections(maxActiveConnections);
 		
 		BlockingQueue<ShopifyProduct> productRankingsQueue = new LinkedBlockingQueue<ShopifyProduct>();
 		BlockingQueue<ShopifySite> pendingSitesQueue = new LinkedBlockingQueue<ShopifySite>(noOfCrawlThreads*3);

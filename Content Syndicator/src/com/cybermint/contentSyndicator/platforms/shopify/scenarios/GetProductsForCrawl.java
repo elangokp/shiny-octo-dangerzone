@@ -36,6 +36,7 @@ public class GetProductsForCrawl implements Runnable {
 						//+ "," + pendingProductsQueue.remainingCapacity());
 						//System.out.println("Before putting the product : " + Instant.now()); 
 						pendingProductsQueue.put(aProduct);
+						//isNextProductAvailable = false;
 						//System.out.println("After putting the product : " + Instant.now()); 
 					}
 				}

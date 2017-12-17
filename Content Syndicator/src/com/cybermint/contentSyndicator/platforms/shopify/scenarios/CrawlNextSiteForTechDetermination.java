@@ -7,6 +7,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.cybermint.contentSyndicator.platforms.shopify.objects.ShopifySite;
 import com.cybermint.contentSyndicator.platforms.shopify.utils.ShopifyClient;
+import com.cybermint.http.URLConnectionPool;
 
 public class CrawlNextSiteForTechDetermination implements Runnable {
 
@@ -38,6 +39,15 @@ public class CrawlNextSiteForTechDetermination implements Runnable {
 		int noOfCrawlThreads = Integer.parseInt(args[0]);
 		int noOfDBUpdateThreads = Integer.parseInt(args[1]);
 		int recordsPerDBBatchUpdate = Integer.parseInt(args[2]);
+		int maxActiveConnections = Integer.parseInt(args[3]);
+		
+		if(args[4].equalsIgnoreCase("yes")) {
+			ShopifyClient.shouldUseProxy = true;
+		} else {
+			ShopifyClient.shouldUseProxy = false;
+		}
+		
+		URLConnectionPool.setMaxActiveConnections(maxActiveConnections);
 		int noOfProcessorThreads = noOfCrawlThreads*20;
 		
 		BlockingQueue<ShopifySite> pendingSitesQueue = new LinkedBlockingQueue<ShopifySite>(noOfCrawlThreads*20);

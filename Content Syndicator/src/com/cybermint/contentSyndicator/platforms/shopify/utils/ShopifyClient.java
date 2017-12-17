@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.ListenableFuture;
 import org.asynchttpclient.Realm;
 import org.asynchttpclient.proxy.ProxyServer;
 import org.jsoup.Jsoup;
@@ -30,10 +30,12 @@ public class ShopifyClient {
 	public static final String SORT_BY_BEST_SELLING = "best-selling";
 	public static final String SORT_BY_CREATED_DESCENDING = "created-descending";
 	public static final String SORT_BY_CREATED_ASCENDING = "created-ascending";
+	public static boolean shouldUseProxy;
 
 	public List<ShopifyProduct> getProductLinks(int crawlHeaderId, int siteId, String storeURL, String sortBy, int noOfpages) throws Exception {
 		List<ShopifyProduct> products = new ArrayList<ShopifyProduct>();
 		LinkedHashSet<String> productLinks = new LinkedHashSet<String>();
+		String pageurl = "";
 		try {
 			//System.out.println(new Date());
 			String url = "http://"+storeURL+"/collections/all?sort_by=best-selling";
@@ -42,8 +44,9 @@ public class ShopifyClient {
 			for(int i = 1; i<=noOfpages && noOfEmptyProductPages<2; i++) {		
 				int noOfProductsBefore = productLinks.size();
 				//System.out.println("Page : " + i);
-				String pageurl = url+"&page="+i;
+				pageurl = url+"&page="+i;
 				Document doc = Jsoup.parse(this.getContentFromUrl(pageurl).get().getResponseBody());
+				URLConnectionPool.reduceConnection();
 				Elements productURLs = doc.select("a");
 				for(Element productURL : productURLs) {	
 					//System.out.println(productURL.attr("href"));				
@@ -63,6 +66,7 @@ public class ShopifyClient {
 				//System.out.println(noOfProductsAfter);
 				if(noOfProductsAfter == noOfProductsBefore) {
 					noOfEmptyProductPages++;
+					i--;
 				} else {
 					noOfEmptyProductPages = 0;
 				}
@@ -85,8 +89,9 @@ public class ShopifyClient {
 			}
 			
 		} catch(Exception e) {
-			e.printStackTrace();
-		}
+			System.out.println(pageurl + " : " + e.getMessage());
+			URLConnectionPool.reduceConnection();
+		}		
 		
 		return products;
 	}
@@ -110,51 +115,120 @@ public class ShopifyClient {
 	
 	public ShopifyProduct processProduct(ShopifyProduct givenProduct) {
 		try {
+			//System.out.println("Before Processing Product : " + givenProduct.getProductURL());
 			if(null != givenProduct.getFutureResponse()) {
+				//System.out.println("Future reponse not null : " + givenProduct.getProductURL());
 				//System.out.println("Not Empty : " + productURL);
-				String html = givenProduct.getFutureResponse().get().getResponseBody();
-				//System.out.println(html);				
-				Instant currentInstant = ZonedDateTime.now(ZoneOffset.UTC).toInstant();
-				Instant publishedAtInstant = currentInstant;
-				Pattern publishedAtPattern = Pattern.compile("(&quot;|\")published_at(&quot;|\"):(&quot;|\").+?(&quot;|\")");
-		        Matcher publishedAtMatcher = publishedAtPattern.matcher(html);
-		        while(publishedAtMatcher.find()) {		        	
-		        	String publishedAt = publishedAtMatcher.group().split("(&quot;|\"):(&quot;|\")")[1].replaceAll("(&quot;|\")", "");	        	
-		        	Instant foundInstant = ZonedDateTime.parse(publishedAt).toInstant();
-		        	//System.out.println(foundInstant);
-		        	publishedAtInstant = publishedAtInstant.isAfter(foundInstant)?foundInstant:publishedAtInstant;
-		        	//System.out.println(publishedAtInstant);
-		        }
-		        if(!publishedAtInstant.equals(currentInstant)) {
-		        	givenProduct.setPublishedOn(publishedAtInstant);
-		        }
-		        /*
-		        Instant createdAtInstant = currentInstant;
-				Pattern createdAtPattern = Pattern.compile("(&quot;|\")created_at(&quot;|\"):(&quot;|\").+?(&quot;|\")");
-		        Matcher createdAtMatcher = createdAtPattern.matcher(html);
-		        while(createdAtMatcher.find()) {		        	
-		        	String createdAt = createdAtMatcher.group().split("(&quot;|\"):(&quot;|\")")[1].replaceAll("(&quot;|\")", "");	        	
-		        	Instant foundInstant = ZonedDateTime.parse(createdAt).toInstant();
-		        	//System.out.println(foundInstant);
-		        	createdAtInstant = createdAtInstant.isAfter(foundInstant)?foundInstant:createdAtInstant;
-		        	//System.out.println(publishedAtInstant);
-		        }
-		        if(!createdAtInstant.equals(currentInstant)) {
-		        	givenProduct.setCreatedOn(createdAtInstant);
-		        }
-		        */
-		        
-		        
-				Document doc = Jsoup.parse(html);
-				givenProduct.setProductTitle(doc.select("meta[property=\"og:title\"]").get(0).attr("content"));
-				givenProduct.setProductDesc(doc.select("meta[property=\"og:description\"]").get(0).attr("content"));
-				givenProduct.setProductPrice(Double.parseDouble(doc.select("meta[property=\"og:price:amount\"]").get(0).attr("content").replaceAll(",", "").trim()));
-				givenProduct.setProductCurrency(doc.select("meta[property=\"og:price:currency\"]").get(0).attr("content"));
+				String html="";
+				try {
+					html = givenProduct.getFutureResponse().get().getResponseBody();
+				} catch (Exception e5) {
+					System.out.println("Response Exception in " + givenProduct.getProductURL() + " : " + e5.getMessage());
+				}
+				if(html.length()>0) {
+					//System.out.println(html);				
+					Instant currentInstant = ZonedDateTime.now(ZoneOffset.UTC).toInstant();
+					Instant publishedAtInstant = currentInstant;
+					try {
+						Pattern publishedAtPattern = Pattern.compile("(&quot;|\")published_at(&quot;|\"):(&quot;|\").+?(&quot;|\")");
+						Matcher publishedAtMatcher = publishedAtPattern.matcher(html);
+						while(publishedAtMatcher.find()) {		        	
+							String publishedAt = publishedAtMatcher.group().split("(&quot;|\"):(&quot;|\")")[1].replaceAll("(&quot;|\")", "");
+							if(publishedAt.length()==10) {
+								publishedAt = publishedAt+"T00:00:00-00:00";
+							}else if(publishedAt.length()==19) {
+								publishedAt = publishedAt+"-00:00";
+							}
+							
+							Instant foundInstant = null;
+							
+							if(publishedAt.length()>19) {
+								foundInstant = ZonedDateTime.parse(publishedAt).toInstant();
+							} else {
+								foundInstant = currentInstant;
+							}
+	
+							//System.out.println(foundInstant);
+							publishedAtInstant = publishedAtInstant.isAfter(foundInstant)?foundInstant:publishedAtInstant;
+							//System.out.println(publishedAtInstant);
+						}
+						if(!publishedAtInstant.equals(currentInstant)) {
+							givenProduct.setPublishedOn(publishedAtInstant);
+						}
+						/*
+						Instant createdAtInstant = currentInstant;
+						Pattern createdAtPattern = Pattern.compile("(&quot;|\")created_at(&quot;|\"):(&quot;|\").+?(&quot;|\")");
+						Matcher createdAtMatcher = createdAtPattern.matcher(html);
+						while(createdAtMatcher.find()) {		        	
+							String createdAt = createdAtMatcher.group().split("(&quot;|\"):(&quot;|\")")[1].replaceAll("(&quot;|\")", "");	        	
+							Instant foundInstant = ZonedDateTime.parse(createdAt).toInstant();
+							//System.out.println(foundInstant);
+							createdAtInstant = createdAtInstant.isAfter(foundInstant)?foundInstant:createdAtInstant;
+							//System.out.println(publishedAtInstant);
+						}
+						if(!createdAtInstant.equals(currentInstant)) {
+							givenProduct.setCreatedOn(createdAtInstant);
+						}
+						*/
+					} catch (Exception e4) {
+						System.out.println("Published On Exception in " + givenProduct.getProductURL() + " : " + e4.getMessage());
+					}
+			        
+			        
+					Document doc = Jsoup.parse(html);
+					Elements titles = doc.select("meta[property=\"og:title\"]");
+					Elements descriptions = doc.select("meta[property=\"og:description\"]");
+					Elements prices = doc.select("meta[property=\"og:price:amount\"]");
+					Elements currencies = doc.select("meta[property=\"og:price:currency\"]");
+					
+					try {
+						if(null != titles && titles.size()>0) {
+							givenProduct.setProductTitle(titles.get(0).attr("content"));
+						} else {
+							titles = doc.select("title");
+							if(null != titles && titles.size()>0) {
+								givenProduct.setProductTitle(titles.get(0).text());
+							}
+						}
+					} catch (Exception e3) {
+						System.out.println("Title Exception in " + givenProduct.getProductURL() + " : " + e3.getMessage());
+					}
+					
+					try {
+						if(null != descriptions && descriptions.size()>0) {
+							givenProduct.setProductDesc(descriptions.get(0).attr("content"));
+						}
+					} catch (Exception e2) {
+						System.out.println("Desc Exception in " + givenProduct.getProductURL() + " : " + e2.getMessage());
+						//e2.printStackTrace();
+					}
+					
+					try {
+						if(null != prices && prices.size()>0) {
+							givenProduct.setProductPrice(Double.parseDouble(prices.get(0).attr("content").replaceAll(",", "").replaceAll("$", "").trim()));
+						}
+					} catch (Exception e1) {
+						System.out.println("Price Exception in " + givenProduct.getProductURL() + " : " + e1.getMessage());
+						//e1.printStackTrace();
+					}
+					
+					try {
+						if(null != currencies && currencies.size()>0) {
+							givenProduct.setProductCurrency(currencies.get(0).attr("content"));
+						}
+					} catch (Exception e) {
+						System.out.println("Currency Exception in " + givenProduct.getProductURL() + " : " + e.getMessage());
+						//e.printStackTrace();
+					}
+				
+				//System.out.println("After Processing Product Done : " + givenProduct.getProductURL());
+				}
 			}
 		} catch (Exception e) {
+			System.out.println("Exception in : " + givenProduct.getProductURL() + " : " + e.getMessage());
 			//e.printStackTrace();
 		}
-		
+		URLConnectionPool.reduceConnection();
 		return givenProduct;
 	}
 	
@@ -180,9 +254,10 @@ public class ShopifyClient {
 	public ShopifySite processSite(ShopifySite givenSite) {
 		try {
 			if(null != givenSite.getFutureResponse()) {
+				URLConnectionPool.reduceConnection();
 				//System.out.println("Not Empty : " + productURL);
 				String html = givenSite.getFutureResponse().get().getResponseBody();
-				//System.out.println(html);	       
+				System.out.println(html);	       
 				
 				givenSite.setHtml(html);
 		        
@@ -357,27 +432,39 @@ public class ShopifyClient {
 	}
 
 	
-	public Future<org.asynchttpclient.Response> getContentFromUrl(String url) {
-		Future<org.asynchttpclient.Response>  response = null;
+	public ListenableFuture<org.asynchttpclient.Response> getContentFromUrl(String url) {
+		ListenableFuture<org.asynchttpclient.Response>  response = null;
 		try {
 			AsyncHttpClient asyncHttpClient = URLConnectionPool.getInstance().getClient();	
-			int sessionId = new Random().nextInt(1000000);
-			ProxyServer ps = new ProxyServer.Builder("servercountry-US.zproxy.luminati.io", 22225)
-					.setRealm(new Realm.Builder("lum-customer-hl_8226f349-zone-zone1-country-US-session-glob_rand"+sessionId, "40or5h2qxicw")
-					.setScheme(Realm.AuthScheme.BASIC))
-					.build();	
+			int sessionId = new Random().nextInt(100);
+			if(shouldUseProxy) {
+				ProxyServer ps = new ProxyServer.Builder("servercountry-US.zproxy.luminati.io", 22225)
+						.setRealm(new Realm.Builder("lum-customer-hl_8226f349-zone-zone1-country-US-session-glob_rand"+sessionId, "40or5h2qxicw")
+						.setScheme(Realm.AuthScheme.BASIC))
+						.build();	
+
+				response = asyncHttpClient
+						.prepareGet(url.toString().replaceFirst("^https", "http"))
+						.addHeader("accept", "text/html,application/xhtml+xml,application/xml")
+						.addHeader("accept-language", "en-US,en;")
+						.addHeader("cache-control", "max-age=0")
+						.addHeader("referer", "https://www.facebook.com/")
+						.addHeader("User-Agent", WebScraperUtils.getInstance().getRandomUserAgentString())
+						.setProxyServer(ps)
+						.setFollowRedirect(true)
+						.execute();
+			} else {
+				response = asyncHttpClient
+						.prepareGet(url.toString().replaceFirst("^https", "http"))
+						.addHeader("accept", "text/html,application/xhtml+xml,application/xml")
+						.addHeader("accept-language", "en-US,en;")
+						.addHeader("cache-control", "max-age=0")
+						.addHeader("referer", "https://www.facebook.com/")
+						.addHeader("User-Agent", WebScraperUtils.getInstance().getRandomUserAgentString())
+						.setFollowRedirect(true)
+						.execute();
+			}
 			
-			
-			response = asyncHttpClient
-														.prepareGet(url)
-														.addHeader("accept", "text/html,application/xhtml+xml,application/xml")
-														.addHeader("accept-language", "en-US,en;")
-														.addHeader("cache-control", "max-age=0")
-														.addHeader("referer", "https://www.facebook.com/")
-														.addHeader("User-Agent", WebScraperUtils.getInstance().getRandomUserAgentString())
-														.setProxyServer(ps)
-														.setFollowRedirect(true)
-														.execute();
 			//org.asynchttpclient.Response r = f.get();
 			//System.out.println("Response " + r.getStatusCode() + " : " + url);
 			/*
@@ -398,12 +485,27 @@ public class ShopifyClient {
 	public static void main(String[] args) throws Exception {
 		
 		ShopifyClient aClient = new ShopifyClient();
+		ShopifyClient.shouldUseProxy = true;
+		
 		ShopifySite givenSite = new ShopifySite();
-		givenSite.setStoreURL("usefuluniques.com");
+		givenSite.setStoreURL("wiki-store.com");
 		aClient.getSiteContent(givenSite);
 		aClient.processSite(givenSite);
 		System.out.println(givenSite.getStoreURL()+"-"+"UseTrackify:"+givenSite.isUseTrackify()
 		+"-"+"UseCoin:"+givenSite.isUseCoin());
+		
+		/*
+		System.setProperty("jsse.enableSNIExtension", "false");
+		ShopifyProduct givenProduct = new ShopifyProduct();
+		System.out.println("After Product Initiation");
+		givenProduct.setProductURL("https://ryutech.cl/products/samsung-galaxy-s6-dorado-32gb-grado-a-semi-nuevo-1");
+		System.out.println("After Product URL Set");
+		aClient.getProductContent(givenProduct);
+		System.out.println("After Product URL content got");
+		aClient.processProduct(givenProduct);
+		System.out.println("After Product Processing");
+		System.out.println(givenProduct.getProductCurrency());
+		*/
 		/*
 		List<ShopifyProduct> products = aClient.getProductLinks(1
 				, 1, "littleplayland.com"

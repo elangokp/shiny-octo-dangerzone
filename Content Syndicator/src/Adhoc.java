@@ -7,6 +7,8 @@ import java.io.Reader;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -70,6 +72,15 @@ public class Adhoc {
 */
 	
 	public static void main(String[] args) throws Exception {
+		
+		//DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+		String publishedAt = "2017-02-24";
+		if(publishedAt.length()==10) {
+			publishedAt = publishedAt+"T00:00:00-00:00";
+		}else if(publishedAt.length()==19) {
+			publishedAt = publishedAt+"-00:00";
+		}
+		Instant foundInstant = ZonedDateTime.parse(publishedAt).toInstant();
 
 		//int sessionId = new Random().nextInt(1000000);
 		//System.out.println(sessionId);
@@ -145,7 +156,7 @@ public class Adhoc {
 		fileScanner.close();
 		*/
 		
-		
+		/*
 		Reader in = new FileReader("C:\\Users\\elangokp\\Downloads\\shopify-topalexarank-live-matrix.csv");
 		//Iterable<CSVRecord> recordsNoHeader = CSVFormat.EXCEL.parse(in);
 		//System.out.println(recordsNoHeader.iterator().next());
@@ -547,7 +558,7 @@ public class Adhoc {
 		    //System.out.println();
 		}
 		
-		
+		*/
 			
 	}
 }

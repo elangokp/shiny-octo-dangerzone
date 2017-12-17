@@ -18,6 +18,8 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 public class URLConnectionPool {
 	
 	private static URLConnectionPool instance = null;
+	private static int activeConnections = 0;
+	private static int maxActiveConnections = 5000;
 	private AsyncHttpClient asyncHttpClient;
 
 	public URLConnectionPool() {
@@ -35,15 +37,16 @@ public class URLConnectionPool {
 				    .trustManager(InsecureTrustManagerFactory.INSTANCE)
 				    .build();
 			
+			System.setProperty("jsse.enableSNIExtension", "false");
 			
 			DefaultAsyncHttpClientConfig config = new DefaultAsyncHttpClientConfig.Builder()
 					.setCompressionEnforced(true)
 			        .setRequestTimeout(60000)
 			        .setConnectTimeout(60000)
-			        .setMaxConnections(2000)
+			        //.setMaxConnections(5000)
 			        .setSslContext(sc)
 			        .setUseInsecureTrustManager(true)
-			        .setMaxConnectionsPerHost(500)
+			        //.setMaxConnectionsPerHost(1000)
 			        .setPooledConnectionIdleTimeout(100)
 			        .setConnectionTtl(500)
 			        .build();
@@ -54,15 +57,31 @@ public class URLConnectionPool {
 		}
 	}
 	
-	 public static URLConnectionPool getInstance() {  
+	public static URLConnectionPool getInstance() {  
     	if (instance == null) {
     		instance = new URLConnectionPool();
-    	}
+    	}    	
         return instance;  
     }  
 
     public AsyncHttpClient getClient()  {  
+    	while(activeConnections>=maxActiveConnections) {
+    		try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+    	}
+    	activeConnections++;
         return asyncHttpClient;
+    }
+    
+    public static void reduceConnection() {
+    	activeConnections--;
+    }
+    
+    public static void setMaxActiveConnections(int maxActiveConnections) {
+    	URLConnectionPool.maxActiveConnections = maxActiveConnections;
     }
     
     final class DummyTrustManager 
