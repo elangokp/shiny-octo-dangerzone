@@ -26,7 +26,7 @@ public class UpdateProductRankings implements Runnable {
 		Boolean ignoreBatchMinimum = false;
 		while(products.size() <= this.recordsPerBatch) {			
 			try {
-				if(products.size() >= this.recordsPerBatch || ignoreBatchMinimum) {
+				if(products.size() >= this.recordsPerBatch || (ignoreBatchMinimum && products.size()>0)) {
 					System.out.println("Calling Update");
 					dbutils.insertProductRankings(products);
 					products.clear();

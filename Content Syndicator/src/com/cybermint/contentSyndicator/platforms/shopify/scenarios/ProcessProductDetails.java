@@ -4,6 +4,7 @@ import java.util.concurrent.BlockingQueue;
 
 import com.cybermint.contentSyndicator.platforms.shopify.objects.ShopifyProduct;
 import com.cybermint.contentSyndicator.platforms.shopify.utils.ShopifyClient;
+import com.cybermint.http.URLConnectionPool;
 
 public class ProcessProductDetails implements Runnable {
 
@@ -49,6 +50,7 @@ public class ProcessProductDetails implements Runnable {
 		try {
 			//System.out.println("Starting thread for : " + Thread.currentThread().getName());
 			//System.out.println("Before Product : " + givenProduct.getProductURL());
+			URLConnectionPool.reduceConnection();
 			client.processProduct(givenProduct);
 			//System.out.println("After Product : " + givenProduct.getProductURL());
 			this.productDetailsQueue.put(givenProduct);

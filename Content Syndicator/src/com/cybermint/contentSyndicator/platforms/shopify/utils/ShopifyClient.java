@@ -228,7 +228,7 @@ public class ShopifyClient {
 			System.out.println("Exception in : " + givenProduct.getProductURL() + " : " + e.getMessage());
 			//e.printStackTrace();
 		}
-		URLConnectionPool.reduceConnection();
+		
 		return givenProduct;
 	}
 	
