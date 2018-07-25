@@ -12,17 +12,17 @@ import com.cybermint.contentSyndicator.platforms.shopify.utils.ShopifyClient;
 import com.cybermint.contentSyndicator.platforms.shopify.utils.ShopifyDBUtils;
 import com.cybermint.http.URLConnectionPool;
 
-public class CrawlNextActiveSite implements Runnable {
+public class CrawlNextSiteForDNSResolution implements Runnable {
 
 	private ShopifyClient client;
 	private BlockingQueue<ShopifySite> pendingSitesQueue;
-	private BlockingQueue<ShopifyProduct> productRankingsQueue;
+	private BlockingQueue<ShopifySite> processedSitesQueue;
 	
 		
-	public CrawlNextActiveSite(BlockingQueue<ShopifySite> pendingSitesQueue, BlockingQueue<ShopifyProduct> productRankingsQueue) {
+	public CrawlNextSiteForDNSResolution(BlockingQueue<ShopifySite> pendingSitesQueue, BlockingQueue<ShopifySite> processedSitesQueue) {
 		this.client = new ShopifyClient();
 		this.pendingSitesQueue =  pendingSitesQueue;
-		this.productRankingsQueue = productRankingsQueue;		
+		this.processedSitesQueue = processedSitesQueue;		
 	}
 
 	@Override
@@ -30,12 +30,8 @@ public class CrawlNextActiveSite implements Runnable {
 		while(1==1) {
 			try {
 				ShopifySite givenSite = this.pendingSitesQueue.take();
-				List<ShopifyProduct> products = client.getProductLinks(givenSite.getCrawlHeaderID()
-						, givenSite.getSiteID(), givenSite.getStoreURL()
-						, ShopifyClient.SORT_BY_BEST_SELLING, 500);
-				for(ShopifyProduct aProduct : products) {
-					this.productRankingsQueue.put(aProduct);
-				}
+				client.getSiteDNS(givenSite);
+				this.processedSitesQueue.put(givenSite);
 				//this.DBExecutorService.execute(new UpdateProductRankings(products, givenSite));
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -50,49 +46,40 @@ public class CrawlNextActiveSite implements Runnable {
 		int noOfCrawlThreads = Integer.parseInt(args[0]);
 		int noOfDBUpdateThreads = Integer.parseInt(args[1]);
 		int recordsPerDBBatchUpdate = Integer.parseInt(args[2]);
-		int maxActiveConnections = Integer.parseInt(args[3]);
-		
-		if(args[4].equalsIgnoreCase("yes")) {
-			ShopifyClient.shouldUseProxy = true;
-		} else {
-			ShopifyClient.shouldUseProxy = false;
-		}
-		
-		URLConnectionPool.setMaxActiveConnections(maxActiveConnections);
-		
-		BlockingQueue<ShopifyProduct> productRankingsQueue = new LinkedBlockingQueue<ShopifyProduct>();
+
 		BlockingQueue<ShopifySite> pendingSitesQueue = new LinkedBlockingQueue<ShopifySite>(noOfCrawlThreads*3);
+		BlockingQueue<ShopifySite> processedSitesQueue = new LinkedBlockingQueue<ShopifySite>();
 		
 		ExecutorService DBSelectors = Executors.newFixedThreadPool(1);		
 		ExecutorService crawlers = Executors.newFixedThreadPool(noOfCrawlThreads);
 		ExecutorService DBUpdators = Executors.newFixedThreadPool(noOfDBUpdateThreads);
 		ShopifyDBUtils dbutils = new ShopifyDBUtils();
-		int maxRetryRuns = 20;
+		int maxRetryRuns = 0;
 		int retryNo = 0;
 		while(retryNo <= maxRetryRuns) {
 			
-			dbutils.UpdateInprogressRankCrawlSites();
+			//dbutils.UpdateInprogressRankCrawlSites();
 			
-			DBSelectors.execute(new GetSitesForCrawl(pendingSitesQueue,noOfCrawlThreads*3));
+			DBSelectors.execute(new GetSitesForDNSResolution(pendingSitesQueue,noOfCrawlThreads*3));
 			
 			int i = 1;
 			while(i<=noOfCrawlThreads) {
-				crawlers.execute(new CrawlNextActiveSite(pendingSitesQueue, productRankingsQueue));
+				crawlers.execute(new CrawlNextSiteForDNSResolution(pendingSitesQueue, processedSitesQueue));
 				i++;
 			}
 			
 			int j = 1;
 			while(j<=noOfDBUpdateThreads) {
-				DBUpdators.execute(new UpdateProductRankings(productRankingsQueue, recordsPerDBBatchUpdate));
+				DBUpdators.execute(new UpdateSiteDNSDetails(processedSitesQueue, recordsPerDBBatchUpdate));
 				j++;
 			}
 			
 			int k = 1;
 			
 			while(k<5) {
-				System.out.println("PendingSitesQueue : " + pendingSitesQueue.size() + " , ProductRankingsQueue : " + productRankingsQueue.size());
+				System.out.println("PendingSitesQueue : " + pendingSitesQueue.size() + " , ProcessedSitesQueue : " + processedSitesQueue.size());
 				
-				if(pendingSitesQueue.size()==0 && productRankingsQueue.size()==0) {
+				if(pendingSitesQueue.size()==0 && processedSitesQueue.size()==0) {
 					k++;
 				} else {
 					k = 1;

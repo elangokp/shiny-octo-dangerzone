@@ -38,7 +38,12 @@ public class CrawlNextActiveProduct implements Runnable {
 				//System.out.println(Thread.currentThread().getName() + " : Got Product : "+givenProduct.getProductURL());
 				client.getProductContent(givenProduct);
 				//System.out.println(Thread.currentThread().getName() + " : Completed Product : "+givenProduct.getProductURL());
-				givenProduct.getFutureResponse().addListener(new ProcessProductDetails(givenProduct,productDetailsQueue), processors);
+				if(givenProduct.getFutureResponse().isFutureResponse()) {
+					givenProduct.getFutureResponse().getFutureResponse().addListener(new ProcessProductDetails(givenProduct,productDetailsQueue), processors);
+				} else {
+					processors.submit(new ProcessProductDetails(givenProduct,productDetailsQueue));
+				}
+				
 				//this.productProcessingQueue.put(givenProduct);
 				//System.out.println("PendingProductsQueue : " + pendingProductsQueue.size() + "," + pendingProductsQueue.remainingCapacity() + " , ProductDetailsQueue : " + productDetailsQueue.size() + "," + productDetailsQueue.remainingCapacity());
 				//System.out.println(Thread.currentThread().getName() + " : Product Added : "+givenProduct.getProductURL());

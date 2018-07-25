@@ -50,6 +50,29 @@ public class ShopifyDBUtils {
 		return sites;
 	}
 	
+	public void UpdateInprogressRankCrawlSites() {	
+		Connection connection = null;
+		CallableStatement stmt = null;
+		ResultSet rs = null;
+		try {
+			connection = CampaignStatsDBConnectionPool.getInstance().getConnection();
+			stmt = connection.prepareCall("{call [UpdateInprogressRankCrawlSites]}");
+			stmt.execute();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				//rs.close();
+				stmt.close();
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			
+		}
+	}
+	
 	public List<ShopifySite> getNextSitesForTechDetermination(int noOfSitesNeeded) {
 		List<ShopifySite> sites = new ArrayList<ShopifySite>();		
 		Connection connection = null;
@@ -73,6 +96,48 @@ public class ShopifyDBUtils {
 				aShopifySite.setSiteID(rs.getInt("SiteID"));
 				aShopifySite.setStoreURL(rs.getString("StoreURL"));
 				aShopifySite.setTechDeterminationStatus(ShopifySite.STATUS_INPROGRESS);
+				sites.add(aShopifySite);
+				//System.out.println(aShopifySite.getSiteID()+","+aShopifySite.getStoreURL());
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				rs.close();
+				stmt.close();
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			
+		}
+		return sites;
+	}
+	
+	public List<ShopifySite> getNextSitesForDNSResolution(int noOfSitesNeeded) {
+		List<ShopifySite> sites = new ArrayList<ShopifySite>();		
+		Connection connection = null;
+		CallableStatement stmt = null;
+		ResultSet rs = null;
+		try {
+			//System.out.println("Before Connection");
+			connection = CampaignStatsDBConnectionPool.getInstance().getConnection();
+			//System.out.println("After Connection");
+			stmt = connection.prepareCall("{call [GetNextSitesForDNSResolution] (?)}");
+			//System.out.println("After Prepare Call");
+			stmt.setInt(1, noOfSitesNeeded);
+			//System.out.println("After Setting Parameter");
+			stmt.execute();
+			//System.out.println("After Executing");
+			rs = stmt.getResultSet();
+			//System.out.println("After Retreiving result set");
+			while (rs.next()) {
+				//System.out.println("Inside WHile");
+				ShopifySite aShopifySite = new ShopifySite();
+				aShopifySite.setSiteID(rs.getInt("SiteID"));
+				aShopifySite.setStoreURL(rs.getString("StoreURL"));
+				aShopifySite.setDnsResolutionStatus(ShopifySite.STATUS_INPROGRESS);
 				sites.add(aShopifySite);
 				//System.out.println(aShopifySite.getSiteID()+","+aShopifySite.getStoreURL());
 			}
@@ -209,6 +274,12 @@ public class ShopifyDBUtils {
 		shopifySiteDetailsTable.addColumnMetadata("useBoosterBundleUpsell" ,java.sql.Types.BIT);
 		shopifySiteDetailsTable.addColumnMetadata("html" ,java.sql.Types.NVARCHAR);
 		shopifySiteDetailsTable.addColumnMetadata("useInCartUpsell" ,java.sql.Types.BIT);
+		shopifySiteDetailsTable.addColumnMetadata("responseCode" ,java.sql.Types.NVARCHAR);
+		shopifySiteDetailsTable.addColumnMetadata("responseText" ,java.sql.Types.NVARCHAR);
+		shopifySiteDetailsTable.addColumnMetadata("exceptionName" ,java.sql.Types.NVARCHAR);		
+		shopifySiteDetailsTable.addColumnMetadata("canonicalHostName" ,java.sql.Types.NVARCHAR);
+		shopifySiteDetailsTable.addColumnMetadata("hostAddress" ,java.sql.Types.NVARCHAR);
+		shopifySiteDetailsTable.addColumnMetadata("dnsResolutionStatus" ,java.sql.Types.INTEGER);
 					
 		for(ShopifySite site : sites) {
 			int siteID = null == site.getSiteID() ? 0 : site.getSiteID();
@@ -258,6 +329,12 @@ public class ShopifyDBUtils {
 			boolean useBoosterBundleUpsell = site.isUseBoosterBundleUpsell();
 			String html = site.getHtml();
 			boolean useInCartUpsell = site.isUseInCartUpsell();
+			String responseCode = site.getResponseCode();
+			String responseText = site.getResponseText();
+			String exceptionName = site.getExceptionName();			
+			String canonicalHostName = site.getCanonicalHostName();
+			String hostAddress = site.getHostAddress();
+			int dnsResolutionStatus = site.getDnsResolutionStatus();
 			
 			shopifySiteDetailsTable.addRow(siteID,techDeterminationStatus,useTrackify,usePixelPerfect,useHextomShippingBar,useKlaviyo,useWheelio,useTrust,useCartHook,useCriteo,useHurrify,
 					useBestCurrencyConverter,useFomo,useBeketing,useHextomMCC,useRetargetApp,usePersonalizerLimespot,
@@ -266,7 +343,7 @@ public class ShopifyDBUtils {
 					useAliReviews,useWeglot,useLooxReviews,useSmar7BundleUpsell,useAutoCurrencySwitcher,useSmar7CountdownTimer,
 					useFrequentlyBoughtTogether,useAlsoBought,useBoldUpsell,useBoldBrain,useBoldMultiCurrency,useBoldSalesMotivator,
 					useBoldProductBundles,useShopifyProductReviews,useBoosterDiscountedUpsells,useBoosterBundleUpsell,html,
-					useInCartUpsell);
+					useInCartUpsell,responseCode,responseText,exceptionName,canonicalHostName,hostAddress,dnsResolutionStatus);
 		}
 		
 		return shopifySiteDetailsTable;
@@ -347,6 +424,29 @@ public class ShopifyDBUtils {
 			SQLServerDataTable shopifySiteDetailsTable = this.getSitesAsDataTable(sites);
 			connection = CampaignStatsDBConnectionPool.getInstance().getConnection();
 			stmt = connection.prepareCall("{call [UpdateShopifySitesTechDetermination] (?)}").unwrap(SQLServerCallableStatement.class);
+			stmt.setStructured(1, "dbo.ShopifySiteTableType", shopifySiteDetailsTable);
+			stmt.execute();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				stmt.close();
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			
+		}
+	}
+	
+	public void updateSiteDNSDetails(List<ShopifySite> sites) {
+		Connection connection = null;
+		SQLServerCallableStatement stmt = null;		
+		try {
+			SQLServerDataTable shopifySiteDetailsTable = this.getSitesAsDataTable(sites);
+			connection = CampaignStatsDBConnectionPool.getInstance().getConnection();
+			stmt = connection.prepareCall("{call [UpdateShopifySitesDNS] (?)}").unwrap(SQLServerCallableStatement.class);
 			stmt.setStructured(1, "dbo.ShopifySiteTableType", shopifySiteDetailsTable);
 			stmt.execute();
 			

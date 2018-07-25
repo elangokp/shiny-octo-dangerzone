@@ -23,11 +23,16 @@ public class ProcessSiteTechDetails implements Runnable {
 			try {
 				//System.out.println("Starting thread for : " + Thread.currentThread().getName());
 				ShopifySite givenSite = this.siteProcessingQueue.take();
-				if(givenSite.getFutureResponse().isDone()) {
+				if(givenSite.getFutureResponse().isFutureResponse()) {
+					if(givenSite.getFutureResponse().getFutureResponse().isDone()) {
+						client.processSite(givenSite);
+						this.siteDetailsQueue.put(givenSite);
+					} else {
+						this.siteProcessingQueue.put(givenSite);
+					}				 
+				} else {
 					client.processSite(givenSite);
 					this.siteDetailsQueue.put(givenSite);
-				} else {
-					this.siteProcessingQueue.put(givenSite);
 				}
 				
 			} catch (Exception e) {

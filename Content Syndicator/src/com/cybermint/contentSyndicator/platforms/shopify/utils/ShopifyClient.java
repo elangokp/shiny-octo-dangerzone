@@ -1,16 +1,25 @@
 package com.cybermint.contentSyndicator.platforms.shopify.utils;
 
+import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.ListenableFuture;
 import org.asynchttpclient.Realm;
@@ -21,8 +30,11 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.cybermint.contentSyndicator.platforms.shopify.objects.ShopifyProduct;
+import com.cybermint.contentSyndicator.platforms.shopify.objects.ShopifyResponse;
 import com.cybermint.contentSyndicator.platforms.shopify.objects.ShopifySite;
+import com.cybermint.http.LuminatiProxyClient;
 import com.cybermint.http.URLConnectionPool;
+import com.cybermint.utils.DNSUtils;
 import com.cybermint.utils.custom.WebScraperUtils;
 
 public class ShopifyClient {
@@ -31,6 +43,19 @@ public class ShopifyClient {
 	public static final String SORT_BY_CREATED_DESCENDING = "created-descending";
 	public static final String SORT_BY_CREATED_ASCENDING = "created-ascending";
 	public static boolean shouldUseProxy;
+	public static final int switch_ip_every_n_req = 40;
+    public static AtomicInteger at_req = new AtomicInteger(0);
+    public static String host;
+    
+    static {
+    	try {
+            int proxy_session_id = new Random().nextInt(Integer.MAX_VALUE);
+            InetAddress address = InetAddress.getByName("session-"+proxy_session_id+".zproxy.lum-superproxy.io");
+            host = address.getHostAddress();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+    }
 
 	public List<ShopifyProduct> getProductLinks(int crawlHeaderId, int siteId, String storeURL, String sortBy, int noOfpages) throws Exception {
 		List<ShopifyProduct> products = new ArrayList<ShopifyProduct>();
@@ -41,11 +66,12 @@ public class ShopifyClient {
 			String url = "http://"+storeURL+"/collections/all?sort_by=best-selling";
 			URL storeBaseURL = new URL("https://"+storeURL);
 			int noOfEmptyProductPages = 0;
-			for(int i = 1; i<=noOfpages && noOfEmptyProductPages<2; i++) {		
+			for(int i = 1; i<=noOfpages && noOfEmptyProductPages<3; i++) {		
 				int noOfProductsBefore = productLinks.size();
 				//System.out.println("Page : " + i);
 				pageurl = url+"&page="+i;
-				Document doc = Jsoup.parse(this.getContentFromUrl(pageurl).get().getResponseBody());
+				Document doc = Jsoup.parse(this.getContentFromUrl(pageurl).getHtml());
+				//System.out.println(doc.html());
 				URLConnectionPool.reduceConnection();
 				Elements productURLs = doc.select("a");
 				for(Element productURL : productURLs) {	
@@ -65,6 +91,7 @@ public class ShopifyClient {
 				int noOfProductsAfter = productLinks.size();
 				//System.out.println(noOfProductsAfter);
 				if(noOfProductsAfter == noOfProductsBefore) {
+					//System.out.println(doc.html());
 					noOfEmptyProductPages++;
 					i--;
 				} else {
@@ -121,7 +148,7 @@ public class ShopifyClient {
 				//System.out.println("Not Empty : " + productURL);
 				String html="";
 				try {
-					html = givenProduct.getFutureResponse().get().getResponseBody();
+					html = givenProduct.getFutureResponse().getHtml();
 				} catch (Exception e5) {
 					System.out.println("Response Exception in " + givenProduct.getProductURL() + " : " + e5.getMessage());
 				}
@@ -232,6 +259,27 @@ public class ShopifyClient {
 		return givenProduct;
 	}
 	
+	public ShopifySite getSiteDNS(ShopifySite givenSite) {
+		String storeURL = givenSite.getStoreURL();
+		try {
+			if(null!=storeURL && !storeURL.isEmpty()) {
+				
+				DNSUtils d= new DNSUtils();
+				Map<String,String> DNSDetails = d.getIPByName(storeURL);
+				
+				DNSDetails.forEach((canonicalHostName, hostAddress) -> {
+											givenSite.setCanonicalHostName(canonicalHostName);
+											givenSite.setHostAddress(hostAddress);
+											});
+				givenSite.setDnsResolutionStatus(ShopifySite.STATUS_COMPLETED);
+			}
+		} catch (Exception e) {
+			//e.printStackTrace();
+		}
+		
+		return givenSite;
+	}
+	
 	public ShopifySite getSiteContent(ShopifySite givenSite) {
 		String storeURL = givenSite.getStoreURL();
 		//System.out.println("Initiating request for : " + productURL);
@@ -256,190 +304,208 @@ public class ShopifyClient {
 			if(null != givenSite.getFutureResponse()) {
 				URLConnectionPool.reduceConnection();
 				//System.out.println("Not Empty : " + productURL);
-				String html = givenSite.getFutureResponse().get().getResponseBody();
-				System.out.println(html);	       
+				givenSite.setResponseCode(givenSite.getFutureResponse().getStatusCode());
+				givenSite.setResponseText(givenSite.getFutureResponse().getStatusText());
+				System.out.println(givenSite.getStoreURL() + ", " +givenSite.getFutureResponse().getStatusCode());
+				//System.out.println(givenSite.getFutureResponse().getStatusText());
+				//System.out.println(givenSite.getFutureResponse().getHtml());
+				//System.out.println(givenSite.getFutureResponse().getRemoteAddress().toString());
+				String html = givenSite.getFutureResponse().getHtml();
+				//System.out.println(html);	       
 				
-				givenSite.setHtml(html);
+				//givenSite.setHtml(html);
 		        
+				if(null != html) {
+					if(html.contains("redretarget.com")) {
+						givenSite.setUseTrackify(true);
+					}
+					
+					if(html.contains("pixel-perfect.js")) {
+						givenSite.setUsePixelPerfect(true);
+					}
+					
+					if(html.contains("lastsecondcoupon.js")) {
+						givenSite.setUseLastSecondCoupon(true);
+					}
+					
+					if(html.contains("freeshippingbar.js")) {
+						givenSite.setUseHextomShippingBar(true);
+					}
+					
+					if(html.contains("multicurrencyconverter.js")) {
+						givenSite.setUseHextomMCC(true);
+					}
+					
+					if(html.contains("quickannouncementbar.js")) {
+						givenSite.setUseHextomQuickAnnouncement(true);
+					}
+					
+					if(html.contains("klaviyo.com")) {
+						givenSite.setUseKlaviyo(true);
+					}
+					
+					if(html.contains("wheelio-")) {
+						givenSite.setUseWheelio(true); 
+					}
+					
+					if(html.contains("varinode.com")) {
+						givenSite.setUseTrust(true);
+					}
+					
+					if(html.contains("trust_hero_")) {
+						givenSite.setUseTrustHero(true);
+					}
+					
+					if(html.contains("doubly.js")) {
+						givenSite.setUseBestCurrencyConverter(true);
+					}
+					
+					if(html.contains("reviews.appiversalapps.com")) {
+						givenSite.setUseExpressReviews(true);
+					}
+					
+					if(html.contains("alireviews.fireapps.io")) {
+						givenSite.setUseAliReviews(true);
+					}
+					
+					if(html.contains("carthook.com")) {
+						givenSite.setUseCartHook(true);
+					}
+					
+					if(html.contains("criteo.com") || html.contains("criteo.net")) {
+						givenSite.setUseCriteo(true);
+					}
+					
+					if(html.contains("hurrifyme.com")) {
+						givenSite.setUseHurrify(true);
+					}
+					
+					if(html.contains("usefomo.com")) {
+						givenSite.setUseFomo(true);
+					}
+					
+					if(html.contains("beeketing.com")) {
+						givenSite.setUseBeeketing(true);
+					}
+					
+					if(html.contains("retargetapp.com")) {
+						givenSite.setUseRetargetApp(true);
+					}
+					
+					if(html.contains("ghostmonitor.com")) {
+						givenSite.setUseRecart(true);
+					}
+					
+					if(html.contains("cartmail.org")) {
+						givenSite.setUseCartBack(true);
+					}
+					
+					if(html.contains("personalizer.io")) {
+						givenSite.setUsePersonalizerLimespot(true);
+					}
+					
+					if(html.contains("coin.js")) {
+						givenSite.setUseCoin(true);
+					}
+					
+					if(html.contains("oneclickupsell.zipify.com")) {
+						givenSite.setUseOneClickUpsell(true);
+					}
+					
+					if(html.contains("weglot.com")) {
+						givenSite.setUseWeglot(true);
+					}
+					
+					if(html.contains("quantity_breaks.php")) {
+						givenSite.setUseQuantityBreaks(true);
+					}
+					
+					if(html.contains("/currency-converter-plus/")||html.contains("\\/currency-converter-plus\\/")) {
+						givenSite.setUseCurrencyConverterPlus(true);
+					}
+					
+					if(html.contains("loox.io")) {
+						givenSite.setUseLooxReviews(true);
+					}
+					
+					if(html.contains("bundle-upsell.smar7apps.com")) {
+						givenSite.setUseSmar7BundleUpsell(true);
+					}
+					
+					if(html.contains("mlveda.com/MultiCurrency")||html.contains("mlveda.com\\/MultiCurrency")) {
+						givenSite.setUseAutoCurrencySwitcher(true);
+					}
+					
+					if(html.contains("counter.smar7apps.com")) {
+						givenSite.setUseSmar7CountdownTimer(true);
+					}
+					
+					if(html.contains("/frequently-bought-together/")||html.contains("\\/frequently-bought-together\\/")) {
+						givenSite.setUseFrequentlyBoughtTogether(true);
+					}
+					
+					if(html.contains("/also-bought/")||html.contains("\\/also-bought\\/")) {
+						givenSite.setUseAlsoBought(true);
+					}
+					
+					if(html.contains("upsells.boldapps.net")) {
+						givenSite.setUseBoldUpsell(true);
+					}
+					
+					if(html.contains("brain.boldapps.net")) {
+						givenSite.setUseBoldBrain(true);
+					}
+					
+					if(html.contains("mc.boldapps.net")) {
+						givenSite.setUseBoldMultiCurrency(true);
+					}
+					
+					if(html.contains("shappify.com/apps/motivate/motivator.php")||html.contains("shappify.com\\/apps\\/motivate\\/motivator.php")) {
+						givenSite.setUseBoldSalesMotivator(true);
+					}
+					
+					if(html.contains("shappify.com/apps/bundle/generate_bundle.php")||html.contains("shappify.com\\/apps\\/bundle\\/generate_bundle.php")) {
+						givenSite.setUseBoldProductBundles(true);
+					}
+					
+					if(html.contains("productreviews.shopifycdn.com")) {
+						givenSite.setUseShopifyProductReviews(true);
+					}
+					
+					if(html.contains("id=\"ba-discount-tiers\"")) {
+						givenSite.setUseBoosterDiscountedUpsells(true);
+					}
+					
+					if(html.contains("id=\"ba-bundle\"")||html.contains("id=\"ba-upsell\"")) {
+						givenSite.setUseBoosterBundleUpsell(true);
+					}
+					
+					givenSite.setTechDeterminationStatus(ShopifySite.STATUS_COMPLETED);
+				} else {
+					givenSite.setTechDeterminationStatus(ShopifySite.STATUS_PENDING);
+				}
 				//Document doc = Jsoup.parse(html);
-				if(html.contains("redretarget.com")) {
-					givenSite.setUseTrackify(true);
-				}
 				
-				if(html.contains("pixel-perfect.js")) {
-					givenSite.setUsePixelPerfect(true);
-				}
-				
-				if(html.contains("lastsecondcoupon.js")) {
-					givenSite.setUseLastSecondCoupon(true);
-				}
-				
-				if(html.contains("freeshippingbar.js")) {
-					givenSite.setUseHextomShippingBar(true);
-				}
-				
-				if(html.contains("multicurrencyconverter.js")) {
-					givenSite.setUseHextomMCC(true);
-				}
-				
-				if(html.contains("quickannouncementbar.js")) {
-					givenSite.setUseHextomQuickAnnouncement(true);
-				}
-				
-				if(html.contains("klaviyo.com")) {
-					givenSite.setUseKlaviyo(true);
-				}
-				
-				if(html.contains("wheelio-")) {
-					givenSite.setUseWheelio(true); 
-				}
-				
-				if(html.contains("varinode.com")) {
-					givenSite.setUseTrust(true);
-				}
-				
-				if(html.contains("trust_hero_")) {
-					givenSite.setUseTrustHero(true);
-				}
-				
-				if(html.contains("doubly.js")) {
-					givenSite.setUseBestCurrencyConverter(true);
-				}
-				
-				if(html.contains("reviews.appiversalapps.com")) {
-					givenSite.setUseExpressReviews(true);
-				}
-				
-				if(html.contains("alireviews.fireapps.io")) {
-					givenSite.setUseAliReviews(true);
-				}
-				
-				if(html.contains("smartercheckout.com")) {
-					givenSite.setUseCartHook(true);
-				}
-				
-				if(html.contains("criteo.com") || html.contains("criteo.net")) {
-					givenSite.setUseCriteo(true);
-				}
-				
-				if(html.contains("hurrifyme.com")) {
-					givenSite.setUseHurrify(true);
-				}
-				
-				if(html.contains("usefomo.com")) {
-					givenSite.setUseFomo(true);
-				}
-				
-				if(html.contains("beeketing.com")) {
-					givenSite.setUseBeeketing(true);
-				}
-				
-				if(html.contains("retargetapp.com")) {
-					givenSite.setUseRetargetApp(true);
-				}
-				
-				if(html.contains("ghostmonitor.com")) {
-					givenSite.setUseRecart(true);
-				}
-				
-				if(html.contains("personalizer.io")) {
-					givenSite.setUsePersonalizerLimespot(true);
-				}
-				
-				if(html.contains("coin.js")) {
-					givenSite.setUseCoin(true);
-				}
-				
-				if(html.contains("oneclickupsell.zipify.com")) {
-					givenSite.setUseOneClickUpsell(true);
-				}
-				
-				if(html.contains("weglot.com")) {
-					givenSite.setUseWeglot(true);
-				}
-				
-				if(html.contains("quantity_breaks.php")) {
-					givenSite.setUseQuantityBreaks(true);
-				}
-				
-				if(html.contains("/currency-converter-plus/")||html.contains("\\/currency-converter-plus\\/")) {
-					givenSite.setUseCurrencyConverterPlus(true);
-				}
-				
-				if(html.contains("loox.io")) {
-					givenSite.setUseLooxReviews(true);
-				}
-				
-				if(html.contains("bundle-upsell.smar7apps.com")) {
-					givenSite.setUseSmar7BundleUpsell(true);
-				}
-				
-				if(html.contains("mlveda.com/MultiCurrency")||html.contains("mlveda.com\\/MultiCurrency")) {
-					givenSite.setUseAutoCurrencySwitcher(true);
-				}
-				
-				if(html.contains("counter.smar7apps.com")) {
-					givenSite.setUseSmar7CountdownTimer(true);
-				}
-				
-				if(html.contains("/frequently-bought-together/")||html.contains("\\/frequently-bought-together\\/")) {
-					givenSite.setUseFrequentlyBoughtTogether(true);
-				}
-				
-				if(html.contains("/also-bought/")||html.contains("\\/also-bought\\/")) {
-					givenSite.setUseAlsoBought(true);
-				}
-				
-				if(html.contains("upsells.boldapps.net")) {
-					givenSite.setUseBoldUpsell(true);
-				}
-				
-				if(html.contains("brain.boldapps.net")) {
-					givenSite.setUseBoldBrain(true);
-				}
-				
-				if(html.contains("mc.boldapps.net")) {
-					givenSite.setUseBoldMultiCurrency(true);
-				}
-				
-				if(html.contains("shappify.com/apps/motivate/motivator.php")||html.contains("shappify.com\\/apps\\/motivate\\/motivator.php")) {
-					givenSite.setUseBoldSalesMotivator(true);
-				}
-				
-				if(html.contains("shappify.com/apps/bundle/generate_bundle.php")||html.contains("shappify.com\\/apps\\/bundle\\/generate_bundle.php")) {
-					givenSite.setUseBoldProductBundles(true);
-				}
-				
-				if(html.contains("productreviews.shopifycdn.com")) {
-					givenSite.setUseShopifyProductReviews(true);
-				}
-				
-				if(html.contains("id=\"ba-discount-tiers\"")) {
-					givenSite.setUseBoosterDiscountedUpsells(true);
-				}
-				
-				if(html.contains("id=\"ba-bundle\"")||html.contains("id=\"ba-upsell\"")) {
-					givenSite.setUseBoosterBundleUpsell(true);
-				}
-				
-				givenSite.setTechDeterminationStatus(ShopifySite.STATUS_COMPLETED);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println(e.getMessage());
+			givenSite.setExceptionName(e.getMessage());
+			givenSite.setTechDeterminationStatus(ShopifySite.STATUS_PENDING);
+			//e.printStackTrace();
 		}
 		
 		return givenSite;
 	}
 
 	
-	public ListenableFuture<org.asynchttpclient.Response> getContentFromUrl(String url) {
-		ListenableFuture<org.asynchttpclient.Response>  response = null;
+	public ShopifyResponse getContentFromUrl(String url) {
+		ShopifyResponse response = new ShopifyResponse();
 		try {
-			AsyncHttpClient asyncHttpClient = URLConnectionPool.getInstance().getClient();	
-			int sessionId = new Random().nextInt(100);
+			//AsyncHttpClient asyncHttpClient = URLConnectionPool.getInstance().getClient();	
+			//int sessionId = new Random().nextInt(100);
 			if(shouldUseProxy) {
-				ProxyServer ps = new ProxyServer.Builder("servercountry-US.zproxy.luminati.io", 22225)
-						.setRealm(new Realm.Builder("lum-customer-hl_8226f349-zone-zone1-country-US-session-glob_rand"+sessionId, "40or5h2qxicw")
+				/*ProxyServer ps = new ProxyServer.Builder("servercountry-US.zproxy.luminati.io", 22225)
+						.setRealm(new Realm.Builder("lum-customer-hl_8226f349-zone-zone1-session-glob_rand"+sessionId, "40or5h2qxicw")
 						.setScheme(Realm.AuthScheme.BASIC))
 						.build();	
 
@@ -453,8 +519,40 @@ public class ShopifyClient {
 						.setProxyServer(ps)
 						.setFollowRedirect(true)
 						.execute();
+						*/
+				LuminatiProxyClient client = new LuminatiProxyClient(null, host);
+	            if (!client.have_good_super_proxy())
+	                client.switch_session_id();
+	            if (client.n_req_for_exit_node == switch_ip_every_n_req)
+	                client.switch_session_id();
+	            CloseableHttpResponse lresponse = null;
+	            try {
+	                lresponse = client.request(url,WebScraperUtils.getInstance().getRandomUserAgentString());
+	                String statusCode = Integer.toString(lresponse.getStatusLine().getStatusCode());
+	                String statusText = lresponse.getStatusLine().getReasonPhrase();
+	                String html = EntityUtils.toString(lresponse.getEntity());
+	                //System.out.println(statusCode);
+	                //System.out.println(statusText);
+	                //System.out.println(html);
+	                response.setStatusCode(statusCode);
+	                response.setStatusText(statusText);
+	                response.setHtml(html);
+	            } catch (IOException e) {
+	            	response.setStatusCode("Exp");
+	            	response.setStatusText(e.getMessage());
+	                System.out.println(e.getMessage());
+	            } finally {
+	                try {
+	                    if (lresponse != null)
+	                        lresponse.close();
+	                } catch (Exception e) {}
+	            }
+	        client.close();
+	        
 			} else {
-				response = asyncHttpClient
+				AsyncHttpClient asyncHttpClient = URLConnectionPool.getInstance().getClient();
+				response.setFutureResponse(
+						asyncHttpClient
 						.prepareGet(url.toString().replaceFirst("^https", "http"))
 						.addHeader("accept", "text/html,application/xhtml+xml,application/xml")
 						.addHeader("accept-language", "en-US,en;")
@@ -462,7 +560,8 @@ public class ShopifyClient {
 						.addHeader("referer", "https://www.facebook.com/")
 						.addHeader("User-Agent", WebScraperUtils.getInstance().getRandomUserAgentString())
 						.setFollowRedirect(true)
-						.execute();
+						.execute()
+						);
 			}
 			
 			//org.asynchttpclient.Response r = f.get();
@@ -487,12 +586,18 @@ public class ShopifyClient {
 		ShopifyClient aClient = new ShopifyClient();
 		ShopifyClient.shouldUseProxy = true;
 		
+		
 		ShopifySite givenSite = new ShopifySite();
-		givenSite.setStoreURL("wiki-store.com");
+		givenSite.setStoreURL("zootzuvvavaaavdva.com");
 		aClient.getSiteContent(givenSite);
 		aClient.processSite(givenSite);
 		System.out.println(givenSite.getStoreURL()+"-"+"UseTrackify:"+givenSite.isUseTrackify()
-		+"-"+"UseCoin:"+givenSite.isUseCoin());
+		+"-"+"UseCoin:"+givenSite.isUseCoin()
+		+"-"+"UseOCU:"+givenSite.isUseOneClickUpsell()
+		+"-"+"UseBaDisc:"+givenSite.isUseBoosterDiscountedUpsells()
+		+"-"+"UseBaBundle:"+givenSite.isUseBoosterBundleUpsell()
+		+"-"+"UseRecart:"+givenSite.isUseRecart()
+		+"-"+"UseLooxReviews:"+givenSite.isUseLooxReviews());
 		
 		/*
 		System.setProperty("jsse.enableSNIExtension", "false");
@@ -506,14 +611,16 @@ public class ShopifyClient {
 		System.out.println("After Product Processing");
 		System.out.println(givenProduct.getProductCurrency());
 		*/
+		
 		/*
 		List<ShopifyProduct> products = aClient.getProductLinks(1
-				, 1, "littleplayland.com"
+				, 1, "molyesstore.com"
 				, ShopifyClient.SORT_BY_BEST_SELLING, 1000);
 		for(ShopifyProduct aProduct : products) {
 			System.out.println(aProduct.getProductURL()+","+aProduct.getBestSellerRank());
 		}
 		*/
+		
 		/*
 		ShopifyProduct aProduct = new ShopifyProduct();
 		aProduct.setProductURL("https://www.foreverpassion.us/products/2017-baby-english-alphabet-jersey-puff-skirt");

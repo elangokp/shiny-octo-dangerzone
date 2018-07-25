@@ -2,8 +2,6 @@ package com.cybermint.contentSyndicator.platforms.shopify.objects;
 
 import java.time.Instant;
 
-import org.asynchttpclient.ListenableFuture;
-
 public class ShopifyProduct {
 
 	private Integer crawlHeaderID;
@@ -19,7 +17,7 @@ public class ShopifyProduct {
 	private Instant createdOn;
 	private Integer bestSellerRank;
 	private Integer isSiteCrawlComplete;
-	private ListenableFuture<org.asynchttpclient.Response> futureResponse;
+	private ShopifyResponse futureResponse;
 	
 	public static final int STATUS_COMPLETED = 0; 
 	public static final int STATUS_INPROGRESS = -1; 
@@ -103,10 +101,10 @@ public class ShopifyProduct {
 	public void setIsSiteCrawlComplete(Integer isSiteCrawlComplete) {
 		this.isSiteCrawlComplete = isSiteCrawlComplete;
 	}
-	public ListenableFuture<org.asynchttpclient.Response> getFutureResponse() {
+	public ShopifyResponse getFutureResponse() {
 		return futureResponse;
 	}
-	public void setFutureResponse(ListenableFuture<org.asynchttpclient.Response> futureResponse) {
+	public void setFutureResponse(ShopifyResponse futureResponse) {
 		this.futureResponse = futureResponse;
 	}
 	

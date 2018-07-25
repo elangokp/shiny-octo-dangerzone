@@ -1,16 +1,21 @@
 package com.cybermint.contentSyndicator.platforms.shopify.objects;
 
-import java.util.concurrent.Future;
-
 public class ShopifySite {
 
 	private Integer crawlHeaderID;
 	private Integer siteID;
 	private String storeURL;
-	private Future<org.asynchttpclient.Response> futureResponse;
+	private ShopifyResponse futureResponse;
 	private String html;
+	private String responseCode;
+	private String responseText;
+	private String exceptionName;
 	
-	private int techDeterminationStatus;
+	private int dnsResolutionStatus;
+	private String canonicalHostName;
+	private String hostAddress;
+	
+	private int techDeterminationStatus;	
 	private boolean useTrackify;
 	private boolean usePixelPerfect;
 	private boolean useHextomShippingBar;
@@ -29,6 +34,7 @@ public class ShopifySite {
 	private boolean usePersonalizerLimespot;
 	private boolean useCoin;
 	private boolean useRecart;
+	private boolean useCartBack;
 	private boolean useOneClickUpsell;
 	private boolean useZipifyPages;
 	private boolean useAdroll;
@@ -78,10 +84,10 @@ public class ShopifySite {
 	public void setStoreURL(String storeURL) {
 		this.storeURL = storeURL;
 	}
-	public Future<org.asynchttpclient.Response> getFutureResponse() {
+	public ShopifyResponse getFutureResponse() {
 		return futureResponse;
 	}
-	public void setFutureResponse(Future<org.asynchttpclient.Response> futureResponse) {
+	public void setFutureResponse(ShopifyResponse futureResponse) {
 		this.futureResponse = futureResponse;
 	}
 	public int getTechDeterminationStatus() {
@@ -359,6 +365,48 @@ public class ShopifySite {
 	}
 	public void setUseInCartUpsell(boolean useInCartUpsell) {
 		this.useInCartUpsell = useInCartUpsell;
+	}
+	public boolean isUseCartBack() {
+		return useCartBack;
+	}
+	public void setUseCartBack(boolean useCartBack) {
+		this.useCartBack = useCartBack;
+	}
+	public String getResponseCode() {
+		return responseCode;
+	}
+	public void setResponseCode(String responseCode) {
+		this.responseCode = responseCode;
+	}
+	public String getExceptionName() {
+		return exceptionName;
+	}
+	public void setExceptionName(String exceptionName) {
+		this.exceptionName = exceptionName;
+	}
+	public String getResponseText() {
+		return responseText;
+	}
+	public void setResponseText(String responseText) {
+		this.responseText = responseText;
+	}
+	public int getDnsResolutionStatus() {
+		return dnsResolutionStatus;
+	}
+	public void setDnsResolutionStatus(int dnsResolutionStatus) {
+		this.dnsResolutionStatus = dnsResolutionStatus;
+	}
+	public String getCanonicalHostName() {
+		return canonicalHostName;
+	}
+	public void setCanonicalHostName(String canonicalHostName) {
+		this.canonicalHostName = canonicalHostName;
+	}
+	public String getHostAddress() {
+		return hostAddress;
+	}
+	public void setHostAddress(String hostAddress) {
+		this.hostAddress = hostAddress;
 	}
 	
 	
