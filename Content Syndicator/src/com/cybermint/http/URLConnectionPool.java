@@ -9,6 +9,7 @@ import javax.net.ssl.X509TrustManager;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClientConfig;
+import org.asynchttpclient.proxy.ProxyServer;
 
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -48,6 +49,7 @@ public class URLConnectionPool {
 			        .setUseInsecureTrustManager(true)
 			        //.setMaxConnectionsPerHost(1000)
 			        .setPooledConnectionIdleTimeout(100)
+			        .setProxyServer(new ProxyServer.Builder("127.0.0.1", 24000))
 			        .setConnectionTtl(500)
 			        .build();
 			asyncHttpClient = new DefaultAsyncHttpClient(config);

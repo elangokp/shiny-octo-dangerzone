@@ -480,7 +480,14 @@ public class ShopifyClient {
 						givenSite.setUseBoosterBundleUpsell(true);
 					}
 					
-					givenSite.setTechDeterminationStatus(ShopifySite.STATUS_COMPLETED);
+					if(givenSite.getResponseCode().equalsIgnoreCase("200")
+							||givenSite.getResponseCode().equalsIgnoreCase("402")
+							||givenSite.getResponseCode().equalsIgnoreCase("404")) {
+						givenSite.setTechDeterminationStatus(ShopifySite.STATUS_COMPLETED);
+					} else {
+						givenSite.setTechDeterminationStatus(ShopifySite.STATUS_PENDING);
+					}
+					
 				} else {
 					givenSite.setTechDeterminationStatus(ShopifySite.STATUS_PENDING);
 				}
@@ -584,11 +591,11 @@ public class ShopifyClient {
 	public static void main(String[] args) throws Exception {
 		
 		ShopifyClient aClient = new ShopifyClient();
-		ShopifyClient.shouldUseProxy = true;
+		ShopifyClient.shouldUseProxy = false;
 		
 		
 		ShopifySite givenSite = new ShopifySite();
-		givenSite.setStoreURL("zootzuvvavaaavdva.com");
+		givenSite.setStoreURL("zootzu.com");
 		aClient.getSiteContent(givenSite);
 		aClient.processSite(givenSite);
 		System.out.println(givenSite.getStoreURL()+"-"+"UseTrackify:"+givenSite.isUseTrackify()
