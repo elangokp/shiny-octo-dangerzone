@@ -49,7 +49,7 @@ public class URLConnectionPool {
 			        .setUseInsecureTrustManager(true)
 			        //.setMaxConnectionsPerHost(1000)
 			        .setPooledConnectionIdleTimeout(100)
-			        .setProxyServer(new ProxyServer.Builder("127.0.0.1", 24000))
+			        //.setProxyServer(new ProxyServer.Builder("127.0.0.1", 24000))
 			        .setConnectionTtl(500)
 			        .build();
 			asyncHttpClient = new DefaultAsyncHttpClient(config);

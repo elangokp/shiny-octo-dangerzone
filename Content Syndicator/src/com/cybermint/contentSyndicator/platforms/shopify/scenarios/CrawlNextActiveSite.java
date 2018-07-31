@@ -30,8 +30,7 @@ public class CrawlNextActiveSite implements Runnable {
 		while(1==1) {
 			try {
 				ShopifySite givenSite = this.pendingSitesQueue.take();
-				List<ShopifyProduct> products = client.getProductLinks(givenSite.getCrawlHeaderID()
-						, givenSite.getSiteID(), givenSite.getStoreURL()
+				List<ShopifyProduct> products = client.getProductLinks(givenSite
 						, ShopifyClient.SORT_BY_BEST_SELLING, 500);
 				for(ShopifyProduct aProduct : products) {
 					this.productRankingsQueue.put(aProduct);

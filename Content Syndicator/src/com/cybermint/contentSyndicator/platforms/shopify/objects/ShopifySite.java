@@ -15,6 +15,9 @@ public class ShopifySite {
 	private String canonicalHostName;
 	private String hostAddress;
 	
+	private int lastSuccessfulPage;
+	private int lastSuccessfulProduct;
+	
 	private int techDeterminationStatus;	
 	private boolean useTrackify;
 	private boolean usePixelPerfect;
@@ -407,6 +410,18 @@ public class ShopifySite {
 	}
 	public void setHostAddress(String hostAddress) {
 		this.hostAddress = hostAddress;
+	}
+	public int getLastSuccessfulPage() {
+		return lastSuccessfulPage;
+	}
+	public void setLastSuccessfulPage(int lastSuccessfulPage) {
+		this.lastSuccessfulPage = lastSuccessfulPage;
+	}
+	public int getLastSuccessfulProduct() {
+		return lastSuccessfulProduct;
+	}
+	public void setLastSuccessfulProduct(int lastSuccessfulProduct) {
+		this.lastSuccessfulProduct = lastSuccessfulProduct;
 	}
 	
 	

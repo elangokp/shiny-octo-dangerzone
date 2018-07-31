@@ -18,6 +18,7 @@ public class ShopifyProduct {
 	private Integer bestSellerRank;
 	private Integer isSiteCrawlComplete;
 	private ShopifyResponse futureResponse;
+	private Integer lastSuccessfulPageNo;
 	
 	public static final int STATUS_COMPLETED = 0; 
 	public static final int STATUS_INPROGRESS = -1; 
@@ -106,6 +107,12 @@ public class ShopifyProduct {
 	}
 	public void setFutureResponse(ShopifyResponse futureResponse) {
 		this.futureResponse = futureResponse;
+	}
+	public Integer getLastSuccessfulPageNo() {
+		return lastSuccessfulPageNo;
+	}
+	public void setLastSuccessfulPageNo(Integer lastSuccessfulPageNo) {
+		this.lastSuccessfulPageNo = lastSuccessfulPageNo;
 	}
 	
 	

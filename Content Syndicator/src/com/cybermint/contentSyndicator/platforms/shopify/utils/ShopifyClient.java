@@ -57,67 +57,129 @@ public class ShopifyClient {
         }
     }
 
-	public List<ShopifyProduct> getProductLinks(int crawlHeaderId, int siteId, String storeURL, String sortBy, int noOfpages) throws Exception {
+	public List<ShopifyProduct> getProductLinks(ShopifySite givenSite, String sortBy, int noOfpages) throws Exception {
+		
+		
 		List<ShopifyProduct> products = new ArrayList<ShopifyProduct>();
 		LinkedHashSet<String> productLinks = new LinkedHashSet<String>();
 		String pageurl = "";
+		boolean isLastResponseSuccessful = false;
+		int lastSuccessfulPageNo = 0;
+		String lastPageResponseStatus="200";
 		try {
 			//System.out.println(new Date());
-			String url = "http://"+storeURL+"/collections/all?sort_by=best-selling";
-			URL storeBaseURL = new URL("https://"+storeURL);
+			String url = "http://"+givenSite.getStoreURL()+"/collections/all?sort_by=best-selling";
+			URL storeBaseURL = new URL("https://"+givenSite.getStoreURL());
 			int noOfEmptyProductPages = 0;
-			for(int i = 1; i<=noOfpages && noOfEmptyProductPages<3; i++) {		
+			for(int pageNoToScrap = givenSite.getLastSuccessfulPage()+1; 
+					pageNoToScrap<=noOfpages && noOfEmptyProductPages<2; 
+					pageNoToScrap++) {		
 				int noOfProductsBefore = productLinks.size();
 				//System.out.println("Page : " + i);
-				pageurl = url+"&page="+i;
-				Document doc = Jsoup.parse(this.getContentFromUrl(pageurl).getHtml());
-				//System.out.println(doc.html());
-				URLConnectionPool.reduceConnection();
-				Elements productURLs = doc.select("a");
-				for(Element productURL : productURLs) {	
-					//System.out.println(productURL.attr("href"));				
-					if(productURL.attr("href").contains("products/")) {
-						URL productURLasURL = new URL(storeBaseURL, productURL.attr("href").trim());
-						//URL productURLasURL = new URL(productURL.attr("href"));
-						if(productURLasURL.getHost().equalsIgnoreCase(storeURL)) {
-							String productLink = productURLasURL.getProtocol()+"://"+productURLasURL.getHost()+productURLasURL.getPath();
-							//System.out.println(productLink);
-							productLinks.add(productLink);
+				pageurl = url+"&page="+pageNoToScrap;
+				int maxAttempts = 10;
+				int noOfAttempts = 0;
+				boolean isSuccessfulResponse = false;
+				
+				while(!isSuccessfulResponse && noOfAttempts<maxAttempts) {
+					
+					ShopifyResponse response = this.getContentFromUrl(pageurl);
+										
+							
+					try {
+						isSuccessfulResponse = response.getStatusCode().equalsIgnoreCase("200")
+								&& null != response.getHtml()
+								&& response.getHtml().length()>0;
+						System.out.println(pageurl + ", " +response.getStatusCode() + ", " + noOfAttempts
+								 + ", " + isSuccessfulResponse);
+												
+						isLastResponseSuccessful = isSuccessfulResponse;
+						if(response.getStatusCode().equalsIgnoreCase("402")
+								|| response.getStatusCode().equalsIgnoreCase("404")
+								|| response.getStatusCode().equalsIgnoreCase("430")) {
+							noOfAttempts =  maxAttempts;
 						}
+						lastPageResponseStatus = response.getStatusCode();
 						
+					} catch (Exception e) {
+						System.out.println(pageurl + " : " + e.getMessage());
+					} finally {
+						URLConnectionPool.reduceConnection();
 					}
-				}			
+												
+					
+					if(isSuccessfulResponse) {
+						Document doc = Jsoup.parse(response.getHtml());
+						//System.out.println(doc.html());response.getHtml()
+						
+						Elements productURLs = doc.select("a");
+						for(Element productURL : productURLs) {	
+							//System.out.println(productURL.attr("href"));				
+							if(productURL.attr("href").contains("products/")) {
+								URL productURLasURL = new URL(storeBaseURL, productURL.attr("href").trim());
+								//URL productURLasURL = new URL(productURL.attr("href"));
+								if(productURLasURL.getHost().equalsIgnoreCase(givenSite.getStoreURL())) {
+									String productLink = productURLasURL.getProtocol()+"://"+productURLasURL.getHost()+productURLasURL.getPath();
+									//System.out.println(productLink);
+									productLinks.add(productLink);
+								}
+								
+							}
+						}
+						lastSuccessfulPageNo = pageNoToScrap;
+					} else {
+						noOfAttempts++;
+					}
+				}
+				
+						
 				//System.out.println(doc.html());			
 				int noOfProductsAfter = productLinks.size();
 				//System.out.println(noOfProductsAfter);
 				if(noOfProductsAfter == noOfProductsBefore) {
 					//System.out.println(doc.html());
 					noOfEmptyProductPages++;
-					i--;
+					pageNoToScrap--;
 				} else {
 					noOfEmptyProductPages = 0;
 				}
 			}
 			//System.out.println(new Date());
 			
-			int bestSellerRank = 1;
+			int bestSellerRank = givenSite.getLastSuccessfulProduct()+1;
 			for(String productLink : productLinks) {
 				ShopifyProduct aShopifyProduct = new ShopifyProduct();
-				aShopifyProduct.setCrawlHeaderID(crawlHeaderId);
-				aShopifyProduct.setSiteID(siteId);
-				aShopifyProduct.setStoreURL(storeURL);
+				aShopifyProduct.setCrawlHeaderID(givenSite.getCrawlHeaderID());
+				aShopifyProduct.setSiteID(givenSite.getSiteID());
+				aShopifyProduct.setStoreURL(givenSite.getStoreURL());
 				aShopifyProduct.setProductURL(productLink);
 				aShopifyProduct.setBestSellerRank(bestSellerRank);
 				products.add(aShopifyProduct);
 				bestSellerRank++;
 			}
-			if(products.size()>0) {
+			if(products.size()>0) {				
+				products.get(products.size()-1).setLastSuccessfulPageNo(lastSuccessfulPageNo);
+				if(isLastResponseSuccessful) {
+					products.get(products.size()-1).setIsSiteCrawlComplete(ShopifySite.STATUS_COMPLETED);
+				} else {
+					products.get(products.size()-1).setIsSiteCrawlComplete(ShopifySite.STATUS_INPROGRESS);
+				}
+			} else if(products.size() == 0
+					&& lastPageResponseStatus.equalsIgnoreCase("402")
+					&& lastPageResponseStatus.equalsIgnoreCase("404")) {
+				ShopifyProduct aShopifyProduct = new ShopifyProduct();
+				aShopifyProduct.setCrawlHeaderID(givenSite.getCrawlHeaderID());
+				aShopifyProduct.setSiteID(givenSite.getSiteID());
+				aShopifyProduct.setStoreURL(givenSite.getStoreURL());
+				aShopifyProduct.setProductURL("dummy");
+				aShopifyProduct.setBestSellerRank(1);
+				products.add(aShopifyProduct);
 				products.get(products.size()-1).setIsSiteCrawlComplete(ShopifySite.STATUS_COMPLETED);
 			}
 			
+			
 		} catch(Exception e) {
-			System.out.println(pageurl + " : " + e.getMessage());
-			URLConnectionPool.reduceConnection();
+			System.out.println(givenSite.getStoreURL() + " : " + e.getMessage() + " : " + "While Processing");
 		}		
 		
 		return products;
@@ -484,6 +546,10 @@ public class ShopifyClient {
 							||givenSite.getResponseCode().equalsIgnoreCase("402")
 							||givenSite.getResponseCode().equalsIgnoreCase("404")) {
 						givenSite.setTechDeterminationStatus(ShopifySite.STATUS_COMPLETED);
+					} else if(givenSite.getResponseCode().equalsIgnoreCase("Exp")
+							&& givenSite.getResponseText().contains("does not match the certificate")) {
+						givenSite.setResponseCode("402");
+						givenSite.setTechDeterminationStatus(ShopifySite.STATUS_COMPLETED);
 					} else {
 						givenSite.setTechDeterminationStatus(ShopifySite.STATUS_PENDING);
 					}
@@ -534,7 +600,9 @@ public class ShopifyClient {
 	                client.switch_session_id();
 	            CloseableHttpResponse lresponse = null;
 	            try {
+	            	//System.out.println("Inside try");
 	                lresponse = client.request(url,WebScraperUtils.getInstance().getRandomUserAgentString());
+	                //System.out.println("After request");
 	                String statusCode = Integer.toString(lresponse.getStatusLine().getStatusCode());
 	                String statusText = lresponse.getStatusLine().getReasonPhrase();
 	                String html = EntityUtils.toString(lresponse.getEntity());
@@ -545,6 +613,7 @@ public class ShopifyClient {
 	                response.setStatusText(statusText);
 	                response.setHtml(html);
 	            } catch (IOException e) {
+	            	//System.out.println(client.);
 	            	response.setStatusCode("Exp");
 	            	response.setStatusText(e.getMessage());
 	                System.out.println(e.getMessage());
@@ -595,7 +664,7 @@ public class ShopifyClient {
 		
 		
 		ShopifySite givenSite = new ShopifySite();
-		givenSite.setStoreURL("zootzu.com");
+		givenSite.setStoreURL("pixkol.com");
 		aClient.getSiteContent(givenSite);
 		aClient.processSite(givenSite);
 		System.out.println(givenSite.getStoreURL()+"-"+"UseTrackify:"+givenSite.isUseTrackify()
@@ -605,6 +674,7 @@ public class ShopifyClient {
 		+"-"+"UseBaBundle:"+givenSite.isUseBoosterBundleUpsell()
 		+"-"+"UseRecart:"+givenSite.isUseRecart()
 		+"-"+"UseLooxReviews:"+givenSite.isUseLooxReviews());
+		
 		
 		/*
 		System.setProperty("jsse.enableSNIExtension", "false");
@@ -621,7 +691,7 @@ public class ShopifyClient {
 		
 		/*
 		List<ShopifyProduct> products = aClient.getProductLinks(1
-				, 1, "molyesstore.com"
+				, 1, "kore24.com"
 				, ShopifyClient.SORT_BY_BEST_SELLING, 1000);
 		for(ShopifyProduct aProduct : products) {
 			System.out.println(aProduct.getProductURL()+","+aProduct.getBestSellerRank());

@@ -32,6 +32,8 @@ public class ShopifyDBUtils {
 				aShopifySite.setCrawlHeaderID(rs.getInt("CrawlHeaderId"));
 				aShopifySite.setSiteID(rs.getInt("SiteID"));
 				aShopifySite.setStoreURL(rs.getString("StoreURL"));
+				aShopifySite.setLastSuccessfulPage(rs.getInt("LastSuccessfulPage"));
+				aShopifySite.setLastSuccessfulProduct(rs.getInt("LastSuccessfulProduct"));
 				sites.add(aShopifySite);
 			}
 			
@@ -203,6 +205,7 @@ public class ShopifyDBUtils {
 		shopifyProductDetailsTable.addColumnMetadata("ProductURL" ,java.sql.Types.NVARCHAR);
 		shopifyProductDetailsTable.addColumnMetadata("BestSellerRank" ,java.sql.Types.INTEGER);
 		shopifyProductDetailsTable.addColumnMetadata("IsSiteCrawlDone" ,java.sql.Types.INTEGER);
+		shopifyProductDetailsTable.addColumnMetadata("LastSuccessfulPageNo" ,java.sql.Types.INTEGER);
 					
 		for(ShopifyProduct product : products) {
 			int productId = null == product.getProductID() ? 0 : product.getProductID();
@@ -216,10 +219,12 @@ public class ShopifyDBUtils {
 			String productURL = null == product.getProductURL() ? "" : product.getProductURL();
 			int bestSellerRank = null == product.getBestSellerRank() ? 0 : product.getBestSellerRank();
 			int isSiteCrawlDone = null == product.getIsSiteCrawlComplete() ? -1 : product.getIsSiteCrawlComplete();
+			int lastSuccessfulPageNo = null == product.getLastSuccessfulPageNo() ? 0 : product.getLastSuccessfulPageNo();
 			
 			shopifyProductDetailsTable.addRow(productId, productTitle, productPrice
 					, productCurrency, productDesc, publishedOn
-					,crawlHeaderId, siteId, productURL, bestSellerRank, isSiteCrawlDone);
+					,crawlHeaderId, siteId, productURL, bestSellerRank, isSiteCrawlDone
+					, lastSuccessfulPageNo);
 		}
 		
 		return shopifyProductDetailsTable;

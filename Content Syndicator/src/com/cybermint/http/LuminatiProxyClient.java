@@ -12,6 +12,7 @@ import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -68,19 +69,25 @@ public class LuminatiProxyClient {
                 .setProxy(super_proxy)
                 .setDefaultCredentialsProvider(cred_provider)
                 .setDefaultRequestConfig(config)
+                .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
                 .build();
     }
 
     public CloseableHttpResponse request(String url, String givenUserAgent) throws IOException {
+    	//CloseableHttpResponse response = null;
         try {
             HttpGet request = new HttpGet(url);
             request.setHeader("User-Agent", givenUserAgent != null ? givenUserAgent : user_agent);
             CloseableHttpResponse response = client.execute(request);
+            //System.out.println("After response");
             handle_response(response);
             return response;
         } catch (IOException e) {
+        	//System.out.println("Inside exp");
             handle_response(null);
+            //System.out.println("After handle response");
             throw e;
+            //return response;
         }
     }
 
