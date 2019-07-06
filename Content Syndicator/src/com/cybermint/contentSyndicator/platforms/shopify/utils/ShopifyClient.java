@@ -80,9 +80,10 @@ public class ShopifyClient {
 				int maxAttempts = 10;
 				int noOfAttempts = 0;
 				boolean isSuccessfulResponse = false;
-				
+				//System.out.println(Thread.currentThread().getName() + ", Before Attempts" +pageurl + ", " + noOfAttempts);
 				while(!isSuccessfulResponse && noOfAttempts<maxAttempts) {
 					
+					//System.out.println(Thread.currentThread().getName() + ", Inside Attempts" +pageurl + ", " + noOfAttempts);
 					ShopifyResponse response = this.getContentFromUrl(pageurl);
 										
 							
@@ -90,7 +91,7 @@ public class ShopifyClient {
 						isSuccessfulResponse = response.getStatusCode().equalsIgnoreCase("200")
 								&& null != response.getHtml()
 								&& response.getHtml().length()>0;
-						System.out.println(pageurl + ", " +response.getStatusCode() + ", " + noOfAttempts
+						System.out.println(Thread.currentThread().getName() + ", " +pageurl + ", " +response.getStatusCode() + ", " + noOfAttempts
 								 + ", " + isSuccessfulResponse);
 												
 						isLastResponseSuccessful = isSuccessfulResponse;
@@ -109,6 +110,8 @@ public class ShopifyClient {
 												
 					
 					if(isSuccessfulResponse) {
+						//System.out.println(Thread.currentThread().getName() + ", Inside Successful Response" +pageurl + ", " +response.getStatusCode() + ", " + noOfAttempts
+						//		 + ", " + isSuccessfulResponse);
 						Document doc = Jsoup.parse(response.getHtml());
 						//System.out.println(doc.html());response.getHtml()
 						
@@ -128,6 +131,8 @@ public class ShopifyClient {
 						}
 						lastSuccessfulPageNo = pageNoToScrap;
 					} else {
+						//System.out.println(Thread.currentThread().getName() + ", Not successful Increase Attempt" +pageurl + ", " +response.getStatusCode() + ", " + noOfAttempts
+						//		 + ", " + isSuccessfulResponse);
 						noOfAttempts++;
 					}
 				}
@@ -138,9 +143,11 @@ public class ShopifyClient {
 				//System.out.println(noOfProductsAfter);
 				if(noOfProductsAfter == noOfProductsBefore) {
 					//System.out.println(doc.html());
+					//System.out.println(Thread.currentThread().getName() + ", No Products Found" +pageurl + ", " + noOfAttempts);
 					noOfEmptyProductPages++;
 					pageNoToScrap--;
 				} else {
+					//System.out.println(Thread.currentThread().getName() + ", Products Found" +pageurl + ", " + noOfAttempts);
 					noOfEmptyProductPages = 0;
 				}
 			}
@@ -662,7 +669,7 @@ public class ShopifyClient {
 		ShopifyClient aClient = new ShopifyClient();
 		ShopifyClient.shouldUseProxy = false;
 		
-		
+		/*
 		ShopifySite givenSite = new ShopifySite();
 		givenSite.setStoreURL("pixkol.com");
 		aClient.getSiteContent(givenSite);
@@ -674,7 +681,7 @@ public class ShopifyClient {
 		+"-"+"UseBaBundle:"+givenSite.isUseBoosterBundleUpsell()
 		+"-"+"UseRecart:"+givenSite.isUseRecart()
 		+"-"+"UseLooxReviews:"+givenSite.isUseLooxReviews());
-		
+		*/
 		
 		/*
 		System.setProperty("jsse.enableSNIExtension", "false");
@@ -689,14 +696,14 @@ public class ShopifyClient {
 		System.out.println(givenProduct.getProductCurrency());
 		*/
 		
-		/*
-		List<ShopifyProduct> products = aClient.getProductLinks(1
-				, 1, "kore24.com"
+		ShopifySite givenSite = new ShopifySite();
+		givenSite.setStoreURL("actiwears.com");
+		List<ShopifyProduct> products = aClient.getProductLinks(givenSite
 				, ShopifyClient.SORT_BY_BEST_SELLING, 1000);
 		for(ShopifyProduct aProduct : products) {
 			System.out.println(aProduct.getProductURL()+","+aProduct.getBestSellerRank());
 		}
-		*/
+		
 		
 		/*
 		ShopifyProduct aProduct = new ShopifyProduct();

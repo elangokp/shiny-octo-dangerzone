@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.pool.impl.GenericObjectPool;
 import org.asynchttpclient.*;
 import org.asynchttpclient.proxy.ProxyServer;
 import org.asynchttpclient.proxy.ProxyServer.Builder;
@@ -34,6 +35,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import com.cybermint.factories.webdrivers.PoolableWebDriverFactory;
@@ -48,6 +50,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Route;
+import org.openqa.selenium.WebElement;
 
 
 public class Adhoc {
@@ -55,7 +58,7 @@ public class Adhoc {
 /*	public static void main(String[] args) throws Exception {
 		TextFileReaderUtils tr = new TextFileReaderUtils();
 		List<String> links = tr.readLinesAsList("c:\\report-links.txt", true);
-		PoolableWebDriverFactory aPoolableWebDriverFactory = new PoolableWebDriverFactory("chrome", "", "C:\\Users\\elangokp\\Google Drive\\Programs\\YahooGeminiCampaignManager\\chromedriver.exe");
+		PoolableWebDriverFactory aPoolableWebDriverFactory = new PoolableWebDriverFactory("chrome", "", "C:\\custom\\ChromeDriver\\chromedriver.exe");
 		GenericObjectPool driverPool = new GenericObjectPool(aPoolableWebDriverFactory);
 		driverPool.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_BLOCK);
 		driverPool.setMaxActive(1);
@@ -70,10 +73,46 @@ public class Adhoc {
 
 	}
 */
-	
+
 	public static void main(String[] args) throws Exception {
-		
+
+		PoolableWebDriverFactory aPoolableWebDriverFactory = new PoolableWebDriverFactory("chrome", "", "C:\\custom\\ChromeDriver\\chromedriver.exe");
+		GenericObjectPool driverPool = new GenericObjectPool(aPoolableWebDriverFactory);
+		driverPool.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_BLOCK);
+		driverPool.setMaxActive(1);
+		driverPool.setLifo(false); //To make it behave a FIFO
+		driverPool.setMaxWait(45000);
+		WebDriver driver = null;
+		driver = (WebDriver) driverPool.borrowObject();
+		int rank = 1;
+		for(int page = 1; page<= 130; page++) {
+			driver.get("https://apps.shopify.com/browse?page="+page);
+			List<WebElement> appContainers = driver.findElements(By.cssSelector(".ui-app-card__container"));
+			for(WebElement appContainer : appContainers) {
+				StringBuffer appDetails = new StringBuffer();
+				String appName = appContainer.findElement(By.cssSelector(".ui-app-card__name")).getText();
+				String appDesc = appContainer.findElement(By.cssSelector(".ui-app-card__details")).getText();
+				String appRating = "0";
+				String appReviewCount = "0";
+				try {
+					appRating = appContainer.findElement(By.cssSelector(".ui-star-rating__rating")).getText().substring(0,3);
+					appReviewCount = appContainer.findElement(By.cssSelector(".ui-review-count-summary")).getText()
+							.replaceAll("\\(", "").replaceAll("\\)","")
+							.replaceAll("\\s+","").replaceAll("reviews","");
+				} catch(Exception e) {
+
+				}
+				appDetails.append("\"").append(appName).append("\",\"").append(appDesc).append("\",\"")
+						.append(appRating).append("\",\"").append(appReviewCount).append("\",")
+						.append(rank++);
+				System.out.println(appDetails.toString());
+				TextFileWriterUtils.writeString(appDetails.toString(), "C:\\custom\\shopify-apps.csv", Boolean.TRUE, Boolean.TRUE);
+			}
+		}
+
+
 		//DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+		/*
 		String publishedAt = "2017-02-24";
 		if(publishedAt.length()==10) {
 			publishedAt = publishedAt+"T00:00:00-00:00";
@@ -81,7 +120,7 @@ public class Adhoc {
 			publishedAt = publishedAt+"-00:00";
 		}
 		Instant foundInstant = ZonedDateTime.parse(publishedAt).toInstant();
-
+		*/
 		//int sessionId = new Random().nextInt(1000000);
 		//System.out.println(sessionId);
 		/*
@@ -559,6 +598,8 @@ public class Adhoc {
 		}
 		
 		*/
+		
 			
 	}
+
 }
